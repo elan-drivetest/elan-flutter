@@ -1,0 +1,26 @@
+# Static analysis config. See https://dart.dev/tools/analysis
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # `print`/`debugPrint` are banned — use AppLog (lib/core/log/app_log.dart).
+    avoid_print: error
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.config.dart"
+    - "build/**"
+  # NEXT STEP (enable once existing fallout is triaged — will surface many
+  # pre-existing issues, so do it in a dedicated PR):
+  # language:
+  #   strict-casts: true
+  #   strict-raw-types: true
+
+linter:
+  rules:
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_final_locals
+    - unawaited_futures
+    - use_build_context_synchronously

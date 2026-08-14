@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+   <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>hrtrace-periodic-task</string>
+        <string>be.tramckrijte.workmanagerExample.taskId</string>
+        <string>be.tramckrijte.workmanagerExample.simpleTask</string>
+        <string>be.tramckrijte.workmanagerExample.rescheduledTask</string>
+        <string>be.tramckrijte.workmanagerExample.failedTask</string>
+        <string>be.tramckrijte.workmanagerExample.simpleDelayedTask</string>
+        <string>be.tramckrijte.workmanagerExample.simplePeriodicTask</string>
+        <string>be.tramckrijte.workmanagerExample.simplePeriodic1HourTask</string>
+        <string>be.tramckrijte.workmanagerExample.iOSBackgroundAppRefresh</string>
+        <string>be.tramckrijte.workmanagerExample.iOSBackgroundProcessingTask</string>
+    </array>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Application requires user’s location for better user experience.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow access to location when in the background for checking your field visits after check-in. </string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Allow access to location for verifying check-in and check-out location.</string>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>com.pravera.flutter_foreground_task.refresh</string>
+    </array>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>location</string>
+    </array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Elan</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>elan</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	
+	<!-- Deep Link Configuration for Email Confirmation -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>ca.elanroadtestrental.www</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>https</string>
+				<string>http</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
