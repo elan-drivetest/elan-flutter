@@ -5,7 +5,6 @@ class DashboardRideCard extends StatelessWidget {
   final String name;
   final String type;
   final String phoneNumber;
-  final double rating;
   final String time;
   final String pickupLocation;
   final String dropOffLocation;
@@ -15,7 +14,6 @@ class DashboardRideCard extends StatelessWidget {
   const DashboardRideCard({
     super.key,
     required this.name,
-    required this.rating,
     required this.time,
     required this.pickupLocation,
     required this.dropOffLocation,

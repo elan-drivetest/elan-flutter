@@ -1,8 +1,11 @@
 import 'dart:developer';
+import 'package:elan/core/app_timezone.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elan/core/app_colors.dart';
+import 'package:elan/core/extension/money.dart';
 import 'package:elan/core/extension/pretty_date_time.dart';
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/core/styles.dart';
 import 'package:elan/data/location_request_service/location_request_service.dart';
 import 'package:elan/data/trace/location_service.dart';
@@ -159,7 +162,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               bearing: state.location?.heading,
                               altitude: state.location?.altitude,
                               batteryLevel: batteryLevel,
-                              timezone: "America/Toronto",
+                              timezone: kDefaultIanaTimezone,
                             ),
                           );
                     }
@@ -274,7 +277,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                           const SliverToBoxAdapter(
                             child: TotalEarningsCard(
-                              walletBalance: '0.00',
+                              walletBalance: '\$0.00',
                               availableBalance: '\$0.00',
                               withdrawn: '\$0.00',
                               totalRides: '0',
@@ -460,10 +463,17 @@ class _DashboardPageState extends State<DashboardPage> {
                               builder: (context, summaryState) {
                                 return Skeletonizer(
                                   enabled: summaryState.status == InstructorSummaryStatus.loading,
+                                  // All three amounts are integer cents from the
+                                  // API (same convention as `hourly_rate`).
+                                  // They used to be printed raw, so a $60.00
+                                  // balance rendered as "6000".
                                   child: TotalEarningsCard(
-                                    walletBalance: '${state.instructorInfo?.walletBalance ?? 0}',
-                                    availableBalance: '\$${summaryState.summaryInfo?.availableBalance ?? "0.00"}',
-                                    withdrawn: '\$${summaryState.summaryInfo?.withdrawn ?? "0.00"}',
+                                    walletBalance:
+                                        (state.instructorInfo?.walletBalance).toCad,
+                                    availableBalance:
+                                        (summaryState.summaryInfo?.availableBalance).toCad,
+                                    withdrawn:
+                                        (summaryState.summaryInfo?.withdrawn).toCad,
                                     totalRides: '${summaryState.summaryInfo?.totalCompletedRides ?? "0"}',
                                   ),
                                 );
@@ -569,9 +579,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                     status: state.currentRide?.status ?? "",
                                     totalHours:
                                         state.currentRide?.totalHours ?? 0,
-                                    hourlyRate:
-                                        ((state.currentRide?.hourlyRate ?? 0) /
-                                            100),
+                                    hourlyRate: (state.currentRide?.hourlyRate ??
+                                            context.pricing.instructorRate)
+                                        .asDollars,
                                     totalDistance:
                                         state.currentRide?.totalDistance ?? 0,
                                   ),
@@ -620,7 +630,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                     return UpcomingRideCard(
                                       onTap: () {},
                                       name: "Loading Name",
-                                      rating: 5.0,
                                       time: "12:00 PM",
                                       pickupLocation: "Loading Address Long Long Long",
                                       dropOffLocation: "Loading Address Long Long Long",
@@ -687,7 +696,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                         );
                                       },
                                       name: ride.fullName ?? "",
-                                      rating: 4.8,
                                       time: ride.testDate?.toDayMonthTime() ??
                                           "-:-",
                                       pickupLocation: ride.pickupAddress ?? "",
@@ -885,7 +893,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                   itemBuilder: (context, index) {
                                     return RideHistoryCard(
                                       name: "Loading Name",
-                                      rating: 5.0,
                                       time: "12:00 PM",
                                       pickupLocation: "Loading Address Long Long Long",
                                       dropOffLocation: "Loading Address Long Long Long",
@@ -946,7 +953,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                     final ride = rides![index];
                                     return RideHistoryCard(
                                       name: ride.customerName ?? "",
-                                      rating: 4.8,
                                       time:
                                           ride.dateTime?.toDayMonthTime() ?? "",
                                       pickupLocation: ride.pickupLocation ?? "",

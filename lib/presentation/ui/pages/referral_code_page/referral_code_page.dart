@@ -15,7 +15,6 @@ class ReferralCodePage extends StatefulWidget {
 
 class _ReferralCodePageState extends State<ReferralCodePage>
     with SingleTickerProviderStateMixin {
-  final String referralCode = 'SCS15115CSVS511';
   late TabController _tabController;
 
   @override
@@ -126,7 +125,7 @@ class _ReferralCodePageState extends State<ReferralCodePage>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    YourReferralCodeTab(referralCode: referralCode),
+                    const YourReferralCodeTab(),
                     const EnterReferralCodeTab(),
                   ],
                 ),

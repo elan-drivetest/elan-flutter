@@ -11,6 +11,7 @@ import 'package:elan/presentation/bloc/generate_referral_code_bloc/generate_refe
 import 'package:elan/presentation/bloc/instructor_info_bloc/instructor_info_bloc.dart';
 import 'package:elan/presentation/bloc/instructor_ride_bloc/instructor_ride_bloc.dart';
 import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart';
+import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:elan/presentation/bloc/stripe_onboarding_bloc/stripe_onboarding_bloc.dart';
 import 'package:elan/presentation/bloc/upcoming_ride_bloc/upcoming_ride_bloc.dart';
 import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
@@ -41,6 +42,14 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => getIt<ConfirmEmailBloc>()),
         BlocProvider(create: (context) => getIt<DirectionBloc>()),
         BlocProvider(create: (context) => getIt<EarningsSummaryBloc>()),
+        // `.value` because PricingConfigBloc is a get_it @lazySingleton —
+        // BlocProvider(create:) would close the singleton on dispose, and any
+        // later `add()` would throw "Cannot add new events after calling
+        // close".
+        BlocProvider.value(
+          value: getIt<PricingConfigBloc>()
+            ..add(const PricingConfigEvent.fetchPricingConfig()),
+        ),
       ],
       child: MaterialApp.router(
         title: 'Elan',

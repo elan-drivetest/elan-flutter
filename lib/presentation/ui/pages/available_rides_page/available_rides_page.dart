@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:elan/core/extension/money.dart';
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elan/presentation/bloc/available_ride_bloc/available_ride_bloc.dart';
 import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
@@ -201,12 +203,11 @@ class _AvailableRidesPageState extends State<AvailableRidesPage> {
                                   bottom: index == 3 ? 0 : 16),
                               child: RideCard(
                                 driverName: 'Loading Name',
-                                rating: 5.0,
                                 pickupLocation: 'Loading Address Long Long Long',
                                 dropOffLocation: 'Loading Address Long Long Long',
                                 testCenterAddress: 'Loading Test Center Address',
                                 phoneNumber: '1234567890',
-                                price: "\$${((context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? 0) / 100).toStringAsFixed(2)}/hr",
+                                price: (context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? context.pricing.instructorRate).toCadPerHour,
                                 type: state.rides?[index].testType ?? "",
                                 onTap: () {},
                                 onAccept: () {},
@@ -275,12 +276,11 @@ class _AvailableRidesPageState extends State<AvailableRidesPage> {
                                 bottom: index == rides.length - 1 ? 0 : 16),
                             child: RideCard(
                               driverName: ride.fullName ?? 'Unknown',
-                              rating: 4.8,
                               pickupLocation: ride.pickupAddress ?? '',
                               dropOffLocation: ride.testCenterAddress ?? '',
                               testCenterAddress: ride.testCenterAddress ?? '',
                               phoneNumber: ride.phoneNumber ?? "",
-                              price: "\$${((context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? 0) / 100).toStringAsFixed(2)}/hr",
+                              price: (context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? context.pricing.instructorRate).toCadPerHour,
                               type: ride.testType ?? "",
                               onTap: () {
                                 context.go(

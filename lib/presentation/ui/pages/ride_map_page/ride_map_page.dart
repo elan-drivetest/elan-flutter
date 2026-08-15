@@ -1,3 +1,5 @@
+import 'package:elan/core/extension/money.dart';
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/domain/common/ride/ride.dart';
 import 'package:elan/presentation/bloc/direction_bloc/direction_bloc.dart';
 import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
@@ -137,7 +139,7 @@ class _RideMapPageState extends State<RideMapPage> {
       formattedDate = DateFormat('d MMM yyyy h:mm a').format(widget.rideInfo.testDate!.toLocal());
     }
     
-    final priceStr = "\$${((context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? 0) / 100).toStringAsFixed(2)}/hr";
+    final priceStr = (context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? context.pricing.instructorRate).toCadPerHour;
 
     return Scaffold(
       extendBodyBehindAppBar: true,

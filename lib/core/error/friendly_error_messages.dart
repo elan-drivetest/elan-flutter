@@ -131,14 +131,15 @@ class FriendlyErrorMessages {
     'booking is not paid or is no longer active':
         'This booking isn\'t paid or is no longer active.',
     'ride session has already started': 'This ride has already started.',
-    'ride session can be started within 6 hours of test date':
-        'A ride can only be started within 6 hours of the test time.',
+    // NOTE: the start-window and transfer-cutoff messages are NOT listed here.
+    // They embed an hour count driven by `/v1/pricing-config`
+    // (ride_start_window_hours / ride_transfer_cutoff_hours), so an exact-match
+    // key would silently stop matching the moment ops change the config.
+    // They are handled by [_resolveRideWindow] instead.
     'you are not assigned to this ride':
         'You aren\'t assigned to this ride.',
     'ride session can not be transferred':
         'This ride can no longer be transferred.',
-    'transfer requests must be made at least 6 hours before the start time':
-        'Transfers must be requested at least 6 hours before the start time.',
     'ride session cannot be stopped':
         'This ride can\'t be stopped right now.',
     'something went wrong': generic,
@@ -181,6 +182,10 @@ class FriendlyErrorMessages {
     final direct = _codes[key];
     if (direct != null) return direct;
 
+    // Config-driven ride window messages, matched by prefix.
+    final rideWindow = _resolveRideWindow(key);
+    if (rideWindow != null) return rideWindow;
+
     // Templated codes: `needLoginViaProvider:google`, `Unable to calc...: X`.
     final head = key.split(':').first.trim();
     for (final entry in _templatePrefixes.entries) {
@@ -192,6 +197,34 @@ class FriendlyErrorMessages {
     // class-validator style messages ("email must be an email", ...).
     final validation = _resolveValidation(trimmed);
     if (validation != null) return validation;
+
+    return null;
+  }
+
+  static final RegExp _hoursPattern = RegExp(r'(\d+)\s*hour');
+
+  /// Handles the two backend messages whose hour count comes from
+  /// `/v1/pricing-config` and can therefore change without a client release.
+  ///
+  /// The number is read back out of the server's own message rather than from
+  /// the local config, so the copy is always consistent with whatever rule the
+  /// server actually enforced — even if the app's cached config is stale.
+  static String? _resolveRideWindow(String key) {
+    final hours = _hoursPattern.firstMatch(key)?.group(1);
+
+    final label = hours == null ? null : '$hours hour${hours == '1' ? '' : 's'}';
+
+    if (key.startsWith('ride session can be started within')) {
+      return label != null
+          ? 'A ride can only be started within $label of the test time.'
+          : 'This ride can\'t be started yet.';
+    }
+
+    if (key.startsWith('transfer requests must be made at least')) {
+      return label != null
+          ? 'Transfers must be requested at least $label before the start time.'
+          : 'It\'s too late to transfer this ride.';
+    }
 
     return null;
   }

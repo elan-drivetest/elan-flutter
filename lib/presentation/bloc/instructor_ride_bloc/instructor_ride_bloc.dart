@@ -1,3 +1,4 @@
+import 'package:elan/core/app_timezone.dart';
 import 'package:bloc/bloc.dart';
 import 'package:elan/core/log/app_log.dart';
 import 'package:elan/core/cache/cache_manager_impl.dart';
@@ -109,7 +110,9 @@ class InstructorRideBloc
       bearing: event.bearing ?? 0.0,
       altitude: event.altitude ?? 0.0,
       batteryLevel: event.batteryLevel ?? 0,
-      timezone: event.timezone ?? DateTime.now().timeZoneName,
+      // `DateTime.now().timeZoneName` returned an abbreviation ("EDT"), not the
+      // IANA identifier the API expects.
+      timezone: resolveTimezone(event.timezone),
     );
 
     await result.fold(

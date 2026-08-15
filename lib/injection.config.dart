@@ -65,6 +65,8 @@ import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart'
     as _i488;
 import 'package:elan/presentation/bloc/otp_verification_bloc/otp_verification_bloc.dart'
     as _i871;
+import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart'
+    as _i868;
 import 'package:elan/presentation/bloc/referral_summary_bloc/referral_summary_bloc.dart'
     as _i629;
 import 'package:elan/presentation/bloc/registration_bloc/registration_bloc.dart'
@@ -165,6 +167,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i1051.CookieRefreshService(gh<_i47.AuthRepository>()));
     gh.factory<_i641.ResetPasswordBloc>(
         () => _i641.ResetPasswordBloc(gh<_i1047.PublicRepository>()));
+    gh.lazySingleton<_i868.PricingConfigBloc>(
+        () => _i868.PricingConfigBloc(gh<_i1047.PublicRepository>()));
     gh.factory<_i676.AuthBloc>(() => _i676.AuthBloc(
           gh<_i47.AuthRepository>(),
           gh<_i557.PersistCookieJar>(),

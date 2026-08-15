@@ -40,9 +40,16 @@ class BankDetailsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        const TransactionItem(date: '12 Feb, 2025', amount: '\$125 CAD'),
-        const SizedBox(height: 16),
-        const TransactionItem(date: '04 Feb, 2025', amount: '\$125 CAD'),
+        // No payout history endpoint exists yet. This used to render two
+        // hardcoded fake transactions ($125 CAD, Feb 2025) that looked real to
+        // the instructor. Empty state until the API is available.
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'No payouts yet.',
+            style: sansDevanagariRegular16(color: Colors.grey),
+          ),
+        ),
       ],
     );
   }

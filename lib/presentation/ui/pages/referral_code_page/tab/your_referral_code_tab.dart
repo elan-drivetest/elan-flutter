@@ -1,4 +1,7 @@
+import 'package:elan/core/extension/money.dart';
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/core/styles.dart';
+import 'package:elan/domain/referral_code_response/referral_code_response.dart';
 import 'package:elan/presentation/bloc/generate_referral_code_bloc/generate_referral_code_bloc.dart';
 import 'package:elan/presentation/ui/widgets/referral_code/referral_card_thump.dart';
 import 'package:flutter/material.dart';
@@ -6,12 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:elan/presentation/ui/extension/skeletonizer_extension.dart';
 class YourReferralCodeTab extends StatelessWidget {
-  final String referralCode;
-
-  const YourReferralCodeTab({
-    super.key,
-    required this.referralCode,
-  });
+  const YourReferralCodeTab({super.key});
 
   Future<void> _onRefresh(BuildContext context) async {
     final bloc = context.read<GenerateReferralCodeBloc>();
@@ -47,6 +45,7 @@ class YourReferralCodeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pricing = context.pricing;
     return BlocBuilder<GenerateReferralCodeBloc, GenerateReferralCodeState>(
       builder: (context, state) {
         // Show loading indicator
@@ -64,7 +63,9 @@ class YourReferralCodeTab extends StatelessWidget {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            referralCode,
+                            // Skeleton placeholder only — never a real-looking
+                            // code, which users would try to copy and share.
+                            '••••••••',
                             style: sansDevanagariBold32(color: Colors.black),
                           ),
                         ),
@@ -132,7 +133,7 @@ class YourReferralCodeTab extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      'LOADING123',
+                                      '••••••••',
                                       style: sansDevanagariBold32(
                                         color: Colors.black87,
                                       ).copyWith(fontSize: 22),
@@ -163,7 +164,7 @@ class YourReferralCodeTab extends StatelessWidget {
                               _buildInfoRow(
                                 Icons.attach_money,
                                 'Amount',
-                                '৳000',
+                                '\$000.00',
                               ),
                               const SizedBox(height: 8),
                               _buildInfoRow(
@@ -255,7 +256,7 @@ class YourReferralCodeTab extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          data.first.code ?? referralCode,
+                          data.first.code ?? '—',
                           style: sansDevanagariBold32(color: Colors.black),
                         ),
                       ),
@@ -263,9 +264,11 @@ class YourReferralCodeTab extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: ElevatedButton.icon(
-                          onPressed: (data.first.code ?? referralCode).isNotEmpty
+                          // Copy is disabled unless the server actually gave us
+                          // a code — no placeholder is ever copyable.
+                          onPressed: (data.first.code ?? '').isNotEmpty
                               ? () {
-                            final code = data.first.code ?? referralCode;
+                            final code = data.first.code!;
                             Clipboard.setData(ClipboardData(text: code));
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -367,13 +370,16 @@ class YourReferralCodeTab extends StatelessWidget {
                             _buildInfoRow(
                               Icons.attach_money,
                               'Amount',
-                              '৳${code.amount ?? 0}',
+                              (code.amount ??
+                                      pricing
+                                          .referralPriceFor(code.referralType))
+                                  .toCadLabel,
                             ),
                             const SizedBox(height: 8),
                             _buildInfoRow(
                               Icons.directions_car,
                               'Rides Required',
-                              '${code.minRidesRequired ?? 0}',
+                              '${code.minRidesRequired ?? pricing.referralMinRides}',
                             ),
                             const SizedBox(height: 8),
                             _buildInfoRow(
@@ -471,12 +477,13 @@ class YourReferralCodeTab extends StatelessWidget {
     );
   }
 
-  void _shareReferralCode(BuildContext context, code) {
+  void _shareReferralCode(BuildContext context, ReferralCode code) {
+    final pricing = context.pricingOnce;
     final message = '''
 🎁 Use my referral code: ${code.code ?? 'N/A'}
 
-💰 Earn ৳${code.amount ?? 0}
-🚗 Complete ${code.minRidesRequired ?? 0} rides to redeem
+💰 Earn ${(code.amount ?? pricing.referralPriceFor(code.referralType)).toCadLabel}
+🚗 Complete ${code.minRidesRequired ?? pricing.referralMinRides} rides to redeem
 📊 Status: ${code.status?.toUpperCase() ?? 'UNKNOWN'}
 
 Join now and start earning!

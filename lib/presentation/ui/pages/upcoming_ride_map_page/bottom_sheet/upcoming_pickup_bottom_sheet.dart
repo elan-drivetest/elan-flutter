@@ -1,3 +1,5 @@
+import 'package:elan/core/extension/money.dart';
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/domain/common/ride/ride.dart';
 import 'package:elan/presentation/bloc/available_ride_bloc/available_ride_bloc.dart';
 import 'package:elan/presentation/bloc/direction_bloc/direction_bloc.dart';
@@ -37,9 +39,8 @@ class UpcomingPickupBottomSheet extends StatelessWidget {
       formattedDate = formatter.format(testDate.toLocal());
     }
 
-    // Ride time and price
-    final totalRideHour = rideInfo.totalRideHour?.toStringAsFixed(2) ?? "--";
-    final ridePrice = "\$${((context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? 0) / 100).toStringAsFixed(2)}/hr";
+    // Ride price
+    final ridePrice = (context.watch<EarningsSummaryBloc>().state.earningsSummary?.hourlyRate ?? context.pricing.instructorRate).toCadPerHour;
 
     return BlocConsumer<UpcomingRideBloc, UpcomingRideState>(
       listener: (context, state) {
@@ -282,12 +283,16 @@ class UpcomingPickupBottomSheet extends StatelessWidget {
                       (dirState.distance.isNotEmpty || dirState.duration.isNotEmpty);
                   final isLoadingDir = dirState.status == DirectionStatus.loading;
 
+                  // Fallback (no route from Directions): both figures must
+                  // describe the SAME journey - the drive to pickup. Previously
+                  // this paired distance-to-pickup with the lesson duration,
+                  // which are unrelated quantities.
                   final distanceText = hasDirectionData
                       ? dirState.distance
                       : "${rideInfo.pickupDistance?.toStringAsFixed(1) ?? '0.0'} km";
                   final durationText = hasDirectionData
                       ? dirState.duration
-                      : "$totalRideHour hr";
+                      : context.pricing.estimateTravelTime(rideInfo.pickupDistance);
 
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -339,6 +344,38 @@ class UpcomingPickupBottomSheet extends StatelessWidget {
                   );
                 },
               ),
+
+              // Lesson duration is a separate quantity from the drive to
+              // pickup above, so it gets its own labelled row rather than
+              // being smuggled into the route chip.
+              if (rideInfo.totalRideHour != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.hourglass_bottom,
+                      size: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Lesson duration',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${rideInfo.totalRideHour!.toStringAsFixed(2)} hr',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
 
               const SizedBox(height: 24),
 

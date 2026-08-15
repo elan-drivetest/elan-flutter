@@ -1,3 +1,5 @@
+import 'package:elan/core/extension/money.dart';
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/core/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:elan/domain/referral_code_summary_response/referral_code_summary_response.dart';
@@ -20,8 +22,15 @@ class ReferralCardThump extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pricing = context.pricing;
+
+    // Bonus for the claim the instructor has actually made, falling back to the
+    // server-configured instructor referral price when the claim hasn't
+    // reported an amount yet.
+    final bonus = peerClaim?.bonusAmount ?? pricing.instructorReferralPrice;
+
     final displayTitle = titleText ?? (peerClaim != null ? 'Claim code and ' : 'Invite a friend and ');
-    final displayAmount = amountText ?? (peerClaim != null ? 'get ৳${peerClaim!.bonusAmount ?? 0}' : 'get \$100 CAD');
+    final displayAmount = amountText ?? 'get ${bonus.toCadCompactLabel}';
     final displaySubtitle = subtitleText ?? (peerClaim != null ? ' credited to your account' : ' credited to both of your accounts');
 
     return Container(
@@ -85,15 +94,17 @@ class ReferralCardThump extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(24),
-            child: peerClaim != null ? _buildPeerClaimView(peerClaim!) : bottomView,
+            child: peerClaim != null
+                ? _buildPeerClaimView(peerClaim!, pricing)
+                : bottomView,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPeerClaimView(PeerClaim code) {
-    final int minRides = code.minRidesRequired ?? 5;
+  Widget _buildPeerClaimView(PeerClaim code, PricingConfig pricing) {
+    final int minRides = code.minRidesRequired ?? pricing.referralMinRides;
     final int completedRides = code.ridesAfterClaim ?? 0;
     final int remainingRides =
         (minRides - completedRides) > 0 ? (minRides - completedRides) : 0;

@@ -3,7 +3,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 class RideCard extends StatelessWidget {
   final String driverName;
-  final double rating;
   final String pickupLocation;
   final String dropOffLocation;
   final String testCenterAddress;
@@ -16,7 +15,6 @@ class RideCard extends StatelessWidget {
   const RideCard({
     super.key,
     required this.driverName,
-    required this.rating,
     required this.pickupLocation,
     required this.dropOffLocation,
     required this.testCenterAddress,

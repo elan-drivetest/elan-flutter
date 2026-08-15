@@ -7,6 +7,7 @@ import 'package:elan/core/endpoints/api_endpoints.dart';
 import 'package:elan/core/error/api_error_mapper.dart';
 import 'package:elan/data/api_service/public_api_service.dart';
 import 'package:elan/domain/login_error_response/login_error_response.dart';
+import 'package:elan/domain/pricing_config_response/pricing_config_response.dart';
 import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: PublicApiService)
@@ -61,6 +62,26 @@ class IPublicApiService extends PublicApiService {
 
       return right(response);
     } on DioException catch (e) {
+      return left(checkResponseError(e));
+    }
+  }
+
+  @override
+  Future<Either<LoginErrorResponse, PricingConfigResponse>>
+      getPricingConfig() async {
+    try {
+      final response = await dio.get(
+        ApiEndpoints.baseUrl + ApiEndpoints.pricingConfigUrl,
+      );
+
+      AppLog.d("getPricingConfig_success: ${response.data}");
+      final result = PricingConfigResponse.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+
+      return right(result);
+    } on DioException catch (e) {
+      AppLog.d("getPricingConfig_error: ${e.response}");
       return left(checkResponseError(e));
     }
   }

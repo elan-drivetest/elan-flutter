@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:elan/core/app_timezone.dart';
 import 'package:elan/core/log/app_log.dart';
 import 'dart:convert';
 
@@ -129,7 +130,9 @@ class LocationServiceHandler extends TaskHandler {
         speed: pos.speed,
         bearing: pos.heading,
         batteryLevel: 100,
-        timezone: DateTime.now().timeZoneName,
+        // Was `DateTime.now().timeZoneName` -> "EDT", while the ride-start call
+        // sent "America/Toronto". Both paths now send the same IANA format.
+        timezone: kDefaultIanaTimezone,
       );
 
       FlutterForegroundTask.updateService(

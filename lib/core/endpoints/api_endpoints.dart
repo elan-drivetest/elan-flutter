@@ -16,6 +16,7 @@ class ApiEndpoints {
   static const String refreshCookieUrl = "/v1/auth/instructor/refresh";
   static const String confirmEmailUrl = "/v1/auth/email/confirm";
   static const String fileUploadUrl = "/v1/files/upload";
+  static const String pricingConfigUrl = "/v1/pricing-config";
   static const String instructorInfoUrl = "/v1/auth/instructor/me";
   static const String patchInstructorInfoUrl = "/v1/auth/instructor/me";
   static const String updateInstructorVehicleInfoUrl = "/v1/instructors/vehicle";

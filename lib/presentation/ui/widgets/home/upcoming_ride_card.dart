@@ -1,3 +1,4 @@
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -5,7 +6,6 @@ class UpcomingRideCard extends StatelessWidget {
   final String name;
   final String type;
   final String phoneNumber;
-  final double rating;
   final String time;
   final String pickupLocation;
   final String dropOffLocation;
@@ -16,7 +16,6 @@ class UpcomingRideCard extends StatelessWidget {
   const UpcomingRideCard({
     super.key,
     required this.name,
-    required this.rating,
     required this.time,
     required this.pickupLocation,
     required this.dropOffLocation,
@@ -339,6 +338,32 @@ class UpcomingRideCard extends StatelessWidget {
                           SizedBox(width: 4),
                           Icon(Icons.arrow_forward, size: 16),
                         ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Advisory only. The server owns the start-window rule; the
+                // button stays enabled so a stale/skewed device clock can never
+                // lock an instructor out of a road test.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.schedule,
+                      size: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Can be started within '
+                        '${context.pricing.rideStartWindowLabel} of the '
+                        'test time.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ),
                   ],
