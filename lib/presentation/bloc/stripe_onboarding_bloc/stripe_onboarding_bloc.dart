@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:elan/core/payout_readiness.dart';
 import 'package:elan/data/repository/user_repository.dart';
 import 'package:elan/domain/error_response/error_response.dart';
 import 'package:elan/domain/instructor_response/instructor_response.dart';
@@ -30,9 +31,13 @@ class StripeOnboardingBloc
 
     result.fold(
       (l) => emit(state.copyWith(
-          status: StripeOnboardingStatus.error, errorResponse: l)),
+          status: StripeOnboardingStatus.infoError,
+          errorResponse: l,
+          payoutReadiness: PayoutReadinessResolver.fromError(l))),
       (r) => emit(state.copyWith(
-          status: StripeOnboardingStatus.success, onboardResponse: r)),
+          status: StripeOnboardingStatus.success,
+          onboardResponse: r,
+          payoutReadiness: PayoutReadinessResolver.fromResponse(r))),
     );
   }
 

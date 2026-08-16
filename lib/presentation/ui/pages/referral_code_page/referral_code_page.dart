@@ -22,7 +22,9 @@ class _ReferralCodePageState extends State<ReferralCodePage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    context.read<GenerateReferralCodeBloc>().add(const GenerateReferralCodeEvent.getReferralCodes());
+    context
+        .read<GenerateReferralCodeBloc>()
+        .add(const GenerateReferralCodeEvent.getReferralCodes());
   }
 
   @override
@@ -60,7 +62,8 @@ class _ReferralCodePageState extends State<ReferralCodePage>
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorResponse?.message ?? 'Failed to generate code'),
+              content: Text(
+                  state.errorResponse?.message ?? 'Failed to generate code'),
               backgroundColor: Colors.red,
             ),
           );
@@ -69,10 +72,13 @@ class _ReferralCodePageState extends State<ReferralCodePage>
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-            onPressed: () => Navigator.of(context).pop(),
-          ) : null,
+          leading: Navigator.canPop(context)
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new,
+                      color: Colors.black87),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : null,
           backgroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
@@ -114,8 +120,10 @@ class _ReferralCodePageState extends State<ReferralCodePage>
                     indicatorSize: TabBarIndicatorSize.tab,
                     labelColor: Colors.black87,
                     unselectedLabelColor: Colors.grey.shade600,
-                    labelStyle: sansJpMedium14(color: Colors.black87).copyWith(fontWeight: FontWeight.w600),
-                    unselectedLabelStyle: sansJpMedium14(color: Colors.grey.shade600),
+                    labelStyle: sansJpMedium14(color: Colors.black87)
+                        .copyWith(fontWeight: FontWeight.w600),
+                    unselectedLabelStyle:
+                        sansJpMedium14(color: Colors.grey.shade600),
                     dividerColor: Colors.transparent,
                     padding: const EdgeInsets.all(4),
                   ),
@@ -137,5 +145,4 @@ class _ReferralCodePageState extends State<ReferralCodePage>
       ),
     );
   }
-
 }

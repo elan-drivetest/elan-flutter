@@ -12,7 +12,6 @@ import 'package:elan/domain/complete_ride_response/complete_ride_response.dart';
 import 'package:elan/domain/error_response/error_response.dart';
 import 'package:elan/domain/file_response/file_response.dart';
 import 'package:elan/domain/instructor_response/instructor_response.dart';
-import 'package:elan/domain/instructor_summary_response/instructor_summary_response.dart';
 import 'package:elan/domain/common/earnings/earnings_summary.dart';
 import 'package:elan/domain/referral_code_response/referral_code_response.dart';
 import 'package:elan/domain/referral_code_summary_response/referral_code_summary_response.dart';
@@ -113,21 +112,6 @@ class IUserApiService extends UserApiService {
       var result = InstructorResponse.fromJson(response.data);
       AppLog.d(
           "get_instructor_header -> ${result.instructor?.profileCompletionPercentage}");
-      return right(result);
-    } on DioException catch (e) {
-      return left(checkResponseError(e));
-    }
-  }
-
-  @override
-  Future<Either<ErrorResponse, InstructorSummaryResponse>> getInstructorDashboardSummary() async {
-    try {
-      final response = await dio.get(
-        ApiEndpoints.baseUrl + ApiEndpoints.instructorDashboardUrl,
-      );
-
-      AppLog.d("get_instructor_dashboard_check -> ${response.data}");
-      var result = InstructorSummaryResponse.fromJson(response.data);
       return right(result);
     } on DioException catch (e) {
       return left(checkResponseError(e));
@@ -514,7 +498,7 @@ class IUserApiService extends UserApiService {
   Future<Either<ErrorResponse, EarningsSummary>> getEarningsSummary() async {
     try {
       final response = await dio.get(
-        ApiEndpoints.baseUrl + ApiEndpoints.earningsSummaryUrl,
+        ApiEndpoints.baseUrl + ApiEndpoints.instructorDashboardUrl,
       );
 
       AppLog.d("getEarningsSummary -> ${response.data}");

@@ -24,6 +24,9 @@ _$StripeOnboardingStateImpl _$$StripeOnboardingStateImplFromJson(
           ? null
           : StripeOnboardUrlResponse.fromJson(
               json['onboardUrlResponse'] as Map<String, dynamic>),
+      payoutReadiness: $enumDecodeNullable(
+              _$PayoutReadinessEnumMap, json['payoutReadiness']) ??
+          PayoutReadiness.unknown,
     );
 
 Map<String, dynamic> _$$StripeOnboardingStateImplToJson(
@@ -33,6 +36,7 @@ Map<String, dynamic> _$$StripeOnboardingStateImplToJson(
       'errorResponse': instance.errorResponse,
       'onboardResponse': instance.onboardResponse,
       'onboardUrlResponse': instance.onboardUrlResponse,
+      'payoutReadiness': _$PayoutReadinessEnumMap[instance.payoutReadiness]!,
     };
 
 const _$StripeOnboardingStatusEnumMap = {
@@ -42,4 +46,12 @@ const _$StripeOnboardingStatusEnumMap = {
   StripeOnboardingStatus.success: 'success',
   StripeOnboardingStatus.update: 'update',
   StripeOnboardingStatus.error: 'error',
+  StripeOnboardingStatus.infoError: 'infoError',
+};
+
+const _$PayoutReadinessEnumMap = {
+  PayoutReadiness.unknown: 'unknown',
+  PayoutReadiness.ready: 'ready',
+  PayoutReadiness.notConnected: 'notConnected',
+  PayoutReadiness.pendingVerification: 'pendingVerification',
 };

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Android 12+ (API 31) launch screen.
+
+      From API 31 the platform ALWAYS draws its own splash and ignores
+      `android:windowBackground` on the launch theme. Without these attributes
+      the system falls back to its default window background plus the launcher
+      icon, then cuts straight to Flutter's black splash — the colour flash this
+      file exists to remove.
+
+      This overlay REPLACES values/styles.xml on API 31+, so it keeps the same
+      `NoTitleBar` parent and only adds the splash attributes on top.
+
+      `windowSplashScreenAnimationDuration` does not delay launch. It is capped
+      at 1000 ms by the platform and only tells the system how long an animated
+      icon should run; ours is static, so it stays short.
+    -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/brand_splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="android:windowSplashScreenAnimationDuration">300</item>
+    </style>
+
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

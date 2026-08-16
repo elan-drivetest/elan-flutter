@@ -92,7 +92,8 @@ class BankDetailsEditSheet extends StatelessWidget {
                     }
                     return Text(
                       "Update",
-                      style: sansMedium24(color: Colors.white).copyWith(fontSize: 16),
+                      style: sansMedium24(color: Colors.white)
+                          .copyWith(fontSize: 16),
                     );
                   }),
                 ),
@@ -109,7 +110,8 @@ class BankDetailsEditSheet extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     "Close",
-                    style: sansMedium24(color: Colors.white).copyWith(fontSize: 16),
+                    style: sansMedium24(color: Colors.white)
+                        .copyWith(fontSize: 16),
                   ),
                 ),
             ],

@@ -11,6 +11,7 @@ import 'package:elan/presentation/bloc/generate_referral_code_bloc/generate_refe
 import 'package:elan/presentation/bloc/instructor_info_bloc/instructor_info_bloc.dart';
 import 'package:elan/presentation/bloc/instructor_ride_bloc/instructor_ride_bloc.dart';
 import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart';
+import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:elan/presentation/bloc/stripe_onboarding_bloc/stripe_onboarding_bloc.dart';
 import 'package:elan/presentation/bloc/upcoming_ride_bloc/upcoming_ride_bloc.dart';
 import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
@@ -28,6 +29,13 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => getIt<BottomNavigationBloc>()),
         BlocProvider(create: (context) => getIt<AuthBloc>()),
+        // Server-owned config. Unauthenticated, so it is fetched immediately at
+        // app start rather than after login, and it never blocks a screen —
+        // state.config falls back to cached-then-default values.
+        BlocProvider(
+          create: (context) =>
+              getIt<PricingConfigBloc>()..add(const PricingConfigEvent.fetch()),
+        ),
         BlocProvider(create: (context) => getIt<InstructorInfoBloc>()),
         BlocProvider(create: (context) => getIt<AvailableRideBloc>()),
         BlocProvider(create: (context) => getIt<UpcomingRideBloc>()),

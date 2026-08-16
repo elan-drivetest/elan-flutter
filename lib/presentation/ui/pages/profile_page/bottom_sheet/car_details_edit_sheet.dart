@@ -215,7 +215,8 @@ class _CarDetailsEditSheetState extends State<CarDetailsEditSheet> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     fixedSize: const Size(double.maxFinite, 54),
-                    backgroundColor: _isUploading ? Colors.grey : const Color(0xFF4D8B55),
+                    backgroundColor:
+                        _isUploading ? Colors.grey : const Color(0xFF4D8B55),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -226,11 +227,13 @@ class _CarDetailsEditSheetState extends State<CarDetailsEditSheet> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
                         )
                       : Text(
                           'Save Car Details',
-                          style: sansMedium24(color: Colors.white).copyWith(fontSize: 16),
+                          style: sansMedium24(color: Colors.white)
+                              .copyWith(fontSize: 16),
                         ),
                 ),
               ],
@@ -253,7 +256,8 @@ class _CarDetailsEditSheetState extends State<CarDetailsEditSheet> {
         labelText: label,
         filled: true,
         fillColor: Colors.grey[50],
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -334,7 +338,8 @@ class _UploadField extends StatelessWidget {
               labelText: label,
               filled: true,
               fillColor: Colors.grey[50],
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
@@ -345,7 +350,8 @@ class _UploadField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4D8B55), width: 1.5),
+                borderSide:
+                    const BorderSide(color: Color(0xFF4D8B55), width: 1.5),
               ),
               suffixIcon: state.status == FileUploadStatus.loading
                   ? const Padding(
@@ -353,7 +359,8 @@ class _UploadField extends StatelessWidget {
                       child: SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF4D8B55)),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Color(0xFF4D8B55)),
                       ),
                     )
                   : const Icon(Icons.upload_file, color: Color(0xFF4D8B55)),

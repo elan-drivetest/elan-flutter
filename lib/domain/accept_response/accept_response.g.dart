@@ -9,29 +9,37 @@ part of 'accept_response.dart';
 _$AcceptResponseImpl _$$AcceptResponseImplFromJson(Map<String, dynamic> json) =>
     _$AcceptResponseImpl(
       id: (json['id'] as num?)?.toInt(),
+      bookingId: (json['booking_id'] as num?)?.toInt(),
       startTime: json['start_time'] == null
           ? null
           : DateTime.parse(json['start_time'] as String),
-      endTime: json['end_time'],
+      endTime: json['end_time'] == null
+          ? null
+          : DateTime.parse(json['end_time'] as String),
       status: json['status'] as String?,
-      totalDistance: json['total_distance'] as String?,
-      pickupLatitude: json['pickup_latitude'],
-      pickupLongitude: json['pickup_longitude'],
-      dropoffLatitude: json['dropoff_latitude'],
-      dropoffLongitude: json['dropoff_longitude'],
-      totalHours: json['total_hours'] as String?,
+      totalDistance: _toDouble(json['total_distance']),
+      pickupLatitude: _toDouble(json['pickup_latitude']),
+      pickupLongitude: _toDouble(json['pickup_longitude']),
+      dropoffLatitude: _toDouble(json['dropoff_latitude']),
+      dropoffLongitude: _toDouble(json['dropoff_longitude']),
+      totalHours: _toDouble(json['total_hours']),
       hourlyRate: (json['hourly_rate'] as num?)?.toInt(),
       instructorEarnings: (json['instructor_earnings'] as num?)?.toInt(),
-      paymentScheduledAt: json['payment_scheduled_at'],
-      paymentProcessedAt: json['payment_processed_at'],
+      paymentScheduledAt: json['payment_scheduled_at'] == null
+          ? null
+          : DateTime.parse(json['payment_scheduled_at'] as String),
+      paymentProcessedAt: json['payment_processed_at'] == null
+          ? null
+          : DateTime.parse(json['payment_processed_at'] as String),
     );
 
 Map<String, dynamic> _$$AcceptResponseImplToJson(
         _$AcceptResponseImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'booking_id': instance.bookingId,
       'start_time': instance.startTime?.toIso8601String(),
-      'end_time': instance.endTime,
+      'end_time': instance.endTime?.toIso8601String(),
       'status': instance.status,
       'total_distance': instance.totalDistance,
       'pickup_latitude': instance.pickupLatitude,
@@ -41,6 +49,6 @@ Map<String, dynamic> _$$AcceptResponseImplToJson(
       'total_hours': instance.totalHours,
       'hourly_rate': instance.hourlyRate,
       'instructor_earnings': instance.instructorEarnings,
-      'payment_scheduled_at': instance.paymentScheduledAt,
-      'payment_processed_at': instance.paymentProcessedAt,
+      'payment_scheduled_at': instance.paymentScheduledAt?.toIso8601String(),
+      'payment_processed_at': instance.paymentProcessedAt?.toIso8601String(),
     };

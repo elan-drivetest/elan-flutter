@@ -6,19 +6,14 @@ part 'refresh_error_response.g.dart';
 @freezed
 class RefreshErrorResponse with _$RefreshErrorResponse {
   const factory RefreshErrorResponse({
-    @JsonKey(name: "status_code")
-    int? statusCode,
-    @JsonKey(name: "message")
-    String? message,
-    @JsonKey(
-        name: "errors",
-        fromJson: Errors.fromJson,
-        toJson: Errors.toJson
-    )
+    @JsonKey(name: "status_code") int? statusCode,
+    @JsonKey(name: "message") String? message,
+    @JsonKey(name: "errors", fromJson: Errors.fromJson, toJson: Errors.toJson)
     Errors? errors,
   }) = _RefreshErrorResponse;
 
-  factory RefreshErrorResponse.fromJson(Map<String, dynamic> json) => _$RefreshErrorResponseFromJson(json);
+  factory RefreshErrorResponse.fromJson(Map<String, dynamic> json) =>
+      _$RefreshErrorResponseFromJson(json);
 }
 
 @freezed

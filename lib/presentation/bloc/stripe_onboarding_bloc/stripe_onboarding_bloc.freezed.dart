@@ -302,6 +302,17 @@ mixin _$StripeOnboardingState {
   StripeOnboardUrlResponse? get onboardUrlResponse =>
       throw _privateConstructorUsedError;
 
+  /// Whether the instructor may accept work, derived from the last
+  /// `getInfo`.
+  ///
+  /// Carried separately from [status] because this bloc serves two unrelated
+  /// flows through one status field: checking payout readiness, and fetching
+  /// an onboarding URL to push the verify page with. A caller that gated on
+  /// `status == error` could not tell "not onboarded" from "the URL request
+  /// failed", and `StripeOnboardingBloc` is app-scoped, so both flows are
+  /// live at once behind the shell's IndexedStack.
+  PayoutReadiness get payoutReadiness => throw _privateConstructorUsedError;
+
   /// Serializes this StripeOnboardingState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -322,7 +333,8 @@ abstract class $StripeOnboardingStateCopyWith<$Res> {
       {StripeOnboardingStatus status,
       ErrorResponse? errorResponse,
       StripeOnboardResponse? onboardResponse,
-      StripeOnboardUrlResponse? onboardUrlResponse});
+      StripeOnboardUrlResponse? onboardUrlResponse,
+      PayoutReadiness payoutReadiness});
 
   $ErrorResponseCopyWith<$Res>? get errorResponse;
   $StripeOnboardResponseCopyWith<$Res>? get onboardResponse;
@@ -349,6 +361,7 @@ class _$StripeOnboardingStateCopyWithImpl<$Res,
     Object? errorResponse = freezed,
     Object? onboardResponse = freezed,
     Object? onboardUrlResponse = freezed,
+    Object? payoutReadiness = null,
   }) {
     return _then(_value.copyWith(
       status: null == status
@@ -367,6 +380,10 @@ class _$StripeOnboardingStateCopyWithImpl<$Res,
           ? _value.onboardUrlResponse
           : onboardUrlResponse // ignore: cast_nullable_to_non_nullable
               as StripeOnboardUrlResponse?,
+      payoutReadiness: null == payoutReadiness
+          ? _value.payoutReadiness
+          : payoutReadiness // ignore: cast_nullable_to_non_nullable
+              as PayoutReadiness,
     ) as $Val);
   }
 
@@ -428,7 +445,8 @@ abstract class _$$StripeOnboardingStateImplCopyWith<$Res>
       {StripeOnboardingStatus status,
       ErrorResponse? errorResponse,
       StripeOnboardResponse? onboardResponse,
-      StripeOnboardUrlResponse? onboardUrlResponse});
+      StripeOnboardUrlResponse? onboardUrlResponse,
+      PayoutReadiness payoutReadiness});
 
   @override
   $ErrorResponseCopyWith<$Res>? get errorResponse;
@@ -456,6 +474,7 @@ class __$$StripeOnboardingStateImplCopyWithImpl<$Res>
     Object? errorResponse = freezed,
     Object? onboardResponse = freezed,
     Object? onboardUrlResponse = freezed,
+    Object? payoutReadiness = null,
   }) {
     return _then(_$StripeOnboardingStateImpl(
       status: null == status
@@ -474,6 +493,10 @@ class __$$StripeOnboardingStateImplCopyWithImpl<$Res>
           ? _value.onboardUrlResponse
           : onboardUrlResponse // ignore: cast_nullable_to_non_nullable
               as StripeOnboardUrlResponse?,
+      payoutReadiness: null == payoutReadiness
+          ? _value.payoutReadiness
+          : payoutReadiness // ignore: cast_nullable_to_non_nullable
+              as PayoutReadiness,
     ));
   }
 }
@@ -485,7 +508,8 @@ class _$StripeOnboardingStateImpl implements _StripeOnboardingState {
       {this.status = StripeOnboardingStatus.initial,
       this.errorResponse,
       this.onboardResponse,
-      this.onboardUrlResponse});
+      this.onboardUrlResponse,
+      this.payoutReadiness = PayoutReadiness.unknown});
 
   factory _$StripeOnboardingStateImpl.fromJson(Map<String, dynamic> json) =>
       _$$StripeOnboardingStateImplFromJson(json);
@@ -500,9 +524,22 @@ class _$StripeOnboardingStateImpl implements _StripeOnboardingState {
   @override
   final StripeOnboardUrlResponse? onboardUrlResponse;
 
+  /// Whether the instructor may accept work, derived from the last
+  /// `getInfo`.
+  ///
+  /// Carried separately from [status] because this bloc serves two unrelated
+  /// flows through one status field: checking payout readiness, and fetching
+  /// an onboarding URL to push the verify page with. A caller that gated on
+  /// `status == error` could not tell "not onboarded" from "the URL request
+  /// failed", and `StripeOnboardingBloc` is app-scoped, so both flows are
+  /// live at once behind the shell's IndexedStack.
+  @override
+  @JsonKey()
+  final PayoutReadiness payoutReadiness;
+
   @override
   String toString() {
-    return 'StripeOnboardingState(status: $status, errorResponse: $errorResponse, onboardResponse: $onboardResponse, onboardUrlResponse: $onboardUrlResponse)';
+    return 'StripeOnboardingState(status: $status, errorResponse: $errorResponse, onboardResponse: $onboardResponse, onboardUrlResponse: $onboardUrlResponse, payoutReadiness: $payoutReadiness)';
   }
 
   @override
@@ -516,13 +553,15 @@ class _$StripeOnboardingStateImpl implements _StripeOnboardingState {
             (identical(other.onboardResponse, onboardResponse) ||
                 other.onboardResponse == onboardResponse) &&
             (identical(other.onboardUrlResponse, onboardUrlResponse) ||
-                other.onboardUrlResponse == onboardUrlResponse));
+                other.onboardUrlResponse == onboardUrlResponse) &&
+            (identical(other.payoutReadiness, payoutReadiness) ||
+                other.payoutReadiness == payoutReadiness));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, status, errorResponse, onboardResponse, onboardUrlResponse);
+  int get hashCode => Object.hash(runtimeType, status, errorResponse,
+      onboardResponse, onboardUrlResponse, payoutReadiness);
 
   /// Create a copy of StripeOnboardingState
   /// with the given fields replaced by the non-null parameter values.
@@ -543,11 +582,11 @@ class _$StripeOnboardingStateImpl implements _StripeOnboardingState {
 
 abstract class _StripeOnboardingState implements StripeOnboardingState {
   const factory _StripeOnboardingState(
-          {final StripeOnboardingStatus status,
-          final ErrorResponse? errorResponse,
-          final StripeOnboardResponse? onboardResponse,
-          final StripeOnboardUrlResponse? onboardUrlResponse}) =
-      _$StripeOnboardingStateImpl;
+      {final StripeOnboardingStatus status,
+      final ErrorResponse? errorResponse,
+      final StripeOnboardResponse? onboardResponse,
+      final StripeOnboardUrlResponse? onboardUrlResponse,
+      final PayoutReadiness payoutReadiness}) = _$StripeOnboardingStateImpl;
 
   factory _StripeOnboardingState.fromJson(Map<String, dynamic> json) =
       _$StripeOnboardingStateImpl.fromJson;
@@ -560,6 +599,18 @@ abstract class _StripeOnboardingState implements StripeOnboardingState {
   StripeOnboardResponse? get onboardResponse;
   @override
   StripeOnboardUrlResponse? get onboardUrlResponse;
+
+  /// Whether the instructor may accept work, derived from the last
+  /// `getInfo`.
+  ///
+  /// Carried separately from [status] because this bloc serves two unrelated
+  /// flows through one status field: checking payout readiness, and fetching
+  /// an onboarding URL to push the verify page with. A caller that gated on
+  /// `status == error` could not tell "not onboarded" from "the URL request
+  /// failed", and `StripeOnboardingBloc` is app-scoped, so both flows are
+  /// live at once behind the shell's IndexedStack.
+  @override
+  PayoutReadiness get payoutReadiness;
 
   /// Create a copy of StripeOnboardingState
   /// with the given fields replaced by the non-null parameter values.

@@ -70,14 +70,16 @@ class TransactionItem extends StatelessWidget {
                 Text(amount, style: sansDevanagariBold16(color: Colors.green)),
                 const SizedBox(width: 24),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
                     children: [
-                      Text('Sent', style: sansDevanagariMedium16(color: Colors.white)),
+                      Text('Sent',
+                          style: sansDevanagariMedium16(color: Colors.white)),
                       const SizedBox(width: 8),
                       const Icon(Icons.download, color: Colors.white, size: 16),
                     ],

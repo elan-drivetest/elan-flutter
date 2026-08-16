@@ -36,8 +36,8 @@ _$CompleteRideImpl _$$CompleteRideImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['dateTime'] as String),
       testType: json['testType'] as String?,
       instructorEarnings: (json['instructorEarnings'] as num?)?.toInt(),
-      totalDistance: json['totalDistance'] as String?,
-      totalHours: json['totalHours'] as String?,
+      totalDistance: _toDouble(json['totalDistance']),
+      totalHours: _toDouble(json['totalHours']),
     );
 
 Map<String, dynamic> _$$CompleteRideImplToJson(_$CompleteRideImpl instance) =>

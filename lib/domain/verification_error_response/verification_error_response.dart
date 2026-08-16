@@ -11,8 +11,7 @@ class VerificationErrorResponse with _$VerificationErrorResponse {
     @JsonKey(
         name: "errors",
         fromJson: VerificationErrors.fromJson,
-        toJson: VerificationErrors.toJson
-    )
+        toJson: VerificationErrors.toJson)
     VerificationErrors? errors,
   }) = _VerificationErrorResponse;
 

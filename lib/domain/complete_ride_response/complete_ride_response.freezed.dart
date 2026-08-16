@@ -245,12 +245,38 @@ mixin _$CompleteRide {
   DateTime? get dateTime => throw _privateConstructorUsedError;
   @JsonKey(name: "testType")
   String? get testType => throw _privateConstructorUsedError;
+
+  /// Cents. **Zero until the payout cron runs**, up to
+  /// `instructor_payout_delay_days` (default 7) after the ride
+  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
+  /// legitimately reports 0 and must not be shown as "earned $0.00".
   @JsonKey(name: "instructorEarnings")
   int? get instructorEarnings => throw _privateConstructorUsedError;
-  @JsonKey(name: "totalDistance")
-  String? get totalDistance => throw _privateConstructorUsedError;
-  @JsonKey(name: "totalHours")
-  String? get totalHours => throw _privateConstructorUsedError;
+
+  /// Kilometres actually driven, and safe to label as such (§5.2).
+  ///
+  /// Summed with haversine over the ride's GPS breadcrumbs: ordered by
+  /// capture time, stationary jitter (<15 m) dropped, fixes worse than 100 m
+  /// accuracy discarded. It under-reads true road distance by roughly 3–8%
+  /// because it draws straight lines between samples — deliberately
+  /// uncorrected, since no money depends on it — and it is only as good as
+  /// the app's ping cadence ([LocationTrackingPolicy], §12.6).
+  ///
+  /// Two things this does *not* cover. It was previously a Distance-Matrix
+  /// lookup from the Start point to the Stop point, which reported ≈ 0 km for
+  /// any round trip that ended where it began; **rides completed before that
+  /// fix were not backfilled**, so old history rows still hold the old
+  /// number. And a session with fewer than two usable points still falls back
+  /// to that point-to-point lookup.
+  ///
+  /// Arrives as a string like `"0.400000"` — a `decimal` column (§12.2).
+  @JsonKey(name: "totalDistance", fromJson: _toDouble)
+  double? get totalDistance => throw _privateConstructorUsedError;
+
+  /// Wall-clock hours from Start to Stop. This is what the instructor is
+  /// actually paid on. Also a string on the wire.
+  @JsonKey(name: "totalHours", fromJson: _toDouble)
+  double? get totalHours => throw _privateConstructorUsedError;
 
   /// Serializes this CompleteRide to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -277,8 +303,9 @@ abstract class $CompleteRideCopyWith<$Res> {
       @JsonKey(name: "dateTime") DateTime? dateTime,
       @JsonKey(name: "testType") String? testType,
       @JsonKey(name: "instructorEarnings") int? instructorEarnings,
-      @JsonKey(name: "totalDistance") String? totalDistance,
-      @JsonKey(name: "totalHours") String? totalHours});
+      @JsonKey(name: "totalDistance", fromJson: _toDouble)
+      double? totalDistance,
+      @JsonKey(name: "totalHours", fromJson: _toDouble) double? totalHours});
 }
 
 /// @nodoc
@@ -343,11 +370,11 @@ class _$CompleteRideCopyWithImpl<$Res, $Val extends CompleteRide>
       totalDistance: freezed == totalDistance
           ? _value.totalDistance
           : totalDistance // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       totalHours: freezed == totalHours
           ? _value.totalHours
           : totalHours // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
     ) as $Val);
   }
 }
@@ -369,8 +396,9 @@ abstract class _$$CompleteRideImplCopyWith<$Res>
       @JsonKey(name: "dateTime") DateTime? dateTime,
       @JsonKey(name: "testType") String? testType,
       @JsonKey(name: "instructorEarnings") int? instructorEarnings,
-      @JsonKey(name: "totalDistance") String? totalDistance,
-      @JsonKey(name: "totalHours") String? totalHours});
+      @JsonKey(name: "totalDistance", fromJson: _toDouble)
+      double? totalDistance,
+      @JsonKey(name: "totalHours", fromJson: _toDouble) double? totalHours});
 }
 
 /// @nodoc
@@ -433,11 +461,11 @@ class __$$CompleteRideImplCopyWithImpl<$Res>
       totalDistance: freezed == totalDistance
           ? _value.totalDistance
           : totalDistance // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       totalHours: freezed == totalHours
           ? _value.totalHours
           : totalHours // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
     ));
   }
 }
@@ -454,8 +482,8 @@ class _$CompleteRideImpl implements _CompleteRide {
       @JsonKey(name: "dateTime") this.dateTime,
       @JsonKey(name: "testType") this.testType,
       @JsonKey(name: "instructorEarnings") this.instructorEarnings,
-      @JsonKey(name: "totalDistance") this.totalDistance,
-      @JsonKey(name: "totalHours") this.totalHours});
+      @JsonKey(name: "totalDistance", fromJson: _toDouble) this.totalDistance,
+      @JsonKey(name: "totalHours", fromJson: _toDouble) this.totalHours});
 
   factory _$CompleteRideImpl.fromJson(Map<String, dynamic> json) =>
       _$$CompleteRideImplFromJson(json);
@@ -481,15 +509,41 @@ class _$CompleteRideImpl implements _CompleteRide {
   @override
   @JsonKey(name: "testType")
   final String? testType;
+
+  /// Cents. **Zero until the payout cron runs**, up to
+  /// `instructor_payout_delay_days` (default 7) after the ride
+  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
+  /// legitimately reports 0 and must not be shown as "earned $0.00".
   @override
   @JsonKey(name: "instructorEarnings")
   final int? instructorEarnings;
+
+  /// Kilometres actually driven, and safe to label as such (§5.2).
+  ///
+  /// Summed with haversine over the ride's GPS breadcrumbs: ordered by
+  /// capture time, stationary jitter (<15 m) dropped, fixes worse than 100 m
+  /// accuracy discarded. It under-reads true road distance by roughly 3–8%
+  /// because it draws straight lines between samples — deliberately
+  /// uncorrected, since no money depends on it — and it is only as good as
+  /// the app's ping cadence ([LocationTrackingPolicy], §12.6).
+  ///
+  /// Two things this does *not* cover. It was previously a Distance-Matrix
+  /// lookup from the Start point to the Stop point, which reported ≈ 0 km for
+  /// any round trip that ended where it began; **rides completed before that
+  /// fix were not backfilled**, so old history rows still hold the old
+  /// number. And a session with fewer than two usable points still falls back
+  /// to that point-to-point lookup.
+  ///
+  /// Arrives as a string like `"0.400000"` — a `decimal` column (§12.2).
   @override
-  @JsonKey(name: "totalDistance")
-  final String? totalDistance;
+  @JsonKey(name: "totalDistance", fromJson: _toDouble)
+  final double? totalDistance;
+
+  /// Wall-clock hours from Start to Stop. This is what the instructor is
+  /// actually paid on. Also a string on the wire.
   @override
-  @JsonKey(name: "totalHours")
-  final String? totalHours;
+  @JsonKey(name: "totalHours", fromJson: _toDouble)
+  final double? totalHours;
 
   @override
   String toString() {
@@ -555,17 +609,18 @@ class _$CompleteRideImpl implements _CompleteRide {
 
 abstract class _CompleteRide implements CompleteRide {
   const factory _CompleteRide(
-          {@JsonKey(name: "id") final int? id,
-          @JsonKey(name: "customerName") final String? customerName,
-          @JsonKey(name: "testCenterName") final String? testCenterName,
-          @JsonKey(name: "pickupLocation") final String? pickupLocation,
-          @JsonKey(name: "dropoffLocation") final String? dropoffLocation,
-          @JsonKey(name: "dateTime") final DateTime? dateTime,
-          @JsonKey(name: "testType") final String? testType,
-          @JsonKey(name: "instructorEarnings") final int? instructorEarnings,
-          @JsonKey(name: "totalDistance") final String? totalDistance,
-          @JsonKey(name: "totalHours") final String? totalHours}) =
-      _$CompleteRideImpl;
+      {@JsonKey(name: "id") final int? id,
+      @JsonKey(name: "customerName") final String? customerName,
+      @JsonKey(name: "testCenterName") final String? testCenterName,
+      @JsonKey(name: "pickupLocation") final String? pickupLocation,
+      @JsonKey(name: "dropoffLocation") final String? dropoffLocation,
+      @JsonKey(name: "dateTime") final DateTime? dateTime,
+      @JsonKey(name: "testType") final String? testType,
+      @JsonKey(name: "instructorEarnings") final int? instructorEarnings,
+      @JsonKey(name: "totalDistance", fromJson: _toDouble)
+      final double? totalDistance,
+      @JsonKey(name: "totalHours", fromJson: _toDouble)
+      final double? totalHours}) = _$CompleteRideImpl;
 
   factory _CompleteRide.fromJson(Map<String, dynamic> json) =
       _$CompleteRideImpl.fromJson;
@@ -591,15 +646,41 @@ abstract class _CompleteRide implements CompleteRide {
   @override
   @JsonKey(name: "testType")
   String? get testType;
+
+  /// Cents. **Zero until the payout cron runs**, up to
+  /// `instructor_payout_delay_days` (default 7) after the ride
+  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
+  /// legitimately reports 0 and must not be shown as "earned $0.00".
   @override
   @JsonKey(name: "instructorEarnings")
   int? get instructorEarnings;
+
+  /// Kilometres actually driven, and safe to label as such (§5.2).
+  ///
+  /// Summed with haversine over the ride's GPS breadcrumbs: ordered by
+  /// capture time, stationary jitter (<15 m) dropped, fixes worse than 100 m
+  /// accuracy discarded. It under-reads true road distance by roughly 3–8%
+  /// because it draws straight lines between samples — deliberately
+  /// uncorrected, since no money depends on it — and it is only as good as
+  /// the app's ping cadence ([LocationTrackingPolicy], §12.6).
+  ///
+  /// Two things this does *not* cover. It was previously a Distance-Matrix
+  /// lookup from the Start point to the Stop point, which reported ≈ 0 km for
+  /// any round trip that ended where it began; **rides completed before that
+  /// fix were not backfilled**, so old history rows still hold the old
+  /// number. And a session with fewer than two usable points still falls back
+  /// to that point-to-point lookup.
+  ///
+  /// Arrives as a string like `"0.400000"` — a `decimal` column (§12.2).
   @override
-  @JsonKey(name: "totalDistance")
-  String? get totalDistance;
+  @JsonKey(name: "totalDistance", fromJson: _toDouble)
+  double? get totalDistance;
+
+  /// Wall-clock hours from Start to Stop. This is what the instructor is
+  /// actually paid on. Also a string on the wire.
   @override
-  @JsonKey(name: "totalHours")
-  String? get totalHours;
+  @JsonKey(name: "totalHours", fromJson: _toDouble)
+  double? get totalHours;
 
   /// Create a copy of CompleteRide
   /// with the given fields replaced by the non-null parameter values.

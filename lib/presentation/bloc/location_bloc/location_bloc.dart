@@ -1,3 +1,4 @@
+import 'package:elan/domain/common/ride/ride.dart';
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -73,6 +74,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
           location: location,
           shouldStart: event.isRideRequest,
           rideId: event.rideId,
+          booking: event.booking,
         )),
       );
     } on TimeoutException {

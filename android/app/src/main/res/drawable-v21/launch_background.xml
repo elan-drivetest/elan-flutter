@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="?android:colorBackground" />
+<!--
+  Launch screen for API < 31. On API 31+ this is ignored entirely in favour of
+  values-v31/styles.xml, which uses the platform SplashScreen API.
 
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
+  Background colour is shared with the Flutter splash and the iOS storyboard —
+  see values/colors.xml for why that matters.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/brand_splash_background" />
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+            android:src="@mipmap/ic_launcher" />
+    </item>
 </layer-list>

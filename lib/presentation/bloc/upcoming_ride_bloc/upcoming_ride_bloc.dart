@@ -14,10 +14,12 @@ part 'upcoming_ride_bloc.g.dart';
 @injectable
 class UpcomingRideBloc extends Bloc<UpcomingRideEvent, UpcomingRideState> {
   final UserRepository repository;
+  final CacheManagerImpl cacheManagerImpl;
 
   String? cursor;
 
-  UpcomingRideBloc(this.repository,) : super(const UpcomingRideState()) {
+  UpcomingRideBloc(this.repository, this.cacheManagerImpl)
+      : super(const UpcomingRideState()) {
     on<_RequestData>(_onRequestData);
     on<_RefreshData>(_onRefreshData);
 
@@ -33,19 +35,49 @@ class UpcomingRideBloc extends Bloc<UpcomingRideEvent, UpcomingRideState> {
 
     final result = await repository.acceptRide(id: event.id);
 
-    result.fold(
+    // `fold` MUST be awaited. Its callbacks are async, so it returns a future;
+    // dropping that future ends the handler immediately and any `emit` after an
+    // `await` inside a callback then fires post-completion, which bloc asserts
+    // on. That is not hypothetical here: the success branch writes to the cache
+    // before it emits, so accepting a ride threw
+    // `emit was called after an event handler completed normally`, the `update`
+    // state never arrived, and the job board's loading dialog — which is
+    // dismissed on `update` — sat there forever.
+    await result.fold(
       (l) async {
+        if (emit.isDone) return;
         emit(
             state.copyWith(status: UpcomingRideStatus.error, errorResponse: l));
-        await Future.delayed(const Duration(milliseconds: 600));
-        add(const UpcomingRideEvent.refreshData());
       },
       (r) async {
+        // The accept response is the new RideSession (§8.2). Only its id is
+        // worth keeping — it is what /location-tracking and /stop expect. The
+        // booking id used to be cached alongside it because no RideSession
+        // response returned one; every response carries `booking_id` now
+        // (§14.4 fixed), so there is no link left for the app to hold.
+        final sessionId = r.id;
+        if (sessionId != null) {
+          await cacheManagerImpl.setTrackableRideId(
+            rideId: sessionId.toString(),
+          );
+        }
+        if (emit.isDone) return;
         emit(state.copyWith(status: UpcomingRideStatus.update));
-        await Future.delayed(const Duration(milliseconds: 600));
-        add(const UpcomingRideEvent.refreshData());
       },
     );
+
+    await _refreshAfter(const Duration(milliseconds: 600));
+  }
+
+  /// Re-fetch the list once the UI has had time to react to the terminal state.
+  ///
+  /// Hoisted out of the fold branches so the delay runs inside the handler
+  /// rather than in a future nobody holds — and guarded on [isClosed], because
+  /// the instructor can navigate away during it.
+  Future<void> _refreshAfter(Duration delay) async {
+    await Future.delayed(delay);
+    if (isClosed) return;
+    add(const UpcomingRideEvent.refreshData());
   }
 
   Future<void> _onTransferRide(
@@ -59,21 +91,22 @@ class UpcomingRideBloc extends Bloc<UpcomingRideEvent, UpcomingRideState> {
       reason: event.reason,
     );
 
-    result.fold(
+    // Same shape as accept. This one happens to emit before its first `await`,
+    // so it works today — but only by accident of statement order.
+    await result.fold(
       (l) async {
+        if (emit.isDone) return;
         emit(
             state.copyWith(status: UpcomingRideStatus.error, errorResponse: l));
-        await Future.delayed(const Duration(milliseconds: 100));
-        add(const UpcomingRideEvent.refreshData());
       },
       (r) async {
+        if (emit.isDone) return;
         emit(state.copyWith(status: UpcomingRideStatus.update));
-        await Future.delayed(const Duration(milliseconds: 100));
-        add(const UpcomingRideEvent.refreshData());
       },
     );
-  }
 
+    await _refreshAfter(const Duration(milliseconds: 100));
+  }
 
   Future<void> _onRequestData(
     _RequestData event,

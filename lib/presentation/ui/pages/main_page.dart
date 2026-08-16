@@ -1,5 +1,7 @@
 import 'package:elan/core/app_colors.dart';
 import 'package:elan/presentation/bloc/bottom_navigation/bottom_navigation_bloc.dart';
+import 'package:elan/presentation/bloc/stripe_onboarding_bloc/stripe_onboarding_bloc.dart';
+import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,8 +25,6 @@ class _MainPageState extends State<MainPage> {
   bool isDarkMode = false;
   String themeName = "Glow Mode";
 
-
-
   void navRoute(int index) {
     widget.navigationShell.goBranch(
       index,
@@ -34,6 +34,26 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Stripe onboarding returns a one-time URL, and whoever asked for it has to
+    // push the verify page. Three places ask — the dashboard's bank card, the
+    // profile bank sheet, and the job-board gate — and only the dashboard ever
+    // pushed, so the other two silently did nothing whenever the dashboard was
+    // not mounted in exactly the right state. Handled once here, above every
+    // branch, so any caller works and none of them push twice.
+    return BlocListener<StripeOnboardingBloc, StripeOnboardingState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status &&
+          current.status == StripeOnboardingStatus.update,
+      listener: (context, state) {
+        final url = state.onboardUrlResponse?.onboardingUrl;
+        if (url == null || url.isEmpty) return;
+        context.push(PagesName.stripeVerifyPage.path, extra: url);
+      },
+      child: _buildShell(context),
+    );
+  }
+
+  Widget _buildShell(BuildContext context) {
     return BlocConsumer<BottomNavigationBloc, BottomNavigationState>(
         builder: (context, state) {
       return Scaffold(
@@ -56,7 +76,8 @@ class _MainPageState extends State<MainPage> {
             child: NavigationBarTheme(
               data: NavigationBarThemeData(
                 backgroundColor: Colors.white,
-                indicatorColor: LightModeColor.navActive.color.withValues(alpha: 0.15),
+                indicatorColor:
+                    LightModeColor.navActive.color.withValues(alpha: 0.15),
                 labelTextStyle: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
                     return TextStyle(
@@ -79,17 +100,20 @@ class _MainPageState extends State<MainPage> {
                 elevation: 0,
                 destinations: const [
                   NavigationDestination(
-                    icon: Icon(Icons.dashboard_outlined, size: 26, color: Colors.grey),
+                    icon: Icon(Icons.dashboard_outlined,
+                        size: 26, color: Colors.grey),
                     selectedIcon: Icon(Icons.dashboard_rounded, size: 26),
                     label: 'Dashboard',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.directions_car_outlined, size: 26, color: Colors.grey),
+                    icon: Icon(Icons.directions_car_outlined,
+                        size: 26, color: Colors.grey),
                     selectedIcon: Icon(Icons.directions_car_rounded, size: 26),
                     label: 'Available Rides',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.card_giftcard_outlined, size: 26, color: Colors.grey),
+                    icon: Icon(Icons.card_giftcard_outlined,
+                        size: 26, color: Colors.grey),
                     selectedIcon: Icon(Icons.card_giftcard, size: 26),
                     label: 'Referral',
                   ),

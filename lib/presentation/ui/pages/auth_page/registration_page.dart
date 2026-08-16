@@ -7,7 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:elan/core/error/api_error_mapper.dart';
 import 'package:elan/presentation/bloc/registration_bloc/registration_bloc.dart';
 import 'package:elan/presentation/ui/pages/auth_page/otp_verification_page.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:elan/core/validatator/canadian_phone.dart';
+import 'package:elan/presentation/ui/widgets/common/canadian_phone_field.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -19,7 +20,6 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage>
     with SingleTickerProviderStateMixin {
   int _currentStep = 0;
-  String _selectedCountryCode = '+1';
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -79,7 +79,8 @@ class _RegistrationPageState extends State<RegistrationPage>
         weight: 1,
       ),
       TweenSequenceItem(
-        tween: Tween<Offset>(begin: const Offset(-0.03, 0), end: const Offset(0.03, 0)),
+        tween: Tween<Offset>(
+            begin: const Offset(-0.03, 0), end: const Offset(0.03, 0)),
         weight: 2,
       ),
       TweenSequenceItem(
@@ -128,7 +129,10 @@ class _RegistrationPageState extends State<RegistrationPage>
                 fullName: _nameController.text.trim(),
                 email: _emailController.text.trim(),
                 password: _passwordController.text,
-                phoneNumber: '$_selectedCountryCode${_phoneController.text.trim()}',
+                // The field displays a mask — "(416) 555-0134" — so send the
+                // E.164 form instead of the raw text. The form has already
+                // validated, hence the non-null assertion.
+                phoneNumber: CanadianPhone.toE164(_phoneController.text)!,
                 address: _addressController.text.trim(),
                 drivingSchoolName: _drivingSchoolController.text.trim(),
                 licenseNumber: _licenseNumberController.text.trim(),
@@ -194,13 +198,15 @@ class _RegistrationPageState extends State<RegistrationPage>
 
         if (state.status == RegistrationStatus.error) {
           Navigator.of(context).pop();
-          
-          String errorMessage = state.errorResponse?.message ?? 'Registration failed';
+
+          String errorMessage =
+              state.errorResponse?.message ?? 'Registration failed';
           final errors = state.errorResponse?.errors;
           if (errors != null) {
-            String? friendly(List<String>? codes) => (codes == null || codes.isEmpty)
-                ? null
-                : (ApiErrorMapper.resolveField(codes.first) ?? codes.first);
+            String? friendly(List<String>? codes) =>
+                (codes == null || codes.isEmpty)
+                    ? null
+                    : (ApiErrorMapper.resolveField(codes.first) ?? codes.first);
 
             final errorMessages = [
               friendly(errors.email),
@@ -247,7 +253,8 @@ class _RegistrationPageState extends State<RegistrationPage>
             child: LinearProgressIndicator(
               value: _currentStep == 0 ? 0.5 : 1.0,
               backgroundColor: Colors.grey[200],
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
             ),
           ),
         ),
@@ -272,35 +279,35 @@ class _RegistrationPageState extends State<RegistrationPage>
               key: ValueKey(_currentStep),
               padding: const EdgeInsets.all(24),
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      _currentStep == 0 ? 'Create Account' : 'Professional Info',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    _currentStep == 0 ? 'Create Account' : 'Professional Info',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _currentStep == 0 
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _currentStep == 0
                         ? 'Join us and start your journey today'
                         : 'Just a few more details to get you set up',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
                     ),
-                    const SizedBox(height: 32),
-                    _currentStep == 0 ? _buildStep1() : _buildStep2(),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 32),
+                  _currentStep == 0 ? _buildStep1() : _buildStep2(),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   // ================= STEP 1 =================
@@ -313,7 +320,7 @@ class _RegistrationPageState extends State<RegistrationPage>
         children: [
           _buildSectionTitle('Personal Information'),
           _inputField(
-            'Full Name', 
+            'Full Name',
             _nameController,
             prefixIcon: Icons.person_outline,
             keyboardType: TextInputType.name,
@@ -335,41 +342,11 @@ class _RegistrationPageState extends State<RegistrationPage>
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
-            child: IntlPhoneField(
-              controller: _phoneController,
-              decoration: InputDecoration(
-                labelText: 'Contact Phone',
-                labelStyle: TextStyle(color: Colors.grey[600]),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.redAccent),
-                ),
-              ),
-              initialCountryCode: 'CA',
-              textInputAction: TextInputAction.next,
-              onCountryChanged: (country) {
-                _selectedCountryCode = '+${country.dialCode}';
-              },
-            ),
+            child: CanadianPhoneField(controller: _phoneController),
           ),
           _inputField(
-            'Address', 
-            _addressController, 
+            'Address',
+            _addressController,
             prefixIcon: Icons.location_on_outlined,
             keyboardType: TextInputType.streetAddress,
             textCapitalization: TextCapitalization.words,
@@ -388,10 +365,8 @@ class _RegistrationPageState extends State<RegistrationPage>
               }
             },
           ),
-          
           const SizedBox(height: 8),
           _buildSectionTitle('Security'),
-          
           _inputField(
             'Password',
             _passwordController,
@@ -400,7 +375,8 @@ class _RegistrationPageState extends State<RegistrationPage>
             prefixIcon: Icons.lock_outline,
             keyboardType: TextInputType.visiblePassword,
             textInputAction: TextInputAction.next,
-            suffixIcon: _obscurePassword ? Icons.visibility_off : Icons.visibility,
+            suffixIcon:
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
             onSuffixTap: () =>
                 setState(() => _obscurePassword = !_obscurePassword),
             validator: (v) {
@@ -456,57 +432,63 @@ class _RegistrationPageState extends State<RegistrationPage>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _inputField(
-            'Instructor Licence', 
+            'Instructor Licence',
             _instructorLicenceController,
             prefixIcon: Icons.badge_outlined,
             textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.next,
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Please enter Instructor Licence';
+              if (v == null || v.trim().isEmpty)
+                return 'Please enter Instructor Licence';
               // Canadian licenses are generally alphanumeric with hyphens/spaces (5 to 17 chars)
               final licenseRegex = RegExp(r'^[A-Za-z0-9\-\s]{5,17}$');
-              if (!licenseRegex.hasMatch(v)) return 'Enter a valid Canadian license format';
+              if (!licenseRegex.hasMatch(v))
+                return 'Enter a valid Canadian license format';
               return null;
             },
           ),
           _inputField(
-            'Driving Licence', 
+            'Driving Licence',
             _drivingLicenceController,
             prefixIcon: Icons.card_membership,
             textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.next,
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Please enter Driving Licence';
+              if (v == null || v.trim().isEmpty)
+                return 'Please enter Driving Licence';
               final licenseRegex = RegExp(r'^[A-Za-z0-9\-\s]{5,17}$');
-              if (!licenseRegex.hasMatch(v)) return 'Enter a valid Canadian license format';
+              if (!licenseRegex.hasMatch(v))
+                return 'Enter a valid Canadian license format';
               return null;
             },
           ),
           _inputField(
-            'License Number', 
+            'License Number',
             _licenseNumberController,
             prefixIcon: Icons.numbers,
             textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.next,
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Please enter License Number';
+              if (v == null || v.trim().isEmpty)
+                return 'Please enter License Number';
               final licenseRegex = RegExp(r'^[A-Za-z0-9\-\s]{5,17}$');
-              if (!licenseRegex.hasMatch(v)) return 'Enter a valid Canadian license format';
+              if (!licenseRegex.hasMatch(v))
+                return 'Enter a valid Canadian license format';
               return null;
             },
           ),
           _datePickerField(),
           _inputField(
-            'Driving School Name', 
+            'Driving School Name',
             _drivingSchoolController,
             prefixIcon: Icons.business_outlined,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
           ),
           _inputField(
-            'Referral Code (optional)', 
+            'Referral Code (optional)',
             _referralCodeController,
-            required: false, 
+            required: false,
             prefixIcon: Icons.local_offer_outlined,
             textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.done,
@@ -514,8 +496,8 @@ class _RegistrationPageState extends State<RegistrationPage>
           ),
           const SizedBox(height: 32),
           _primaryButton(
-            'Complete Registration', 
-            _nextStep, 
+            'Complete Registration',
+            _nextStep,
             Icons.check_circle_outline,
           ),
         ],
@@ -590,8 +572,8 @@ class _RegistrationPageState extends State<RegistrationPage>
           labelStyle: TextStyle(color: Colors.grey[600]),
           alignLabelWithHint: maxLines > 1,
           prefixIcon: prefixWidget ??
-              (prefixIcon != null 
-                  ? Icon(prefixIcon, color: Colors.grey[500], size: 22) 
+              (prefixIcon != null
+                  ? Icon(prefixIcon, color: Colors.grey[500], size: 22)
                   : null),
           suffixIcon: suffixIcon != null
               ? IconButton(
@@ -602,7 +584,8 @@ class _RegistrationPageState extends State<RegistrationPage>
               : null,
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -638,10 +621,12 @@ class _RegistrationPageState extends State<RegistrationPage>
         decoration: InputDecoration(
           labelText: 'License Validity Date',
           labelStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: Icon(Icons.calendar_today_outlined, color: Colors.grey[500], size: 22),
+          prefixIcon: Icon(Icons.calendar_today_outlined,
+              color: Colors.grey[500], size: 22),
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -659,8 +644,7 @@ class _RegistrationPageState extends State<RegistrationPage>
             borderSide: const BorderSide(color: Colors.redAccent),
           ),
         ),
-        validator: (v) =>
-            v == null || v.isEmpty ? 'Please select date' : null,
+        validator: (v) => v == null || v.isEmpty ? 'Please select date' : null,
         onTap: () async {
           final picked = await showDatePicker(
             context: context,
@@ -696,13 +680,15 @@ class _RegistrationPageState extends State<RegistrationPage>
       height: 56,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        boxShadow: onTap != null ? [
-          BoxShadow(
-            color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          )
-        ] : null,
+        boxShadow: onTap != null
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : null,
       ),
       child: ElevatedButton(
         onPressed: onTap,
@@ -712,7 +698,8 @@ class _RegistrationPageState extends State<RegistrationPage>
           disabledBackgroundColor: Colors.grey.shade300,
           disabledForegroundColor: Colors.grey.shade600,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -720,7 +707,7 @@ class _RegistrationPageState extends State<RegistrationPage>
             Text(
               text,
               style: const TextStyle(
-                fontSize: 16, 
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),

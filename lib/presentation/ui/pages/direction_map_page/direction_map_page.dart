@@ -1,439 +1,410 @@
-import 'dart:developer';
+import 'dart:convert';
+
+import 'package:elan/core/app_colors.dart';
+import 'package:elan/core/cache/cache_manager_impl.dart';
 import 'package:elan/core/log/app_log.dart';
 import 'package:elan/core/styles.dart';
+import 'package:elan/domain/common/ride/ride.dart';
+import 'package:elan/domain/common/ride/ride_leg.dart';
+import 'package:elan/domain/common/ride/ride_shape.dart';
 import 'package:elan/domain/ride_session/ride_session.dart';
+import 'package:elan/injection.dart';
+import 'package:elan/presentation/bloc/ride_route_bloc/ride_route_bloc.dart';
+import 'package:elan/presentation/ui/widgets/common/ride_route_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:elan/presentation/bloc/direction_bloc/direction_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
 
+/// Navigation for a ride that is under way.
+///
+/// ## What was wrong
+///
+/// This screen used to take a [RideSession] and route from the instructor to
+/// its `dropoff_latitude/longitude`. But those columns are **null for the whole
+/// duration of an in-progress ride** — the backend writes them at Stop, and
+/// `ride-session.repository.ts:254` literally identifies an active session by
+/// `isNull(dropoff_latitude)`. The page's own guard then bailed out with
+/// *"Drop-off location not available for this ride"*, so navigation failed on
+/// **every** active ride, every time.
+///
+/// It also could not have worked in principle: a RideSession carries no test
+/// centre and no customer address (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §8.8 — it
+/// "contains no booking data at all"). The journey is a property of the
+/// *booking*, which is why the app now caches that at Start.
+///
+/// ## What it does now
+///
+/// Rebuilds the real leg model (§3) — deadhead → pickup run → return — from the
+/// booking. `/rides/upcoming` now returns test-centre coordinates (§14.2
+/// fixed), so they are read straight off the booking; the app used to recover
+/// them by matching centre names against `/v1/drive-test-centers`.
+///
+/// The session is still used for the one thing it genuinely knows: where the
+/// instructor was standing when they pressed Start.
 class DirectionMapPage extends StatefulWidget {
-  const DirectionMapPage({super.key, required this.rideSession});
+  const DirectionMapPage({super.key, required this.rideSession, this.booking});
+
   final RideSession? rideSession;
+
+  /// Optional — falls back to the booking cached at Start.
+  final Ride? booking;
 
   @override
   State<DirectionMapPage> createState() => _DirectionMapPageState();
 }
 
 class _DirectionMapPageState extends State<DirectionMapPage> {
-  late LatLng _initialPosition;
-  late Set<Marker> _markers;
-  Set<Polyline> _polylines = {};
+  static const LatLng _fallbackPosition = LatLng(56.1304, -106.3468);
+
+  final _cache = getIt<CacheManagerImpl>();
+
   GoogleMapController? _mapController;
-  Position? _currentPosition;
-  String _pickupAddress = "Fetching...";
-  String _dropoffAddress = "Fetching...";
+  Ride? _booking;
+  LatLng? _testCentre;
+  LatLng? _currentPosition;
+  bool _resolving = true;
 
   @override
   void initState() {
     super.initState();
-
-    final pickupLat = widget.rideSession?.pickupLatitude;
-    final pickupLng = widget.rideSession?.pickupLongitude;
-    final dropoffLat = widget.rideSession?.dropoffLatitude;
-    final dropoffLng = widget.rideSession?.dropoffLongitude;
-
-    log('🗺️ DirectionMapPage initState');
-    log('📍 RideSession data: ${widget.rideSession}');
-    log('📍 Pickup: lat=$pickupLat, lng=$pickupLng');
-    log('📍 Drop-off: lat=$dropoffLat, lng=$dropoffLng');
-
-    _initialPosition = (pickupLat != null && pickupLng != null)
-        ? LatLng(pickupLat, pickupLng)
-        : const LatLng(37.7749, -122.4194);
-
-    log('📍 Pickup position set to: ${_initialPosition.latitude}, ${_initialPosition.longitude}');
-
-    // Create markers for both pickup and drop-off
-    Set<Marker> markers = {
-      Marker(
-        markerId: const MarkerId('pickup'),
-        position: _initialPosition,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: const InfoWindow(
-          title: 'Pickup Location',
-          snippet: 'Start of ride',
-        ),
-      ),
-    };
-
-    // Add drop-off marker if coordinates available
-    if (dropoffLat != null && dropoffLng != null) {
-      final dropoffPosition = LatLng(dropoffLat, dropoffLng);
-      markers.add(
-        Marker(
-          markerId: const MarkerId('dropoff'),
-          position: dropoffPosition,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: const InfoWindow(
-            title: 'Drop-off Location',
-            snippet: 'End of ride',
-          ),
-        ),
-      );
-      log('📍 Drop-off marker added at: ${dropoffPosition.latitude}, ${dropoffPosition.longitude}');
-    } else {
-      log('⚠️ No drop-off coordinates available');
-    }
-
-    _markers = markers;
-    _fetchAddresses();
+    _prepare();
   }
 
-  Future<void> _fetchAddresses() async {
-    try {
-      final pickupLat = widget.rideSession?.pickupLatitude;
-      final pickupLng = widget.rideSession?.pickupLongitude;
-      if (pickupLat != null && pickupLng != null) {
-        List<Placemark> placemarks = await placemarkFromCoordinates(pickupLat, pickupLng);
-        if (placemarks.isNotEmpty) {
-          final p = placemarks.first;
-          final address = [p.street, p.subLocality, p.locality].where((e) => e != null && e.isNotEmpty).join(', ');
-          if (mounted) setState(() => _pickupAddress = address);
-        }
-      } else {
-        if (mounted) setState(() => _pickupAddress = "Unknown Pickup Location");
-      }
-    } catch (e) {
-      log('Error fetching pickup address: $e');
-      if (mounted) setState(() => _pickupAddress = "Address not found");
+  /// Gathers everything the route needs before asking for it: the booking, the
+  /// centre coordinates, and a GPS fix. Each is independently optional — a
+  /// missing GPS fix costs the deadhead leg but not the billable ones.
+  Future<void> _prepare() async {
+    final booking = widget.booking ?? await _cachedBooking();
+
+    LatLng? centre;
+    final centreLat = booking?.testCenterLatitude;
+    final centreLng = booking?.testCenterLongitude;
+    if (centreLat != null && centreLng != null) {
+      centre = LatLng(centreLat, centreLng);
     }
 
+    LatLng? current;
     try {
-      final dropoffLat = widget.rideSession?.dropoffLatitude;
-      final dropoffLng = widget.rideSession?.dropoffLongitude;
-      if (dropoffLat != null && dropoffLng != null) {
-        List<Placemark> placemarks = await placemarkFromCoordinates(dropoffLat, dropoffLng);
-        if (placemarks.isNotEmpty) {
-          final p = placemarks.first;
-          final address = [p.street, p.subLocality, p.locality].where((e) => e != null && e.isNotEmpty).join(', ');
-          if (mounted) setState(() => _dropoffAddress = address);
-        }
-      } else {
-        if (mounted) setState(() => _dropoffAddress = "Unknown Drop-off Location");
-      }
-    } catch (e) {
-      log('Error fetching drop-off address: $e');
-      if (mounted) setState(() => _dropoffAddress = "Address not found");
-    }
-  }
-
-  Future<void> _fetchDirections(BuildContext context) async {
-    log('🚀 Starting _fetchDirections');
-
-    final dropoffLat = widget.rideSession?.dropoffLatitude;
-    final dropoffLng = widget.rideSession?.dropoffLongitude;
-
-    // Check if we have drop-off coordinates
-    if (dropoffLat == null || dropoffLng == null) {
-      log('⚠️ No drop-off coordinates available, cannot fetch directions');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Drop-off location not available for this ride'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-      return;
-    }
-
-    try {
-      log('📍 Checking location permission...');
-      LocationPermission permission = await Geolocator.checkPermission();
-      log('📍 Current permission: $permission');
-
+      var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
-        log('⚠️ Permission denied, requesting...');
         permission = await Geolocator.requestPermission();
-        log('📍 Permission after request: $permission');
       }
-
       if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {
-        log('✅ Permission granted, getting current position...');
         final position = await Geolocator.getCurrentPosition();
-        log('📍 Current position: ${position.latitude}, ${position.longitude}');
-
-        if (!mounted) {
-          log('⚠️ Widget not mounted, returning');
-          return;
-        }
-
-        setState(() {
-          _currentPosition = position;
-        });
-
-        final dropoffPosition = LatLng(dropoffLat, dropoffLng);
-        final pickupPosition = _initialPosition;
-        final myLocation = LatLng(position.latitude, position.longitude);
-
-        // Determine destination based on distance to pickup
-        final distToPickup = Geolocator.distanceBetween(
-          myLocation.latitude,
-          myLocation.longitude,
-          pickupPosition.latitude,
-          pickupPosition.longitude,
-        );
-
-        LatLng destinationPosition;
-        if (distToPickup > 200) {
-          destinationPosition = pickupPosition;
-          log('🗺️ Routing to pickup location because driver is ${distToPickup.toStringAsFixed(0)}m away');
-        } else {
-          destinationPosition = dropoffPosition;
-          log('🗺️ Routing to drop-off location because driver is at pickup location');
-        }
-
-        // Calculate distance between current location and destination
-        final distanceInMeters = Geolocator.distanceBetween(
-          myLocation.latitude,
-          myLocation.longitude,
-          destinationPosition.latitude,
-          destinationPosition.longitude,
-        );
-        final distanceInKm = distanceInMeters / 1000;
-
-        log('📏 Distance to destination: ${distanceInKm.toStringAsFixed(2)} km');
-
-        // Check if distance is reasonable (let's say within 500km for driving directions)
-        if (distanceInKm > 500) {
-          log('⚠️ Distance too large for driving directions: ${distanceInKm.toStringAsFixed(2)} km');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Destination is ${distanceInKm.toStringAsFixed(0)} km away. '
-                  'Directions are only available for rides within 500km.',
-                ),
-                backgroundColor: Colors.orange,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          }
-          return;
-        }
-
-        log('🗺️ Fetching directions from current location to destination');
-        log('📍 Origin: ${myLocation.latitude}, ${myLocation.longitude}');
-        log('📍 Destination: ${destinationPosition.latitude}, ${destinationPosition.longitude}');
-
-        context.read<DirectionBloc>().add(
-              DirectionEvent.fetchDirections(
-                origin: myLocation,
-                destination: destinationPosition,
-              ),
-            );
-        log('✅ Direction fetch event dispatched to bloc');
-      } else {
-        log('❌ Permission not granted: $permission');
+        current = LatLng(position.latitude, position.longitude);
       }
-    } catch (e, stackTrace) {
-      log('❌ Error fetching directions: $e');
-      log('Stack trace: $stackTrace');
-      AppLog.d("Error fetching directions: $e");
+    } catch (e) {
+      AppLog.d('DirectionMapPage: no GPS fix — $e');
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _booking = booking;
+      _testCentre = centre;
+      _currentPosition = current;
+      _resolving = false;
+    });
+
+    if (booking != null) {
+      context.read<RideRouteBloc>().add(
+            RideRouteEvent.build(
+              ride: booking,
+              currentPosition: current,
+              testCentre: centre,
+            ),
+          );
     }
   }
 
-  void _fitBounds(List<LatLng> points) {
-    if (_mapController == null || points.isEmpty) return;
+  /// The booking being driven, read from the cache written at Start.
+  ///
+  /// This cache is the **only** copy, which is why it is written before
+  /// `/rides/start` is even called. `/rides/current` now returns `booking_id`
+  /// (§8.8), but that id cannot be redeemed for a booking: there is no
+  /// instructor-facing get-booking-by-id endpoint, and `/rides/upcoming`
+  /// excludes the ride the moment it starts — its query requires the session to
+  /// be `scheduled` and the test date to still be in the future
+  /// (`booking.repository.ts:385`). So a cleared cache means no route, and the
+  /// screen degrades to the session's Start coordinates alone.
+  Future<Ride?> _cachedBooking() async {
+    try {
+      final raw = await _cache.getActiveBooking();
+      if (raw == null || raw.isEmpty) return null;
+      return Ride.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (e) {
+      AppLog.e('DirectionMapPage: cached booking unreadable', error: e);
+      return null;
+    }
+  }
 
-    double minLat = points.first.latitude;
-    double minLng = points.first.longitude;
-    double maxLat = points.first.latitude;
-    double maxLng = points.first.longitude;
+  /// Where the instructor pressed Start. This is what a RideSession's
+  /// `pickup_latitude/longitude` actually hold (§8.4) — not the customer's
+  /// address, despite the column name.
+  LatLng? get _startedAt {
+    final lat = widget.rideSession?.pickupLatitude;
+    final lng = widget.rideSession?.pickupLongitude;
+    return (lat != null && lng != null) ? LatLng(lat, lng) : null;
+  }
 
-    for (var point in points) {
-      if (point.latitude < minLat) minLat = point.latitude;
-      if (point.latitude > maxLat) maxLat = point.latitude;
-      if (point.longitude < minLng) minLng = point.longitude;
-      if (point.longitude > maxLng) maxLng = point.longitude;
+  LatLng? get _customerPickup {
+    final lat = _booking?.pickupLatitude;
+    final lng = _booking?.pickupLongitude;
+    return (lat != null && lng != null) ? LatLng(lat, lng) : null;
+  }
+
+  Set<Marker> _buildMarkers() {
+    final markers = <Marker>{};
+    final isMeetAtCentre = _booking?.isMeetAtCentre ?? false;
+
+    if (!isMeetAtCentre && _customerPickup != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('pickup'),
+        position: _customerPickup!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        infoWindow: InfoWindow(
+          title: _booking?.fullName ?? 'Pickup',
+          snippet: _booking?.pickupAddress,
+        ),
+      ));
     }
 
-    _mapController!.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(minLat, minLng),
-          northeast: LatLng(maxLat, maxLng),
+    if (_testCentre != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('test_centre'),
+        position: _testCentre!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: InfoWindow(
+          title: _booking?.testCenterName ?? 'Test centre',
+          snippet: _booking?.testCenterAddress,
         ),
-        50, // padding
-      ),
-    );
+      ));
+    }
+
+    // Only worth showing once the instructor has moved away from it.
+    if (_startedAt != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('started_at'),
+        position: _startedAt!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        infoWindow: const InfoWindow(
+          title: 'Ride started here',
+          snippet: 'Where you pressed Start',
+        ),
+      ));
+    }
+
+    return markers;
+  }
+
+  void _fitTo(List<LatLng> points) {
+    final bounds = RideRouteStyle.boundsOf(points);
+    if (bounds == null || _mapController == null) return;
+    _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 60));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Builder(builder: (context) {
-
-      return BlocListener<DirectionBloc, DirectionState>(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        title: Text(
+          'Ride route',
+          style: ibmPlexSerifH5Style(color: Theme.of(context).primaryColorDark),
+        ),
+      ),
+      body: BlocConsumer<RideRouteBloc, RideRouteState>(
         listener: (context, state) {
-          log('🔔 DirectionBloc state changed: ${state.status}');
-
-          if (state.status == DirectionStatus.success &&
-              state.routePoints.isNotEmpty) {
-            log('✅ Direction fetch successful!');
-            log('📍 Route points count: ${state.routePoints.length}');
-            setState(() {
-              _polylines = {
-                Polyline(
-                  polylineId: const PolylineId('route'),
-                  color: Colors.blue,
-                  width: 5,
-                  points: state.routePoints,
-                ),
-              };
-            });
-            log('🗺️ Polyline created, fitting bounds...');
-            _fitBounds(state.routePoints);
-          } else if (state.status == DirectionStatus.error) {
-            log('❌ Direction fetch failed: ${state.error?.message}');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(
-                      state.error?.message ?? "Error fetching directions")),
-            );
-          } else if (state.status == DirectionStatus.loading) {
-            log('⏳ Direction fetch in progress...');
-          } else {
-            log('ℹ️ Direction state: ${state.status}, route points: ${state.routePoints.length}');
+          if (state.status == RideRouteStatus.success) {
+            // Fit the PAID legs, not everything: on a long deadhead the leg
+            // that actually matters shrinks to nothing (§11).
+            final focus = state.paidPoints.isNotEmpty
+                ? state.paidPoints
+                : state.allPoints;
+            _fitTo(focus);
           }
         },
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            leading: Navigator.canPop(context) ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-              onPressed: () => Navigator.of(context).pop(),
-            ) : null,
-            title: Text(
-              'Pickup Location',
-              style: ibmPlexSerifH5Style(
-                  color: Theme.of(context).primaryColorDark),
-            ),
-          ),
-          body: Stack(
+        builder: (context, state) {
+          return Stack(
             children: [
               GoogleMap(
                 initialCameraPosition: CameraPosition(
-                  target: _initialPosition,
+                  target: _testCentre ??
+                      _customerPickup ??
+                      _startedAt ??
+                      _currentPosition ??
+                      _fallbackPosition,
                   zoom: 12,
                 ),
-                mapType: MapType.normal,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
-                markers: _markers,
-                polylines: _polylines,
-                onMapCreated: (controller) async {
-                  log('🗺️ GoogleMap created, controller initialized');
-                  _mapController = controller;
-
-                  // Get current position first
-                  try {
-                    final position = await Geolocator.getCurrentPosition();
-                    final myLocation =
-                        LatLng(position.latitude, position.longitude);
-
-                    // Calculate distance
-                    final distanceInMeters = Geolocator.distanceBetween(
-                      myLocation.latitude,
-                      myLocation.longitude,
-                      _initialPosition.latitude,
-                      _initialPosition.longitude,
-                    );
-                    final distanceInKm = distanceInMeters / 1000;
-
-                    log('📏 Initial distance check: ${distanceInKm.toStringAsFixed(2)} km');
-
-                    // If pickup is too far, center on user's current location instead
-                    if (distanceInKm > 500) {
-                      log('🗺️ Centering map on current location (pickup too far)');
-                      controller.animateCamera(
-                        CameraUpdate.newLatLngZoom(myLocation, 14),
-                      );
-                    } else {
-                      log('🗺️ Keeping map centered on pickup location');
-                    }
-                  } catch (e) {
-                    log('⚠️ Could not get current position for map centering: $e');
-                  }
-
-                  // Trigger direction fetch
-                  log('🚀 Triggering direction fetch from onMapCreated');
-                  _fetchDirections(context);
-                },
+                markers: _buildMarkers(),
+                polylines: RideRouteStyle.polylines(state.legs),
+                onMapCreated: (c) => _mapController = c,
               ),
               Positioned(
                 bottom: 24,
                 left: 16,
                 right: 16,
-                child: _buildAddressCard(),
+                child: _RouteCard(
+                  resolving: _resolving,
+                  booking: _booking,
+                  state: state,
+                ),
               ),
             ],
-          ),
-        ),
-      );
-    });
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Bottom card describing the legs, with a legend that matches the map.
+class _RouteCard extends StatelessWidget {
+  const _RouteCard({
+    required this.resolving,
+    required this.booking,
+    required this.state,
+  });
+
+  final bool resolving;
+  final Ride? booking;
+  final RideRouteState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: _body(),
+      ),
+    );
   }
 
-  Widget _buildAddressCard() {
-    final pickup = _pickupAddress;
-    final dropoff = _dropoffAddress;
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _body() {
+    if (resolving) {
+      return const Row(
+        children: [
+          SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2)),
+          SizedBox(width: 12),
+          Text('Working out your route…'),
+        ],
+      );
+    }
+
+    if (booking == null) {
+      // Honest dead end — but a different one from before. This means the app
+      // has no record of the booking (started before this build shipped, or
+      // reinstalled mid-ride), not that the API is missing a field.
+      return const Text(
+        'Ride details unavailable on this device.\n'
+        'Open the ride from your dashboard to restore them.',
+        style: TextStyle(fontSize: 13, color: Colors.black54),
+      );
+    }
+
+    final isMeetAtCentre = booking!.isMeetAtCentre;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          isMeetAtCentre ? 'Meet at test centre' : 'Pickup ride',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+        ),
+        const SizedBox(height: 10),
+        if (!isMeetAtCentre)
+          _LegLine(
+            colour: RideCardColors.actionGreen,
+            dashed: false,
+            label: 'Round trip',
+            // Out and back — the drive actually made. The kilometre figure is
+            // derived from the API's pickup_distance, never from a Directions
+            // result: the pay estimate was computed from this number (§5.3).
+            value: booking!.roundTripDistanceKm != null
+                ? '${booking!.roundTripDistanceKm!.toStringAsFixed(1)} km'
+                : '--',
+            eta: state.pickupRun?.durationText,
+          ),
+        _LegLine(
+          colour: const Color(0xFF9E9E9E),
+          dashed: true,
+          label: 'Your drive',
+          value: state.deadhead?.distanceText ?? '--',
+          eta: state.deadhead?.durationText,
+        ),
+        if (!isMeetAtCentre)
+          _LegLine(
+            colour: RideCardColors.actionGreen.withValues(alpha: 0.5),
+            dashed: false,
+            label: 'Return',
+            value: 'Back to pickup',
+            eta: state.returnRun?.durationText,
+          ),
+        if (state.status == RideRouteStatus.error) ...[
+          const SizedBox(height: 8),
+          Text(
+            state.error?.message ?? 'Route unavailable.',
+            style: const TextStyle(fontSize: 12, color: Colors.redAccent),
           ),
         ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      ],
+    );
+  }
+}
+
+class _LegLine extends StatelessWidget {
+  const _LegLine({
+    required this.colour,
+    required this.dashed,
+    required this.label,
+    required this.value,
+    this.eta,
+  });
+
+  final Color colour;
+  final bool dashed;
+  final String label;
+  final String value;
+  final String? eta;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
         children: [
-          Row(
-            children: [
-              const Icon(Icons.my_location, color: Colors.green, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  pickup,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 9.0, top: 4, bottom: 4),
-            child: Container(
-              height: 16,
-              width: 2,
-              color: Colors.grey.shade300,
+          // Mirrors the polyline styling so the card reads as a legend.
+          Container(
+            width: 18,
+            height: 3,
+            decoration: BoxDecoration(
+              color: dashed ? colour.withValues(alpha: 0.6) : colour,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          Row(
-            children: [
-              const Icon(Icons.location_on, color: Colors.red, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  dropoff,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+          const SizedBox(width: 10),
+          Text(label,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+          const Spacer(),
+          Text(
+            eta == null || eta!.isEmpty ? value : '$value · $eta',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
         ],
       ),

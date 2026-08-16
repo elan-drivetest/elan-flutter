@@ -133,7 +133,8 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
               }
 
               // 2. Detect session expiration or user cancellation
-              if (request.url.contains('/onboarding/refresh') || request.url.contains('/onboarding/reauth')) {
+              if (request.url.contains('/onboarding/refresh') ||
+                  request.url.contains('/onboarding/reauth')) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -217,18 +218,22 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
           await _controller!.goBack();
           return false;
         }
-        
+
         // 2. Otherwise, show a confirmation dialog
         final shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Text('Cancel Verification?'),
-            content: const Text('Are you sure you want to exit? Your Stripe onboarding progress may be lost.'),
+            content: const Text(
+                'Are you sure you want to exit? Your Stripe onboarding progress may be lost.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Continue', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold)),
+                child: const Text('Continue',
+                    style: TextStyle(
+                        color: Color(0xFF4CAF50), fontWeight: FontWeight.bold)),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -238,16 +243,19 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
             ],
           ),
         );
-        
+
         return shouldPop ?? false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-            onPressed: () => Navigator.of(context).pop(),
-          ) : null,
+          leading: Navigator.canPop(context)
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new,
+                      color: Colors.black87),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : null,
           title: Text(
             'Verify Stripe',
             style:
@@ -262,7 +270,9 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
               : loadingError
                   ? _buildErrorWidget()
                   : _controller == null
-                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                              color: Color(0xFF4CAF50)))
                       : Stack(
                           children: [
                             WebViewWidget(controller: _controller!),
@@ -273,7 +283,8 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
                                 right: 0,
                                 child: LinearProgressIndicator(
                                   color: const Color(0xFF4CAF50),
-                                  backgroundColor: const Color(0xFF4CAF50).withOpacity(0.2),
+                                  backgroundColor:
+                                      const Color(0xFF4CAF50).withOpacity(0.2),
                                 ),
                               ),
                           ],

@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 class LogoutButton extends StatelessWidget {
   const LogoutButton({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
@@ -29,16 +29,19 @@ class LogoutButton extends StatelessWidget {
           onPressed: () {
             context.read<AuthBloc>().add(const AuthEvent.logout());
           },
-          icon: Icon(Icons.logout_rounded, color: Colors.red.shade700, size: 20),
+          icon:
+              Icon(Icons.logout_rounded, color: Colors.red.shade700, size: 20),
           label: Text(
             'Logout',
-            style: sansMedium24(color: Colors.red.shade700).copyWith(fontSize: 16),
+            style:
+                sansMedium24(color: Colors.red.shade700).copyWith(fontSize: 16),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red.shade50,
             foregroundColor: Colors.red.shade700,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
         ),

@@ -17,7 +17,8 @@ extension InstructorValidation on Instructor? {
     return i == null ||
         (i.stripeAccountId?.isEmpty ?? true) ||
         (i.stripeAccountStatus?.isEmpty ?? true) ||
-        (i.stripeAccountStatus?.toLowerCase().contains("unverified") ?? false) ||
+        (i.stripeAccountStatus?.toLowerCase().contains("unverified") ??
+            false) ||
         (i.stripeAccountStatus?.toLowerCase().contains("pending") ?? false) ||
         (i.stripeAccountType?.isEmpty ?? true);
   }

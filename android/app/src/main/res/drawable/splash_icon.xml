@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Splash icon for the Android 12+ SplashScreen API.
+
+  The platform draws this into a 288dp canvas and masks everything outside the
+  inner circle, leaving roughly the middle two-thirds visible. `ic_launcher` is
+  a legacy full-bleed icon, so handing it over unpadded gets its edges clipped
+  by that mask. The 25% inset pulls the artwork inside the safe circle.
+
+  Referenced only from values-v31/, so it is never inflated below API 31.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@mipmap/ic_launcher"
+    android:insetLeft="25%"
+    android:insetTop="25%"
+    android:insetRight="25%"
+    android:insetBottom="25%" />

@@ -1,5 +1,8 @@
+import 'package:elan/core/money.dart';
 import 'package:elan/core/styles.dart';
+import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:elan/domain/referral_code_summary_response/referral_code_summary_response.dart';
 
 class ReferralCardThump extends StatelessWidget {
@@ -20,9 +23,21 @@ class ReferralCardThump extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTitle = titleText ?? (peerClaim != null ? 'Claim code and ' : 'Invite a friend and ');
-    final displayAmount = amountText ?? (peerClaim != null ? 'get ৳${peerClaim!.bonusAmount ?? 0}' : 'get \$100 CAD');
-    final displaySubtitle = subtitleText ?? (peerClaim != null ? ' credited to your account' : ' credited to both of your accounts');
+    // The peer-referral bonus is a live server setting and is read at PAYOUT
+    // time, not claim time (ADMIN_SETTINGS.md §4.1) — so the invite pitch must
+    // quote the current value, never a hardcoded $100.
+    final config = context.watch<PricingConfigBloc>().state.config;
+
+    final displayTitle = titleText ??
+        (peerClaim != null ? 'Claim code and ' : 'Invite a friend and ');
+    final displayAmount = amountText ??
+        (peerClaim != null
+            ? 'get ${Money.format(peerClaim!.bonusAmount)}'
+            : 'get ${Money.formatWithCurrency(config.instructorReferralPrice)}');
+    final displaySubtitle = subtitleText ??
+        (peerClaim != null
+            ? ' credited to your account'
+            : ' credited to both of your accounts');
 
     return Container(
       decoration: BoxDecoration(
@@ -65,7 +80,8 @@ class ReferralCardThump extends StatelessWidget {
                       TextSpan(
                         text: displayAmount,
                         style: const TextStyle(
-                          color: Color(0xFF90EE90), // A lighter, softer green that looks good on dark background
+                          color: Color(
+                              0xFF90EE90), // A lighter, softer green that looks good on dark background
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -85,19 +101,25 @@ class ReferralCardThump extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(24),
-            child: peerClaim != null ? _buildPeerClaimView(peerClaim!) : bottomView,
+            child: peerClaim != null
+                ? _buildPeerClaimView(peerClaim!, config.referralMinRides)
+                : bottomView,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPeerClaimView(PeerClaim code) {
-    final int minRides = code.minRidesRequired ?? 5;
+  Widget _buildPeerClaimView(PeerClaim code, num referralMinRidesFallback) {
+    // `min_rides_required` is frozen onto the claim at creation, so prefer it.
+    // Only when the server omits it do we fall back to the live setting.
+    final int minRides =
+        (code.minRidesRequired ?? referralMinRidesFallback).toInt();
     final int completedRides = code.ridesAfterClaim ?? 0;
     final int remainingRides =
         (minRides - completedRides) > 0 ? (minRides - completedRides) : 0;
-    final double progress = minRides > 0 ? (completedRides / minRides).clamp(0.0, 1.0) : 0.0;
+    final double progress =
+        minRides > 0 ? (completedRides / minRides).clamp(0.0, 1.0) : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +132,8 @@ class ReferralCardThump extends StatelessWidget {
                 color: const Color(0xFF4D8B55).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.directions_car, size: 20, color: Color(0xFF4D8B55)),
+              child: const Icon(Icons.directions_car,
+                  size: 20, color: Color(0xFF4D8B55)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -131,7 +154,8 @@ class ReferralCardThump extends StatelessWidget {
             ),
             Text(
               '$completedRides / $minRides Rides',
-              style: sansJpMedium14(color: Colors.black87).copyWith(fontWeight: FontWeight.bold),
+              style: sansJpMedium14(color: Colors.black87)
+                  .copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -154,7 +178,9 @@ class ReferralCardThump extends StatelessWidget {
               width: 32,
               height: 14,
               fit: BoxFit.fill,
-              color: remainingRides > 0 ? Colors.grey : null, // greyed out if not unlocked
+              color: remainingRides > 0
+                  ? Colors.grey
+                  : null, // greyed out if not unlocked
             ),
             const SizedBox(width: 8),
             Text(
@@ -162,8 +188,11 @@ class ReferralCardThump extends StatelessWidget {
                   ? "$remainingRides more rides to get your prize!"
                   : "Prize Unlocked! 🎉",
               style: sansDevanagariMedium16(
-                color: remainingRides > 0 ? Colors.grey.shade700 : const Color(0xFF4D8B55),
-              ).copyWith(fontWeight: remainingRides <= 0 ? FontWeight.bold : null),
+                color: remainingRides > 0
+                    ? Colors.grey.shade700
+                    : const Color(0xFF4D8B55),
+              ).copyWith(
+                  fontWeight: remainingRides <= 0 ? FontWeight.bold : null),
             ),
           ],
         ),

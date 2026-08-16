@@ -136,13 +136,14 @@ class _LoginPageState extends State<LoginPage> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: prefixIcon != null 
-              ? Icon(prefixIcon, color: Colors.grey[500], size: 22) 
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, color: Colors.grey[500], size: 22)
               : null,
           suffixIcon: suffixIcon,
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -199,8 +200,8 @@ class _LoginPageState extends State<LoginPage> {
             if (activeError == "userIsNotActive") {
               final email = _emailController.text;
               context.read<OtpVerificationBloc>().add(
-                OtpVerificationEvent.resend(email: email),
-              );
+                    OtpVerificationEvent.resend(email: email),
+                  );
               context.push(
                 "${PagesName.loginPage.path}/${PagesName.otpVerificationPage.path}",
                 extra: {
@@ -212,8 +213,8 @@ class _LoginPageState extends State<LoginPage> {
 
             // Inline widgets already show field-level errors; the snackbar
             // carries the friendly summary message.
-            final errorMessage =
-                state.errorResponse?.message ?? "Something went wrong. Please try again.";
+            final errorMessage = state.errorResponse?.message ??
+                "Something went wrong. Please try again.";
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -258,9 +259,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     'Log in to continue to your account',
                     style: TextStyle(
@@ -269,7 +270,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: 48),
 
                   // Email
@@ -350,7 +351,8 @@ class _LoginPageState extends State<LoginPage> {
                             "${PagesName.loginPage.path}/${PagesName.forgetPasswordPage.path}");
                       },
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),

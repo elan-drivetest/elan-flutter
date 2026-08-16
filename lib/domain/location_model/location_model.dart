@@ -11,4 +11,3 @@ class LocationModel with _$LocationModel {
   factory LocationModel.empty() =>
       const LocationModel(latitude: 0, longitude: 0);
 }
-

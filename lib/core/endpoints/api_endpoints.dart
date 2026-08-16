@@ -6,11 +6,13 @@ const bool debugMode = false;
 class ApiEndpoints {
   static const String baseUrl = "https://api-dev.elanroadtestrental.ca";
   static const String loginInstructorUrl = "/v1/auth/instructor/email/login";
-  static const String registerInstructorUrl = "/v1/auth/instructor/email/register";
+  static const String registerInstructorUrl =
+      "/v1/auth/instructor/email/register";
   static const String logOutInstructorUrl = "/v1/auth/instructor/logout";
   static const String resetPasswordUrl = "/v1/auth/instructor/forgot/password";
   static const String submitNewPasswordUrl = "/v1/auth/reset/password";
-  static const String forgotPasswordVerifyUrl = "/v1/auth/instructor/forgot/password/verify";
+  static const String forgotPasswordVerifyUrl =
+      "/v1/auth/instructor/forgot/password/verify";
   static const String verifyOtpUrl = "/v1/auth/instructor/otp/verify";
   static const String resendOtpUrl = "/v1/auth/instructor/otp/resend";
   static const String refreshCookieUrl = "/v1/auth/instructor/refresh";
@@ -18,13 +20,17 @@ class ApiEndpoints {
   static const String fileUploadUrl = "/v1/files/upload";
   static const String instructorInfoUrl = "/v1/auth/instructor/me";
   static const String patchInstructorInfoUrl = "/v1/auth/instructor/me";
-  static const String updateInstructorVehicleInfoUrl = "/v1/instructors/vehicle";
+  static const String updateInstructorVehicleInfoUrl =
+      "/v1/instructors/vehicle";
   static const String instructorDashboardUrl = "/v1/instructors/dashboard";
-  static const String earningsSummaryUrl = "/v1/instructors/dashboard";
 
-  static const String referralCodeSummaryUrl = "/v1/instructors/referral-codes/summary";
+  static const String referralCodeSummaryUrl =
+      "/v1/instructors/referral-codes/summary";
 
   static const String locationTrackingUrl = "/v1/rides/location-tracking";
+
+  /// Public and unauthenticated — safe to call before login.
+  static const String pricingConfigUrl = "/v1/pricing-config";
 
   static String getAvailableRidesUrl = "/v1/rides/available";
 
@@ -48,7 +54,8 @@ class ApiEndpoints {
     return "/v1/rides/completed${queryString.isNotEmpty ? '?$queryString' : ''}";
   }
 
-  static const String getStripeStatusUrl = "/v1/instructors/stripe-onboarding-status";
+  static const String getStripeStatusUrl =
+      "/v1/instructors/stripe-onboarding-status";
   static const String requestStripeUrl = "/v1/instructors/stripe-onboarding";
 
   static String getUpcomingRidesUrl({
@@ -83,9 +90,11 @@ class ApiEndpoints {
         "&orderDirection=$orderDirection";
   }
 
-  static const String generateReferralCodeUrl = "/v1/instructors/referral-codes";
+  static const String generateReferralCodeUrl =
+      "/v1/instructors/referral-codes";
 
-  static const String getClaimedReferralCodesUrl = "/v1/instructors/referral-codes";
-  static const String claimReferralCodesUrl = "/v1/instructors/referral-codes/claim";
-
+  static const String getClaimedReferralCodesUrl =
+      "/v1/instructors/referral-codes";
+  static const String claimReferralCodesUrl =
+      "/v1/instructors/referral-codes/claim";
 }

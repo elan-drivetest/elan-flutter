@@ -46,7 +46,8 @@ class AppError {
         statusCode: status,
       );
 
-  AppError copyWith({String? message, String? code, int? statusCode, String? field}) =>
+  AppError copyWith(
+          {String? message, String? code, int? statusCode, String? field}) =>
       AppError(
         message: message ?? this.message,
         code: code ?? this.code,

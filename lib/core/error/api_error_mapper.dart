@@ -79,7 +79,8 @@ class ApiErrorMapper {
 
   /// Resolve a raw field code (as stored in `errors[...]`) to friendly text.
   /// Returns null when [raw] is null/empty so callers can fall back.
-  static String? resolveField(String? raw) => FriendlyErrorMessages.resolve(raw);
+  static String? resolveField(String? raw) =>
+      FriendlyErrorMessages.resolve(raw);
 
   // ---- internals ----
 

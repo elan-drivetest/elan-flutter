@@ -46,6 +46,11 @@ mixin _$Ride {
   String? get roadTestDocUrl => throw _privateConstructorUsedError;
   @JsonKey(name: "g1_license_doc_url")
   String? get g1LicenseDocUrl => throw _privateConstructorUsedError;
+
+  /// Exposed to instructors alongside the centre's coordinates (§14.2), so a
+  /// centre can be joined by id rather than matched on its name.
+  @JsonKey(name: "test_center_id")
+  int? get testCenterId => throw _privateConstructorUsedError;
   @JsonKey(name: "test_center_name")
   String? get testCenterName => throw _privateConstructorUsedError;
   @JsonKey(name: "test_center_address")
@@ -94,6 +99,7 @@ abstract class $RideCopyWith<$Res> {
       @JsonKey(name: "timezone") String? timezone,
       @JsonKey(name: "road_test_doc_url") String? roadTestDocUrl,
       @JsonKey(name: "g1_license_doc_url") String? g1LicenseDocUrl,
+      @JsonKey(name: "test_center_id") int? testCenterId,
       @JsonKey(name: "test_center_name") String? testCenterName,
       @JsonKey(name: "test_center_address") String? testCenterAddress,
       @JsonKey(name: "test_center_latitude", fromJson: _parseDouble)
@@ -135,6 +141,7 @@ class _$RideCopyWithImpl<$Res, $Val extends Ride>
     Object? timezone = freezed,
     Object? roadTestDocUrl = freezed,
     Object? g1LicenseDocUrl = freezed,
+    Object? testCenterId = freezed,
     Object? testCenterName = freezed,
     Object? testCenterAddress = freezed,
     Object? testCenterLatitude = freezed,
@@ -197,6 +204,10 @@ class _$RideCopyWithImpl<$Res, $Val extends Ride>
           ? _value.g1LicenseDocUrl
           : g1LicenseDocUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      testCenterId: freezed == testCenterId
+          ? _value.testCenterId
+          : testCenterId // ignore: cast_nullable_to_non_nullable
+              as int?,
       testCenterName: freezed == testCenterName
           ? _value.testCenterName
           : testCenterName // ignore: cast_nullable_to_non_nullable
@@ -257,6 +268,7 @@ abstract class _$$RideImplCopyWith<$Res> implements $RideCopyWith<$Res> {
       @JsonKey(name: "timezone") String? timezone,
       @JsonKey(name: "road_test_doc_url") String? roadTestDocUrl,
       @JsonKey(name: "g1_license_doc_url") String? g1LicenseDocUrl,
+      @JsonKey(name: "test_center_id") int? testCenterId,
       @JsonKey(name: "test_center_name") String? testCenterName,
       @JsonKey(name: "test_center_address") String? testCenterAddress,
       @JsonKey(name: "test_center_latitude", fromJson: _parseDouble)
@@ -295,6 +307,7 @@ class __$$RideImplCopyWithImpl<$Res>
     Object? timezone = freezed,
     Object? roadTestDocUrl = freezed,
     Object? g1LicenseDocUrl = freezed,
+    Object? testCenterId = freezed,
     Object? testCenterName = freezed,
     Object? testCenterAddress = freezed,
     Object? testCenterLatitude = freezed,
@@ -357,6 +370,10 @@ class __$$RideImplCopyWithImpl<$Res>
           ? _value.g1LicenseDocUrl
           : g1LicenseDocUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      testCenterId: freezed == testCenterId
+          ? _value.testCenterId
+          : testCenterId // ignore: cast_nullable_to_non_nullable
+              as int?,
       testCenterName: freezed == testCenterName
           ? _value.testCenterName
           : testCenterName // ignore: cast_nullable_to_non_nullable
@@ -413,6 +430,7 @@ class _$RideImpl implements _Ride {
       @JsonKey(name: "timezone") this.timezone,
       @JsonKey(name: "road_test_doc_url") this.roadTestDocUrl,
       @JsonKey(name: "g1_license_doc_url") this.g1LicenseDocUrl,
+      @JsonKey(name: "test_center_id") this.testCenterId,
       @JsonKey(name: "test_center_name") this.testCenterName,
       @JsonKey(name: "test_center_address") this.testCenterAddress,
       @JsonKey(name: "test_center_latitude", fromJson: _parseDouble)
@@ -467,6 +485,12 @@ class _$RideImpl implements _Ride {
   @override
   @JsonKey(name: "g1_license_doc_url")
   final String? g1LicenseDocUrl;
+
+  /// Exposed to instructors alongside the centre's coordinates (§14.2), so a
+  /// centre can be joined by id rather than matched on its name.
+  @override
+  @JsonKey(name: "test_center_id")
+  final int? testCenterId;
   @override
   @JsonKey(name: "test_center_name")
   final String? testCenterName;
@@ -494,7 +518,7 @@ class _$RideImpl implements _Ride {
 
   @override
   String toString() {
-    return 'Ride(id: $id, instructorId: $instructorId, testType: $testType, testDate: $testDate, meetAtCenter: $meetAtCenter, pickupAddress: $pickupAddress, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, pickupDistance: $pickupDistance, isRescheduled: $isRescheduled, timezone: $timezone, roadTestDocUrl: $roadTestDocUrl, g1LicenseDocUrl: $g1LicenseDocUrl, testCenterName: $testCenterName, testCenterAddress: $testCenterAddress, testCenterLatitude: $testCenterLatitude, testCenterLongitude: $testCenterLongitude, fullName: $fullName, phoneNumber: $phoneNumber, totalRideHour: $totalRideHour, ridePrice: $ridePrice)';
+    return 'Ride(id: $id, instructorId: $instructorId, testType: $testType, testDate: $testDate, meetAtCenter: $meetAtCenter, pickupAddress: $pickupAddress, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, pickupDistance: $pickupDistance, isRescheduled: $isRescheduled, timezone: $timezone, roadTestDocUrl: $roadTestDocUrl, g1LicenseDocUrl: $g1LicenseDocUrl, testCenterId: $testCenterId, testCenterName: $testCenterName, testCenterAddress: $testCenterAddress, testCenterLatitude: $testCenterLatitude, testCenterLongitude: $testCenterLongitude, fullName: $fullName, phoneNumber: $phoneNumber, totalRideHour: $totalRideHour, ridePrice: $ridePrice)';
   }
 
   @override
@@ -527,6 +551,8 @@ class _$RideImpl implements _Ride {
                 other.roadTestDocUrl == roadTestDocUrl) &&
             (identical(other.g1LicenseDocUrl, g1LicenseDocUrl) ||
                 other.g1LicenseDocUrl == g1LicenseDocUrl) &&
+            (identical(other.testCenterId, testCenterId) ||
+                other.testCenterId == testCenterId) &&
             (identical(other.testCenterName, testCenterName) ||
                 other.testCenterName == testCenterName) &&
             (identical(other.testCenterAddress, testCenterAddress) ||
@@ -562,6 +588,7 @@ class _$RideImpl implements _Ride {
         timezone,
         roadTestDocUrl,
         g1LicenseDocUrl,
+        testCenterId,
         testCenterName,
         testCenterAddress,
         testCenterLatitude,
@@ -606,6 +633,7 @@ abstract class _Ride implements Ride {
       @JsonKey(name: "timezone") final String? timezone,
       @JsonKey(name: "road_test_doc_url") final String? roadTestDocUrl,
       @JsonKey(name: "g1_license_doc_url") final String? g1LicenseDocUrl,
+      @JsonKey(name: "test_center_id") final int? testCenterId,
       @JsonKey(name: "test_center_name") final String? testCenterName,
       @JsonKey(name: "test_center_address") final String? testCenterAddress,
       @JsonKey(name: "test_center_latitude", fromJson: _parseDouble)
@@ -659,6 +687,12 @@ abstract class _Ride implements Ride {
   @override
   @JsonKey(name: "g1_license_doc_url")
   String? get g1LicenseDocUrl;
+
+  /// Exposed to instructors alongside the centre's coordinates (§14.2), so a
+  /// centre can be joined by id rather than matched on its name.
+  @override
+  @JsonKey(name: "test_center_id")
+  int? get testCenterId;
   @override
   @JsonKey(name: "test_center_name")
   String? get testCenterName;

@@ -29,9 +29,10 @@ class ITraceApiService extends TraceApiService {
       required double bearing,
       required double altitude,
       required int batteryLevel,
-      required String timezone}) async {
+      required String timezone,
+      required DateTime timestamp}) async {
     try {
-      var data = json.encode({
+      final data = json.encode({
         "ride_session_id": rideSessionId,
         "latitude": latitude,
         "longitude": longitude,
@@ -40,11 +41,16 @@ class ITraceApiService extends TraceApiService {
         "bearing": bearing,
         "altitude": altitude,
         "battery_level": batteryLevel,
-        "timezone": timezone
+        "timezone": timezone,
+        // Capture time, not upload time. The server sorts the track by this and
+        // clamps anything in the future or before the session started, so a
+        // skewed device clock cannot distort the distance sum (§8.5).
+        "timestamp": timestamp.toUtc().toIso8601String(),
       });
 
-      Response response = await _client.post(
-          Uri.encodeFull(ApiEndpoints.baseUrl + ApiEndpoints.locationTrackingUrl),
+      final Response response = await _client.post(
+          Uri.encodeFull(
+              ApiEndpoints.baseUrl + ApiEndpoints.locationTrackingUrl),
           data: data);
       //var result = SuccessResponse.fromJson(response.data);
       AppLog.d("sendLocationGpx -> ${jsonEncode(response.data)}");
