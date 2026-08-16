@@ -10,6 +10,12 @@ analyzer:
     - "**/*.freezed.dart"
     - "**/*.config.dart"
     - "build/**"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   # NEXT STEP (enable once existing fallout is triaged — will surface many
   # pre-existing issues, so do it in a dedicated PR):
   # language:

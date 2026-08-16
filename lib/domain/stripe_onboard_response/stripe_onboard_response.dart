@@ -7,13 +7,11 @@ part 'stripe_onboard_response.g.dart';
 @freezed
 class StripeOnboardResponse with _$StripeOnboardResponse {
   const factory StripeOnboardResponse({
-    @JsonKey(name: "status")
-    String? status,
-    @JsonKey(name: "charges_enabled")
-    bool? chargesEnabled,
-    @JsonKey(name: "payouts_enabled")
-    bool? payoutsEnabled,
+    @JsonKey(name: "status") String? status,
+    @JsonKey(name: "charges_enabled") bool? chargesEnabled,
+    @JsonKey(name: "payouts_enabled") bool? payoutsEnabled,
   }) = _StripeOnboardResponse;
 
-  factory StripeOnboardResponse.fromJson(Map<String, dynamic> json) => _$StripeOnboardResponseFromJson(json);
+  factory StripeOnboardResponse.fromJson(Map<String, dynamic> json) =>
+      _$StripeOnboardResponseFromJson(json);
 }

@@ -47,34 +47,45 @@ class ProfileSummaryCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8F5E9), // Light green background
+                          color:
+                              const Color(0xFFE8F5E9), // Light green background
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(icon, color: const Color(0xFF4D8B55), size: 20), // Primary green color
+                        child: Icon(icon,
+                            color: const Color(0xFF4D8B55),
+                            size: 20), // Primary green color
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           title,
-                          style: sansMedium24(color: Colors.black87).copyWith(fontSize: 18),
+                          style: sansMedium24(color: Colors.black87)
+                              .copyWith(fontSize: 18),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (isComplete != null) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isComplete! ? Colors.green.shade50 : Colors.red.shade50,
+                            color: isComplete!
+                                ? Colors.green.shade50
+                                : Colors.red.shade50,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isComplete! ? Colors.green.shade200 : Colors.red.shade200,
+                              color: isComplete!
+                                  ? Colors.green.shade200
+                                  : Colors.red.shade200,
                             ),
                           ),
                           child: Text(
                             isComplete! ? 'Complete' : 'Incomplete',
                             style: sansMedium24(
-                              color: isComplete! ? Colors.green.shade700 : Colors.red.shade700,
+                              color: isComplete!
+                                  ? Colors.green.shade700
+                                  : Colors.red.shade700,
                             ).copyWith(fontSize: 12),
                           ),
                         ),
@@ -88,10 +99,12 @@ class ProfileSummaryCard extends StatelessWidget {
                     onTap: onEdit,
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
                       child: Text(
                         'Edit',
-                        style: sansMedium24(color: const Color(0xFF4D8B55)).copyWith(
+                        style: sansMedium24(color: const Color(0xFF4D8B55))
+                            .copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -119,14 +132,17 @@ class ProfileSummaryCard extends StatelessWidget {
                         flex: 2,
                         child: Text(
                           entry.key,
-                          style: sansDevanagariRegular16(color: Colors.grey.shade600).copyWith(fontSize: 14),
+                          style: sansDevanagariRegular16(
+                                  color: Colors.grey.shade600)
+                              .copyWith(fontSize: 14),
                         ),
                       ),
                       Expanded(
                         flex: 3,
                         child: Text(
                           entry.value.isEmpty ? '-' : entry.value,
-                          style: sansMedium24(color: Colors.black87).copyWith(fontSize: 14),
+                          style: sansMedium24(color: Colors.black87)
+                              .copyWith(fontSize: 14),
                           textAlign: TextAlign.right,
                         ),
                       ),

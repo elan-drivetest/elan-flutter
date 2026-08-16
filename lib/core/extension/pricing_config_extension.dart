@@ -1,23 +1,28 @@
-import 'package:elan/domain/pricing_config_response/pricing_config_response.dart';
+import 'package:elan/domain/pricing_config/pricing_config.dart';
 import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Non-null view over [PricingConfigResponse].
+/// Label helpers over [PricingConfig].
 ///
-/// The config is fetched once at app start, but the first frame can render
-/// before it lands (and the request can fail offline). Rather than making every
-/// widget null-check, this exposes non-null getters backed by defaults that
-/// mirror the values the app used to hardcode. UI copy therefore degrades to
-/// today's behaviour instead of showing `0` or an empty string.
-class PricingConfig {
-  const PricingConfig(this._config);
+/// Renamed from `PricingConfig` when the two parallel implementations of this
+/// feature were merged: that name now belongs to the freezed model in
+/// `domain/pricing_config/`, which already guarantees non-null values through
+/// `@Default`s. What survives here is the part that model does not do — turning
+/// numbers into pluralised copy ("6 hours", "7 days").
+class PricingConfigView {
+  const PricingConfigView(this._config, {this.isLoaded = true});
 
-  final PricingConfigResponse? _config;
+  final PricingConfig? _config;
 
-  /// True once the real config has been fetched. Use to hide optional copy
-  /// (e.g. payout-delay hints) rather than showing a default that may be wrong.
-  bool get isLoaded => _config != null;
+  /// False while [_config] is compiled-in defaults or a cached copy rather than
+  /// a fresh server response — the bloc's `isFallback`, inverted. Use it to
+  /// hide optional copy (e.g. payout-delay hints) rather than to gate
+  /// rendering.
+  final bool isLoaded;
+
+  // `.toInt()` throughout: the freezed model types these as `num` so a server
+  // sending `6.0` still parses, but the label helpers below want whole units.
 
   // ---- Rates (cents) ----
 
@@ -58,7 +63,7 @@ class PricingConfig {
   num get adminReferralPrice => _config?.adminReferralPrice ?? 12000;
 
   /// Rides the referee must complete before the bonus unlocks.
-  int get referralMinRides => _config?.referralMinRides ?? 5;
+  int get referralMinRides => (_config?.referralMinRides ?? 5).toInt();
 
   /// Bonus for a given `referral_type` from the referral-code endpoints.
   /// Falls back to the instructor price for unknown types.
@@ -71,10 +76,11 @@ class PricingConfig {
   // ---- Ride timing ----
 
   /// How long before the test time a ride may be started.
-  int get rideStartWindowHours => _config?.rideStartWindowHours ?? 6;
+  int get rideStartWindowHours => (_config?.rideStartWindowHours ?? 6).toInt();
 
   /// Deadline before the test time for requesting a transfer.
-  int get rideTransferCutoffHours => _config?.rideTransferCutoffHours ?? 6;
+  int get rideTransferCutoffHours =>
+      (_config?.rideTransferCutoffHours ?? 6).toInt();
 
   /// `6 hours` / `1 hour` — config values are operator-editable, so never
   /// hardcode the plural.
@@ -89,32 +95,37 @@ class PricingConfig {
 
   static String _hours(int value) => '$value hour${value == 1 ? '' : 's'}';
 
-  int get bookingMinLeadDays => _config?.bookingMinLeadDays ?? 1;
+  int get bookingMinLeadDays => (_config?.bookingMinLeadDays ?? 1).toInt();
 
   // ---- Payouts ----
 
-  int get instructorPayoutDelayDays => _config?.instructorPayoutDelayDays ?? 7;
+  int get instructorPayoutDelayDays =>
+      (_config?.instructorPayoutDelayDays ?? 7).toInt();
 
   // ---- Refunds (student-facing; exposed for completeness) ----
 
-  int get refundFullHours => _config?.refundFullHours ?? 48;
+  int get refundFullHours => (_config?.refundFullHours ?? 48).toInt();
 
-  int get refundPartialHours => _config?.refundPartialHours ?? 24;
+  int get refundPartialHours => (_config?.refundPartialHours ?? 24).toInt();
 
   num get refundPartialPercentage => _config?.refundPartialPercentage ?? 50;
 
   num get failureCouponPercentage => _config?.failureCouponPercentage ?? 10;
 
   int get failureCouponValidityMonths =>
-      _config?.failureCouponValidityMonths ?? 6;
+      (_config?.failureCouponValidityMonths ?? 6).toInt();
 }
 
 extension PricingConfigContextX on BuildContext {
   /// Rebuilds the caller when the config arrives.
-  PricingConfig get pricing =>
-      PricingConfig(watch<PricingConfigBloc>().state.config);
+  PricingConfigView get pricing {
+    final state = watch<PricingConfigBloc>().state;
+    return PricingConfigView(state.config, isLoaded: !state.isFallback);
+  }
 
   /// Non-reactive read, for callbacks and `initState`.
-  PricingConfig get pricingOnce =>
-      PricingConfig(read<PricingConfigBloc>().state.config);
+  PricingConfigView get pricingOnce {
+    final state = read<PricingConfigBloc>().state;
+    return PricingConfigView(state.config, isLoaded: !state.isFallback);
+  }
 }

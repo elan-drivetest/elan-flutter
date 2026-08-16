@@ -16,44 +16,37 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$PricingConfigEvent {
-  bool get forceRefresh => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(bool forceRefresh) fetchPricingConfig,
+    required TResult Function() fetch,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool forceRefresh)? fetchPricingConfig,
+    TResult? Function()? fetch,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool forceRefresh)? fetchPricingConfig,
+    TResult Function()? fetch,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_FetchPricingConfig value) fetchPricingConfig,
+    required TResult Function(_FetchPricingConfig value) fetch,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_FetchPricingConfig value)? fetchPricingConfig,
+    TResult? Function(_FetchPricingConfig value)? fetch,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_FetchPricingConfig value)? fetchPricingConfig,
+    TResult Function(_FetchPricingConfig value)? fetch,
     required TResult orElse(),
   }) =>
-      throw _privateConstructorUsedError;
-
-  /// Create a copy of PricingConfigEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $PricingConfigEventCopyWith<PricingConfigEvent> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -62,8 +55,6 @@ abstract class $PricingConfigEventCopyWith<$Res> {
   factory $PricingConfigEventCopyWith(
           PricingConfigEvent value, $Res Function(PricingConfigEvent) then) =
       _$PricingConfigEventCopyWithImpl<$Res, PricingConfigEvent>;
-  @useResult
-  $Res call({bool forceRefresh});
 }
 
 /// @nodoc
@@ -78,29 +69,13 @@ class _$PricingConfigEventCopyWithImpl<$Res, $Val extends PricingConfigEvent>
 
   /// Create a copy of PricingConfigEvent
   /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? forceRefresh = null,
-  }) {
-    return _then(_value.copyWith(
-      forceRefresh: null == forceRefresh
-          ? _value.forceRefresh
-          : forceRefresh // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
-  }
 }
 
 /// @nodoc
-abstract class _$$FetchPricingConfigImplCopyWith<$Res>
-    implements $PricingConfigEventCopyWith<$Res> {
+abstract class _$$FetchPricingConfigImplCopyWith<$Res> {
   factory _$$FetchPricingConfigImplCopyWith(_$FetchPricingConfigImpl value,
           $Res Function(_$FetchPricingConfigImpl) then) =
       __$$FetchPricingConfigImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({bool forceRefresh});
 }
 
 /// @nodoc
@@ -113,79 +88,51 @@ class __$$FetchPricingConfigImplCopyWithImpl<$Res>
 
   /// Create a copy of PricingConfigEvent
   /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? forceRefresh = null,
-  }) {
-    return _then(_$FetchPricingConfigImpl(
-      forceRefresh: null == forceRefresh
-          ? _value.forceRefresh
-          : forceRefresh // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
-  }
 }
 
 /// @nodoc
 
 class _$FetchPricingConfigImpl implements _FetchPricingConfig {
-  const _$FetchPricingConfigImpl({this.forceRefresh = false});
-
-  @override
-  @JsonKey()
-  final bool forceRefresh;
+  const _$FetchPricingConfigImpl();
 
   @override
   String toString() {
-    return 'PricingConfigEvent.fetchPricingConfig(forceRefresh: $forceRefresh)';
+    return 'PricingConfigEvent.fetch()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$FetchPricingConfigImpl &&
-            (identical(other.forceRefresh, forceRefresh) ||
-                other.forceRefresh == forceRefresh));
+        (other.runtimeType == runtimeType && other is _$FetchPricingConfigImpl);
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, forceRefresh);
-
-  /// Create a copy of PricingConfigEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$FetchPricingConfigImplCopyWith<_$FetchPricingConfigImpl> get copyWith =>
-      __$$FetchPricingConfigImplCopyWithImpl<_$FetchPricingConfigImpl>(
-          this, _$identity);
+  int get hashCode => runtimeType.hashCode;
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(bool forceRefresh) fetchPricingConfig,
+    required TResult Function() fetch,
   }) {
-    return fetchPricingConfig(forceRefresh);
+    return fetch();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool forceRefresh)? fetchPricingConfig,
+    TResult? Function()? fetch,
   }) {
-    return fetchPricingConfig?.call(forceRefresh);
+    return fetch?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool forceRefresh)? fetchPricingConfig,
+    TResult Function()? fetch,
     required TResult orElse(),
   }) {
-    if (fetchPricingConfig != null) {
-      return fetchPricingConfig(forceRefresh);
+    if (fetch != null) {
+      return fetch();
     }
     return orElse();
   }
@@ -193,59 +140,50 @@ class _$FetchPricingConfigImpl implements _FetchPricingConfig {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_FetchPricingConfig value) fetchPricingConfig,
+    required TResult Function(_FetchPricingConfig value) fetch,
   }) {
-    return fetchPricingConfig(this);
+    return fetch(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_FetchPricingConfig value)? fetchPricingConfig,
+    TResult? Function(_FetchPricingConfig value)? fetch,
   }) {
-    return fetchPricingConfig?.call(this);
+    return fetch?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_FetchPricingConfig value)? fetchPricingConfig,
+    TResult Function(_FetchPricingConfig value)? fetch,
     required TResult orElse(),
   }) {
-    if (fetchPricingConfig != null) {
-      return fetchPricingConfig(this);
+    if (fetch != null) {
+      return fetch(this);
     }
     return orElse();
   }
 }
 
 abstract class _FetchPricingConfig implements PricingConfigEvent {
-  const factory _FetchPricingConfig({final bool forceRefresh}) =
-      _$FetchPricingConfigImpl;
-
-  @override
-  bool get forceRefresh;
-
-  /// Create a copy of PricingConfigEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$FetchPricingConfigImplCopyWith<_$FetchPricingConfigImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-PricingConfigState _$PricingConfigStateFromJson(Map<String, dynamic> json) {
-  return _PricingConfigState.fromJson(json);
+  const factory _FetchPricingConfig() = _$FetchPricingConfigImpl;
 }
 
 /// @nodoc
 mixin _$PricingConfigState {
   PricingConfigStatus get status => throw _privateConstructorUsedError;
-  PricingConfigResponse? get config => throw _privateConstructorUsedError;
-  LoginErrorResponse? get errorResponse => throw _privateConstructorUsedError;
+  ErrorResponse? get errorResponse => throw _privateConstructorUsedError;
 
-  /// Serializes this PricingConfigState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  /// Always populated — defaults before the first fetch, cached values after a
+  /// cold start, live values once the fetch lands. Never null, so no call site
+  /// needs a null check or a loading branch.
+  PricingConfig get config => throw _privateConstructorUsedError;
+
+  /// True while [config] is compiled-in defaults or a cached copy rather than
+  /// a fresh server response. Use it to decide whether to show a stale-data
+  /// hint — not to gate rendering.
+  bool get isFallback => throw _privateConstructorUsedError;
 
   /// Create a copy of PricingConfigState
   /// with the given fields replaced by the non-null parameter values.
@@ -262,11 +200,12 @@ abstract class $PricingConfigStateCopyWith<$Res> {
   @useResult
   $Res call(
       {PricingConfigStatus status,
-      PricingConfigResponse? config,
-      LoginErrorResponse? errorResponse});
+      ErrorResponse? errorResponse,
+      PricingConfig config,
+      bool isFallback});
 
-  $PricingConfigResponseCopyWith<$Res>? get config;
-  $LoginErrorResponseCopyWith<$Res>? get errorResponse;
+  $ErrorResponseCopyWith<$Res>? get errorResponse;
+  $PricingConfigCopyWith<$Res> get config;
 }
 
 /// @nodoc
@@ -285,22 +224,27 @@ class _$PricingConfigStateCopyWithImpl<$Res, $Val extends PricingConfigState>
   @override
   $Res call({
     Object? status = null,
-    Object? config = freezed,
     Object? errorResponse = freezed,
+    Object? config = null,
+    Object? isFallback = null,
   }) {
     return _then(_value.copyWith(
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as PricingConfigStatus,
-      config: freezed == config
-          ? _value.config
-          : config // ignore: cast_nullable_to_non_nullable
-              as PricingConfigResponse?,
       errorResponse: freezed == errorResponse
           ? _value.errorResponse
           : errorResponse // ignore: cast_nullable_to_non_nullable
-              as LoginErrorResponse?,
+              as ErrorResponse?,
+      config: null == config
+          ? _value.config
+          : config // ignore: cast_nullable_to_non_nullable
+              as PricingConfig,
+      isFallback: null == isFallback
+          ? _value.isFallback
+          : isFallback // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -308,13 +252,13 @@ class _$PricingConfigStateCopyWithImpl<$Res, $Val extends PricingConfigState>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $PricingConfigResponseCopyWith<$Res>? get config {
-    if (_value.config == null) {
+  $ErrorResponseCopyWith<$Res>? get errorResponse {
+    if (_value.errorResponse == null) {
       return null;
     }
 
-    return $PricingConfigResponseCopyWith<$Res>(_value.config!, (value) {
-      return _then(_value.copyWith(config: value) as $Val);
+    return $ErrorResponseCopyWith<$Res>(_value.errorResponse!, (value) {
+      return _then(_value.copyWith(errorResponse: value) as $Val);
     });
   }
 
@@ -322,13 +266,9 @@ class _$PricingConfigStateCopyWithImpl<$Res, $Val extends PricingConfigState>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $LoginErrorResponseCopyWith<$Res>? get errorResponse {
-    if (_value.errorResponse == null) {
-      return null;
-    }
-
-    return $LoginErrorResponseCopyWith<$Res>(_value.errorResponse!, (value) {
-      return _then(_value.copyWith(errorResponse: value) as $Val);
+  $PricingConfigCopyWith<$Res> get config {
+    return $PricingConfigCopyWith<$Res>(_value.config, (value) {
+      return _then(_value.copyWith(config: value) as $Val);
     });
   }
 }
@@ -343,13 +283,14 @@ abstract class _$$PricingConfigStateImplCopyWith<$Res>
   @useResult
   $Res call(
       {PricingConfigStatus status,
-      PricingConfigResponse? config,
-      LoginErrorResponse? errorResponse});
+      ErrorResponse? errorResponse,
+      PricingConfig config,
+      bool isFallback});
 
   @override
-  $PricingConfigResponseCopyWith<$Res>? get config;
+  $ErrorResponseCopyWith<$Res>? get errorResponse;
   @override
-  $LoginErrorResponseCopyWith<$Res>? get errorResponse;
+  $PricingConfigCopyWith<$Res> get config;
 }
 
 /// @nodoc
@@ -366,48 +307,63 @@ class __$$PricingConfigStateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? status = null,
-    Object? config = freezed,
     Object? errorResponse = freezed,
+    Object? config = null,
+    Object? isFallback = null,
   }) {
     return _then(_$PricingConfigStateImpl(
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as PricingConfigStatus,
-      config: freezed == config
-          ? _value.config
-          : config // ignore: cast_nullable_to_non_nullable
-              as PricingConfigResponse?,
       errorResponse: freezed == errorResponse
           ? _value.errorResponse
           : errorResponse // ignore: cast_nullable_to_non_nullable
-              as LoginErrorResponse?,
+              as ErrorResponse?,
+      config: null == config
+          ? _value.config
+          : config // ignore: cast_nullable_to_non_nullable
+              as PricingConfig,
+      isFallback: null == isFallback
+          ? _value.isFallback
+          : isFallback // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$PricingConfigStateImpl implements _PricingConfigState {
   const _$PricingConfigStateImpl(
       {this.status = PricingConfigStatus.initial,
-      this.config,
-      this.errorResponse});
-
-  factory _$PricingConfigStateImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PricingConfigStateImplFromJson(json);
+      this.errorResponse,
+      this.config = const PricingConfig(),
+      this.isFallback = true});
 
   @override
   @JsonKey()
   final PricingConfigStatus status;
   @override
-  final PricingConfigResponse? config;
+  final ErrorResponse? errorResponse;
+
+  /// Always populated — defaults before the first fetch, cached values after a
+  /// cold start, live values once the fetch lands. Never null, so no call site
+  /// needs a null check or a loading branch.
   @override
-  final LoginErrorResponse? errorResponse;
+  @JsonKey()
+  final PricingConfig config;
+
+  /// True while [config] is compiled-in defaults or a cached copy rather than
+  /// a fresh server response. Use it to decide whether to show a stale-data
+  /// hint — not to gate rendering.
+  @override
+  @JsonKey()
+  final bool isFallback;
 
   @override
   String toString() {
-    return 'PricingConfigState(status: $status, config: $config, errorResponse: $errorResponse)';
+    return 'PricingConfigState(status: $status, errorResponse: $errorResponse, config: $config, isFallback: $isFallback)';
   }
 
   @override
@@ -416,14 +372,16 @@ class _$PricingConfigStateImpl implements _PricingConfigState {
         (other.runtimeType == runtimeType &&
             other is _$PricingConfigStateImpl &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.config, config) || other.config == config) &&
             (identical(other.errorResponse, errorResponse) ||
-                other.errorResponse == errorResponse));
+                other.errorResponse == errorResponse) &&
+            (identical(other.config, config) || other.config == config) &&
+            (identical(other.isFallback, isFallback) ||
+                other.isFallback == isFallback));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, status, config, errorResponse);
+  int get hashCode =>
+      Object.hash(runtimeType, status, errorResponse, config, isFallback);
 
   /// Create a copy of PricingConfigState
   /// with the given fields replaced by the non-null parameter values.
@@ -433,30 +391,31 @@ class _$PricingConfigStateImpl implements _PricingConfigState {
   _$$PricingConfigStateImplCopyWith<_$PricingConfigStateImpl> get copyWith =>
       __$$PricingConfigStateImplCopyWithImpl<_$PricingConfigStateImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PricingConfigStateImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _PricingConfigState implements PricingConfigState {
   const factory _PricingConfigState(
       {final PricingConfigStatus status,
-      final PricingConfigResponse? config,
-      final LoginErrorResponse? errorResponse}) = _$PricingConfigStateImpl;
-
-  factory _PricingConfigState.fromJson(Map<String, dynamic> json) =
-      _$PricingConfigStateImpl.fromJson;
+      final ErrorResponse? errorResponse,
+      final PricingConfig config,
+      final bool isFallback}) = _$PricingConfigStateImpl;
 
   @override
   PricingConfigStatus get status;
   @override
-  PricingConfigResponse? get config;
+  ErrorResponse? get errorResponse;
+
+  /// Always populated — defaults before the first fetch, cached values after a
+  /// cold start, live values once the fetch lands. Never null, so no call site
+  /// needs a null check or a loading branch.
   @override
-  LoginErrorResponse? get errorResponse;
+  PricingConfig get config;
+
+  /// True while [config] is compiled-in defaults or a cached copy rather than
+  /// a fresh server response. Use it to decide whether to show a stale-data
+  /// hint — not to gate rendering.
+  @override
+  bool get isFallback;
 
   /// Create a copy of PricingConfigState
   /// with the given fields replaced by the non-null parameter values.

@@ -1,4 +1,3 @@
-
 import 'package:elan/core/styles.dart';
 import 'package:flutter/material.dart';
 
@@ -27,11 +26,11 @@ class CustomAppbarTitle extends StatelessWidget {
               children: [
                 Text(
                   "Hello!",
-                  style: ibmPlexSerifBSStyle(color:Colors.black),
+                  style: ibmPlexSerifBSStyle(color: Colors.black),
                 ),
                 Text(
                   "Shaun Hossain",
-                  style: ibmPlexSerifBMStyle(color:Colors.black),
+                  style: ibmPlexSerifBMStyle(color: Colors.black),
                 ),
               ],
             ),

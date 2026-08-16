@@ -3,6 +3,9 @@ import 'package:bloc/bloc.dart';
 import 'package:elan/core/log/app_log.dart';
 import 'package:elan/core/cache/cache_manager_impl.dart';
 import 'package:elan/data/repository/user_repository.dart';
+import 'dart:convert';
+
+import 'package:elan/domain/common/ride/ride.dart';
 import 'package:elan/domain/error_response/error_response.dart';
 import 'package:elan/domain/ride_session/ride_session.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -88,6 +91,7 @@ class InstructorRideBloc
       },
       (r) async {
         await cacheManagerImpl.clearTrackableRideId();
+        await cacheManagerImpl.clearActiveBooking();
         emit(state.copyWith(status: InstructorRideStatus.stopSuccess));
         await Future.delayed(const Duration(milliseconds: 1000));
         add(const InstructorRideEvent.requestData());
@@ -95,12 +99,41 @@ class InstructorRideBloc
     );
   }
 
+  /// Pulls the ride-session id out of a `/rides/start` response body.
+  ///
+  /// Tolerant of shape because the endpoint returns a raw `Response` here, and
+  /// `id` arrives as an int while every decimal on the same object arrives as a
+  /// string (§12.2) — so don't assume the type.
+  static int? _sessionIdOf(dynamic data) {
+    if (data is! Map) return null;
+    final raw = data['id'];
+    if (raw is int) return raw;
+    if (raw is num) return raw.toInt();
+    return int.tryParse(raw?.toString() ?? '');
+  }
+
   Future<void> _onStartRide(
     _Start event,
     Emitter<InstructorRideState> emit,
   ) async {
     emit(state.copyWith(status: InstructorRideStatus.loading));
-    await cacheManagerImpl.setTrackableRideId(rideId: event.id.toString());
+
+    // `event.id` is the BOOKING id — that is what /rides/start takes. It used
+    // to be written straight into the ride-session cache key, so the background
+    // tracker then posted it as `ride_session_id` on every breadcrumb until the
+    // next dashboard refresh happened to overwrite it. The session id is only
+    // knowable from the start response, so it is recorded after the call.
+    final booking = event.booking;
+    if (booking != null) {
+      try {
+        await cacheManagerImpl.setActiveBooking(
+          rawJson: jsonEncode(booking.toJson()),
+        );
+      } catch (e) {
+        AppLog.e('Failed to cache the active booking', error: e);
+      }
+    }
+
     final result = await repository.startRide(
       bookingId: event.id!,
       latitude: event.lat!,
@@ -118,6 +151,7 @@ class InstructorRideBloc
     await result.fold(
       (error) async {
         await cacheManagerImpl.clearTrackableRideId();
+        await cacheManagerImpl.clearActiveBooking();
         emit(
           state.copyWith(
             status: InstructorRideStatus.error,
@@ -128,7 +162,21 @@ class InstructorRideBloc
         // refresh ride data after successful start
         add(const InstructorRideEvent.requestData());
       },
-      (_) async {
+      (response) async {
+        // /rides/start returns the RideSession (§8.4). Its `id` is the only
+        // thing location tracking may use, so capture it here rather than
+        // waiting for the next /rides/current poll to correct the cache.
+        final sessionId = _sessionIdOf(response.data);
+        if (sessionId != null) {
+          await cacheManagerImpl.setTrackableRideId(
+            rideId: sessionId.toString(),
+          );
+        } else {
+          // Shouldn't happen, but tracking with a stale id is worse than not
+          // tracking — requestData() below will repopulate it from /current.
+          AppLog.e('start response carried no session id: ${response.data}');
+          await cacheManagerImpl.clearTrackableRideId();
+        }
         emit(state.copyWith(status: InstructorRideStatus.startSuccess));
         await Future.delayed(const Duration(milliseconds: 1000));
         // refresh ride data after successful start

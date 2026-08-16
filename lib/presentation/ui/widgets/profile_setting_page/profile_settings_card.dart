@@ -54,7 +54,8 @@ class ProfileSettingsCard extends StatelessWidget {
                     const SizedBox(width: 16),
                     Text(
                       title,
-                      style: sansMedium24(color: Colors.black87).copyWith(fontSize: 18),
+                      style: sansMedium24(color: Colors.black87)
+                          .copyWith(fontSize: 18),
                     ),
                   ],
                 ),
@@ -89,7 +90,8 @@ class ProfileSettingsCard extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(width: 12),
-                    const Icon(Icons.chevron_right, color: Colors.black38, size: 24),
+                    const Icon(Icons.chevron_right,
+                        color: Colors.black38, size: 24),
                   ],
                 )
               ],

@@ -28,7 +28,8 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll(LightModeColor.buttonBackground.color),
+        backgroundColor:
+            WidgetStatePropertyAll(LightModeColor.buttonBackground.color),
         shape: WidgetStatePropertyAll(
           const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -85,7 +86,6 @@ class AppTheme {
       }),
     ),
   );
-
 
   static final darkTheme = ThemeData(
     useMaterial3: true,

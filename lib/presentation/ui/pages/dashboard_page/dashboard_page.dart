@@ -1,11 +1,13 @@
+import 'package:elan/core/booking_time.dart';
 import 'dart:developer';
-import 'package:elan/core/app_timezone.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elan/core/app_colors.dart';
-import 'package:elan/core/extension/money.dart';
 import 'package:elan/core/extension/pretty_date_time.dart';
-import 'package:elan/core/extension/pricing_config_extension.dart';
+import 'package:elan/core/money.dart';
+import 'package:elan/core/ride_windows.dart';
+import 'package:elan/domain/common/ride/ride_shape.dart';
+import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:elan/core/styles.dart';
 import 'package:elan/data/location_request_service/location_request_service.dart';
 import 'package:elan/data/trace/location_service.dart';
@@ -13,12 +15,12 @@ import 'package:elan/domain/vehicle_request_response/vehicle_request_response.da
 import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/available_ride_bloc/available_ride_bloc.dart';
 import 'package:elan/presentation/bloc/complete_ride_bloc/complete_ride_bloc.dart';
+import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
 import 'package:elan/presentation/bloc/instructor_info_bloc/instructor_info_bloc.dart';
 import 'package:elan/presentation/bloc/instructor_ride_bloc/instructor_ride_bloc.dart';
 import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart';
 import 'package:elan/presentation/bloc/stripe_onboarding_bloc/stripe_onboarding_bloc.dart';
 import 'package:elan/presentation/bloc/upcoming_ride_bloc/upcoming_ride_bloc.dart';
-import 'package:elan/presentation/bloc/instructor_summary_bloc/instructor_summary_bloc.dart';
 import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:elan/presentation/ui/dialog/location_dialog/open_setting_dialog.dart';
 import 'package:elan/presentation/ui/dialog/location_dialog/permission_warning_dialog.dart';
@@ -35,6 +37,7 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:elan/presentation/ui/extension/skeletonizer_extension.dart';
+
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
@@ -59,6 +62,11 @@ class _DashboardPageState extends State<DashboardPage> {
     context.read<StripeOnboardingBloc>().add(StripeOnboardingEvent.getInfo());
     context.read<UpcomingRideBloc>().add(UpcomingRideEvent.requestData());
     context.read<CompleteRideBloc>().add(CompleteRideEvent.requestData());
+    // EarningsSummaryBloc is app-scoped, so unlike the other blocs above it is
+    // not constructed per-visit — this screen has to ask for its own data.
+    context
+        .read<EarningsSummaryBloc>()
+        .add(const EarningsSummaryEvent.getEarningsSummary());
     // checkAllPermissions internally runs checkBackgroundPermissions sequentially
     context.read<LocationBloc>().add(const LocationEvent.checkAllPermissions());
     getInfo();
@@ -141,8 +149,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   .read<CompleteRideBloc>()
                   .add(CompleteRideEvent.refreshData());
               context
-                  .read<InstructorSummaryBloc>()
-                  .add(const InstructorSummaryEvent.getSummary());
+                  .read<EarningsSummaryBloc>()
+                  .add(const EarningsSummaryEvent.getEarningsSummary());
             },
             child: MultiBlocListener(
               listeners: [
@@ -155,6 +163,10 @@ class _DashboardPageState extends State<DashboardPage> {
                       context.read<InstructorRideBloc>().add(
                             InstructorRideEvent.start(
                               id: state.rideId,
+                              // Cached so the active-ride screen has a
+                              // destination — /rides/current returns no
+                              // booking data at all (§8.8).
+                              booking: state.booking,
                               lat: state.location?.latitude,
                               lot: state.location?.longitude,
                               accuracy: state.location?.accuracy,
@@ -162,7 +174,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               bearing: state.location?.heading,
                               altitude: state.location?.altitude,
                               batteryLevel: batteryLevel,
-                              timezone: kDefaultIanaTimezone,
+                              timezone: "America/Toronto",
                             ),
                           );
                     }
@@ -228,7 +240,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                 'Location permission denied')),
                       );
                     }
-                    if (state.status == LocationStatus.backgroundPermissionNotGranted) {
+                    if (state.status ==
+                        LocationStatus.backgroundPermissionNotGranted) {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -262,7 +275,10 @@ class _DashboardPageState extends State<DashboardPage> {
                             sliver: SliverToBoxAdapter(
                               child: Text(
                                 'Hey, Instructor 👋',
-                                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                                style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87),
                               ),
                             ),
                           ),
@@ -277,7 +293,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                           const SliverToBoxAdapter(
                             child: TotalEarningsCard(
-                              walletBalance: '\$0.00',
+                              walletBalance: '0.00',
                               availableBalance: '\$0.00',
                               withdrawn: '\$0.00',
                               totalRides: '0',
@@ -293,18 +309,25 @@ class _DashboardPageState extends State<DashboardPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                              const Icon(Icons.error_outline,
+                                  size: 48, color: Colors.redAccent),
                               const SizedBox(height: 16),
                               Text(
-                                state.errorResponse?.message ?? 'Failed to load profile',
-                                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                                state.errorResponse?.message ??
+                                    'Failed to load profile',
+                                style: const TextStyle(
+                                    fontSize: 16, color: Colors.black87),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
-                                  context.read<InstructorInfoBloc>().add(InstructorInfoEvent.getInfo());
+                                  context
+                                      .read<InstructorInfoBloc>()
+                                      .add(InstructorInfoEvent.getInfo());
                                 },
-                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4CAF50), foregroundColor: Colors.white),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF4CAF50),
+                                    foregroundColor: Colors.white),
                                 child: const Text('Retry'),
                               ),
                             ],
@@ -322,7 +345,10 @@ class _DashboardPageState extends State<DashboardPage> {
                             sliver: SliverToBoxAdapter(
                               child: Text(
                                 'Hey, ${state.userInfo?.fullName ?? "Instructor"} 👋',
-                                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                                style: const TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87),
                               ),
                             ),
                           ),
@@ -340,14 +366,16 @@ class _DashboardPageState extends State<DashboardPage> {
                               PaymentInfoStatus.incomplete)
                             BlocConsumer<StripeOnboardingBloc,
                                 StripeOnboardingState>(
+                              // The `update` -> push-verify-page case is
+                              // handled once in MainPage, above every branch.
                               listener: (context, state) {
-                                if (state.status == StripeOnboardingStatus.update) {
-                                  context.push(PagesName.stripeVerifyPage.path,
-                                      extra: state.onboardUrlResponse?.onboardingUrl ?? "");
-                                } else if (state.status == StripeOnboardingStatus.error) {
+                                if (state.status ==
+                                    StripeOnboardingStatus.error) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(state.errorResponse?.message ?? "Failed to initiate bank onboarding. Please try again."),
+                                      content: Text(state
+                                              .errorResponse?.message ??
+                                          "Failed to initiate bank onboarding. Please try again."),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
@@ -355,17 +383,23 @@ class _DashboardPageState extends State<DashboardPage> {
                               },
                               builder: (context, state) {
                                 return SliverPadding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
                                   sliver: SliverToBoxAdapter(
                                     child: DashboardCardSection(
                                       title: 'Add A Bank To Get Paid',
-                                      description: 'Secure Your Earnings By Linking Your Bank Account.',
+                                      description:
+                                          'Secure Your Earnings By Linking Your Bank Account.',
                                       buttonText: 'Add Your Bank',
                                       buttonColor: const Color(0xFF2196F3),
                                       imageAsset: 'assets/bank_logo.png',
-                                      isLoading: state.status == StripeOnboardingStatus.loading,
+                                      isLoading: state.status ==
+                                          StripeOnboardingStatus.loading,
                                       onPressed: () {
-                                        context.read<StripeOnboardingBloc>().add(StripeOnboardingEvent.onboardStripe());
+                                        context
+                                            .read<StripeOnboardingBloc>()
+                                            .add(StripeOnboardingEvent
+                                                .onboardStripe());
                                       },
                                     ),
                                   ),
@@ -459,22 +493,24 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                             ),
                           SliverToBoxAdapter(
-                            child: BlocBuilder<InstructorSummaryBloc, InstructorSummaryState>(
+                            child: BlocBuilder<EarningsSummaryBloc,
+                                EarningsSummaryState>(
                               builder: (context, summaryState) {
                                 return Skeletonizer(
-                                  enabled: summaryState.status == InstructorSummaryStatus.loading,
-                                  // All three amounts are integer cents from the
-                                  // API (same convention as `hourly_rate`).
-                                  // They used to be printed raw, so a $60.00
-                                  // balance rendered as "6000".
+                                  enabled: summaryState.status ==
+                                      EarningsSummaryStatus.loading,
                                   child: TotalEarningsCard(
-                                    walletBalance:
-                                        (state.instructorInfo?.walletBalance).toCad,
-                                    availableBalance:
-                                        (summaryState.summaryInfo?.availableBalance).toCad,
-                                    withdrawn:
-                                        (summaryState.summaryInfo?.withdrawn).toCad,
-                                    totalRides: '${summaryState.summaryInfo?.totalCompletedRides ?? "0"}',
+                                    // All three are integer cents on the wire
+                                    // (BUSINESS_LOGIC.md §10) — they were being
+                                    // rendered raw, showing $266.67 as "26667".
+                                    walletBalance: Money.amount(
+                                        state.instructorInfo?.walletBalance),
+                                    availableBalance: Money.format(summaryState
+                                        .earningsSummary?.availableBalance),
+                                    withdrawn: Money.format(summaryState
+                                        .earningsSummary?.withdrawn),
+                                    totalRides:
+                                        '${summaryState.earningsSummary?.totalCompletedRides ?? "0"}',
                                   ),
                                 );
                               },
@@ -579,9 +615,10 @@ class _DashboardPageState extends State<DashboardPage> {
                                     status: state.currentRide?.status ?? "",
                                     totalHours:
                                         state.currentRide?.totalHours ?? 0,
-                                    hourlyRate: (state.currentRide?.hourlyRate ??
-                                            context.pricing.instructorRate)
-                                        .asDollars,
+                                    // Cents, and the ride session's own
+                                    // snapshot — not the dashboard's global
+                                    // rate (§8.10). ActiveRideCard formats it.
+                                    hourlyRate: state.currentRide?.hourlyRate,
                                     totalDistance:
                                         state.currentRide?.totalDistance ?? 0,
                                   ),
@@ -625,14 +662,19 @@ class _DashboardPageState extends State<DashboardPage> {
                               if (state.status == UpcomingRideStatus.loading) {
                                 return SliverList.separated(
                                   itemCount: 2,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 16),
                                   itemBuilder: (context, index) {
                                     return UpcomingRideCard(
                                       onTap: () {},
                                       name: "Loading Name",
+                                      rating: 5.0,
                                       time: "12:00 PM",
-                                      pickupLocation: "Loading Address Long Long Long",
-                                      dropOffLocation: "Loading Address Long Long Long",
+                                      pickupLocation:
+                                          "Loading Address Long Long Long",
+                                      testCenterName: "Loading Test Center",
+                                      testCenterAddress: "Loading Address Long",
+                                      roundTripKm: 40.0,
                                       type: "Driving Test",
                                       phoneNumber: "1234567890",
                                       transfer: () {},
@@ -688,6 +730,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                       const SizedBox(height: 16),
                                   itemBuilder: (context, index) {
                                     final ride = rides![index];
+                                    // watch, so the gates re-evaluate when the
+                                    // config lands after its background fetch.
+                                    final pricingConfig = context
+                                        .watch<PricingConfigBloc>()
+                                        .state
+                                        .config;
                                     return UpcomingRideCard(
                                       onTap: () {
                                         context.push(
@@ -696,13 +744,31 @@ class _DashboardPageState extends State<DashboardPage> {
                                         );
                                       },
                                       name: ride.fullName ?? "",
-                                      time: ride.testDate?.toDayMonthTime() ??
-                                          "-:-",
+                                      rating: 4.8,
+                                      time: BookingTime.dayMonthTime(
+                                          ride.testDate, ride.timezone),
+                                      // Shape B has no pickup leg at all (§2);
+                                      // an empty address is not a blank row.
+                                      meetAtCentre: ride.isMeetAtCentre,
+                                      roundTripKm: ride.roundTripDistanceKm,
                                       pickupLocation: ride.pickupAddress ?? "",
-                                      dropOffLocation:
+                                      testCenterName: ride.testCenterName ?? "",
+                                      testCenterAddress:
                                           ride.testCenterAddress ?? "",
                                       type: ride.testType ?? "",
                                       phoneNumber: ride.phoneNumber ?? "",
+                                      // Timing gates come from the server
+                                      // (`/v1/pricing-config`), never hardcoded.
+                                      canStart: RideWindows.canStart(
+                                        testDate: ride.testDate,
+                                        startWindowHours:
+                                            pricingConfig.rideStartWindowHours,
+                                      ),
+                                      canTransfer: RideWindows.canTransfer(
+                                        testDate: ride.testDate,
+                                        transferCutoffHours: pricingConfig
+                                            .rideTransferCutoffHours,
+                                      ),
                                       transfer: () {
                                         final upcomingBloc =
                                             context.read<UpcomingRideBloc>();
@@ -721,7 +787,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                                         UpcomingRideStatus
                                                             .update) {
                                                       _reasonController.clear();
-                                                      Navigator.of(context).pop();
+                                                      Navigator.of(context)
+                                                          .pop();
                                                       context
                                                           .read<
                                                               AvailableRideBloc>()
@@ -732,12 +799,22 @@ class _DashboardPageState extends State<DashboardPage> {
                                                               UpcomingRideBloc>()
                                                           .add(UpcomingRideEvent
                                                               .refreshData());
-                                                    } else if (upcomingState.status == UpcomingRideStatus.error) {
-                                                      Navigator.of(context).pop();
-                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                    } else if (upcomingState
+                                                            .status ==
+                                                        UpcomingRideStatus
+                                                            .error) {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
                                                         SnackBar(
-                                                          content: Text(upcomingState.errorResponse?.message ?? "Failed to transfer ride."),
-                                                          backgroundColor: Colors.red,
+                                                          content: Text(upcomingState
+                                                                  .errorResponse
+                                                                  ?.message ??
+                                                              "Failed to transfer ride."),
+                                                          backgroundColor:
+                                                              Colors.red,
                                                         ),
                                                       );
                                                     }
@@ -830,7 +907,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                                 LocationEvent
                                                     .checkLocationAccess(
                                                         isRideRequest: true,
-                                                        rideId: ride.id));
+                                                        rideId: ride.id,
+                                                        booking: ride));
                                           }
                                         }
                                       },
@@ -889,13 +967,18 @@ class _DashboardPageState extends State<DashboardPage> {
                                   (rides == null || rides.isEmpty)) {
                                 return SliverList.separated(
                                   itemCount: 2,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 16),
                                   itemBuilder: (context, index) {
                                     return RideHistoryCard(
                                       name: "Loading Name",
+                                      rating: 5.0,
                                       time: "12:00 PM",
-                                      pickupLocation: "Loading Address Long Long Long",
-                                      dropOffLocation: "Loading Address Long Long Long",
+                                      pickupLocation:
+                                          "Loading Address Long Long Long",
+                                      testCenterName: "Loading Test Center",
+                                      testCenterAddress:
+                                          "Loading Address Long Long",
                                       type: "Driving Test",
                                       phoneNumber: "1234567890",
                                       transfer: () {},
@@ -953,13 +1036,37 @@ class _DashboardPageState extends State<DashboardPage> {
                                     final ride = rides![index];
                                     return RideHistoryCard(
                                       name: ride.customerName ?? "",
+                                      rating: 4.8,
                                       time:
                                           ride.dateTime?.toDayMonthTime() ?? "",
+                                      // /rides/completed has no
+                                      // `meet_at_center`, so this reads the
+                                      // server's own sentinel: the query
+                                      // selects COALESCE(pickup_address,
+                                      // 'Meet at center').
+                                      meetAtCentre: (ride.pickupLocation ?? "")
+                                              .trim()
+                                              .toLowerCase() ==
+                                          'meet at center',
                                       pickupLocation: ride.pickupLocation ?? "",
-                                      dropOffLocation:
+                                      testCenterName: ride.testCenterName ?? "",
+                                      // `dropoffLocation` IS the test centre —
+                                      // there is no drop-off column (§3).
+                                      testCenterAddress:
                                           ride.dropoffLocation ?? "",
                                       type: ride.testType ?? "",
                                       phoneNumber: "",
+                                      // instructorEarnings stays 0 until the
+                                      // payout cron runs (§14.6), so the card
+                                      // previews it from the hours actually
+                                      // worked and the live rate.
+                                      earningsCents: ride.instructorEarnings,
+                                      totalHours: ride.totalHours,
+                                      hourlyRateCents: context
+                                          .watch<PricingConfigBloc>()
+                                          .state
+                                          .config
+                                          .instructorRate,
                                       transfer: () {},
                                       start: () {},
                                     );
@@ -992,11 +1099,9 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
         ),
-        ),
-      );
+      ),
+    );
   }
-
-
 
   Widget _buildEarningsStat(String title, String value, IconData icon) {
     return Column(
@@ -1028,10 +1133,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      leading: Navigator.canPop(context) ? IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-        onPressed: () => Navigator.of(context).pop(),
-      ) : null,
+      leading: Navigator.canPop(context)
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          : null,
       title: Image.asset("assets/eclan_color_logo.png", height: 32),
       actions: [
         Padding(
@@ -1053,8 +1160,10 @@ class _DashboardPageState extends State<DashboardPage> {
                               height: 48,
                               fit: BoxFit.cover,
                               placeholder: (context, url) =>
-                                  const CircularProgressIndicator(strokeWidth: 2),
-                              errorWidget: (context, url, error) => Icon(Icons.person,
+                                  const CircularProgressIndicator(
+                                      strokeWidth: 2),
+                              errorWidget: (context, url, error) => Icon(
+                                  Icons.person,
                                   color: Theme.of(context).primaryColorDark,
                                   size: 24),
                             )
@@ -1136,7 +1245,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             child: LinearProgressIndicator(
                               value: progress,
                               backgroundColor: Colors.grey.shade200,
-                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF4CAF50)),
                             ),
                           ),
                         ),

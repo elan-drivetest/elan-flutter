@@ -19,7 +19,7 @@ mixin _$LocationEvent {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            bool isRideRequest, int? rideId, bool fromBackground)
+            bool isRideRequest, int? rideId, Ride? booking, bool fromBackground)
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
@@ -27,7 +27,8 @@ mixin _$LocationEvent {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult? Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
@@ -35,7 +36,8 @@ mixin _$LocationEvent {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
@@ -96,7 +98,10 @@ abstract class _$$CheckLocationAccessImplCopyWith<$Res> {
           $Res Function(_$CheckLocationAccessImpl) then) =
       __$$CheckLocationAccessImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({bool isRideRequest, int? rideId, bool fromBackground});
+  $Res call(
+      {bool isRideRequest, int? rideId, Ride? booking, bool fromBackground});
+
+  $RideCopyWith<$Res>? get booking;
 }
 
 /// @nodoc
@@ -114,6 +119,7 @@ class __$$CheckLocationAccessImplCopyWithImpl<$Res>
   $Res call({
     Object? isRideRequest = null,
     Object? rideId = freezed,
+    Object? booking = freezed,
     Object? fromBackground = null,
   }) {
     return _then(_$CheckLocationAccessImpl(
@@ -125,11 +131,29 @@ class __$$CheckLocationAccessImplCopyWithImpl<$Res>
           ? _value.rideId
           : rideId // ignore: cast_nullable_to_non_nullable
               as int?,
+      booking: freezed == booking
+          ? _value.booking
+          : booking // ignore: cast_nullable_to_non_nullable
+              as Ride?,
       fromBackground: null == fromBackground
           ? _value.fromBackground
           : fromBackground // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
+  }
+
+  /// Create a copy of LocationEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $RideCopyWith<$Res>? get booking {
+    if (_value.booking == null) {
+      return null;
+    }
+
+    return $RideCopyWith<$Res>(_value.booking!, (value) {
+      return _then(_value.copyWith(booking: value));
+    });
   }
 }
 
@@ -137,7 +161,10 @@ class __$$CheckLocationAccessImplCopyWithImpl<$Res>
 
 class _$CheckLocationAccessImpl implements CheckLocationAccess {
   const _$CheckLocationAccessImpl(
-      {this.isRideRequest = false, this.rideId, this.fromBackground = false});
+      {this.isRideRequest = false,
+      this.rideId,
+      this.booking,
+      this.fromBackground = false});
 
   @override
   @JsonKey()
@@ -145,12 +172,14 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
   @override
   final int? rideId;
   @override
+  final Ride? booking;
+  @override
   @JsonKey()
   final bool fromBackground;
 
   @override
   String toString() {
-    return 'LocationEvent.checkLocationAccess(isRideRequest: $isRideRequest, rideId: $rideId, fromBackground: $fromBackground)';
+    return 'LocationEvent.checkLocationAccess(isRideRequest: $isRideRequest, rideId: $rideId, booking: $booking, fromBackground: $fromBackground)';
   }
 
   @override
@@ -161,13 +190,14 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
             (identical(other.isRideRequest, isRideRequest) ||
                 other.isRideRequest == isRideRequest) &&
             (identical(other.rideId, rideId) || other.rideId == rideId) &&
+            (identical(other.booking, booking) || other.booking == booking) &&
             (identical(other.fromBackground, fromBackground) ||
                 other.fromBackground == fromBackground));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, isRideRequest, rideId, fromBackground);
+      Object.hash(runtimeType, isRideRequest, rideId, booking, fromBackground);
 
   /// Create a copy of LocationEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -182,36 +212,40 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            bool isRideRequest, int? rideId, bool fromBackground)
+            bool isRideRequest, int? rideId, Ride? booking, bool fromBackground)
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
   }) {
-    return checkLocationAccess(isRideRequest, rideId, fromBackground);
+    return checkLocationAccess(isRideRequest, rideId, booking, fromBackground);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult? Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
   }) {
-    return checkLocationAccess?.call(isRideRequest, rideId, fromBackground);
+    return checkLocationAccess?.call(
+        isRideRequest, rideId, booking, fromBackground);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
     required TResult orElse(),
   }) {
     if (checkLocationAccess != null) {
-      return checkLocationAccess(isRideRequest, rideId, fromBackground);
+      return checkLocationAccess(
+          isRideRequest, rideId, booking, fromBackground);
     }
     return orElse();
   }
@@ -258,10 +292,12 @@ abstract class CheckLocationAccess implements LocationEvent {
   const factory CheckLocationAccess(
       {final bool isRideRequest,
       final int? rideId,
+      final Ride? booking,
       final bool fromBackground}) = _$CheckLocationAccessImpl;
 
   bool get isRideRequest;
   int? get rideId;
+  Ride? get booking;
   bool get fromBackground;
 
   /// Create a copy of LocationEvent
@@ -316,7 +352,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            bool isRideRequest, int? rideId, bool fromBackground)
+            bool isRideRequest, int? rideId, Ride? booking, bool fromBackground)
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
@@ -327,7 +363,8 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult? Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
@@ -338,7 +375,8 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
@@ -435,7 +473,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-            bool isRideRequest, int? rideId, bool fromBackground)
+            bool isRideRequest, int? rideId, Ride? booking, bool fromBackground)
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
@@ -446,7 +484,8 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult? Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
@@ -457,7 +496,8 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool isRideRequest, int? rideId, bool fromBackground)?
+    TResult Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
@@ -516,6 +556,7 @@ mixin _$LocationState {
   LocationStatus get status => throw _privateConstructorUsedError;
   Position? get location => throw _privateConstructorUsedError;
   int? get rideId => throw _privateConstructorUsedError;
+  Ride? get booking => throw _privateConstructorUsedError;
   bool get shouldStart => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
 
@@ -536,8 +577,11 @@ abstract class $LocationStateCopyWith<$Res> {
       {LocationStatus status,
       Position? location,
       int? rideId,
+      Ride? booking,
       bool shouldStart,
       String? errorMessage});
+
+  $RideCopyWith<$Res>? get booking;
 }
 
 /// @nodoc
@@ -558,6 +602,7 @@ class _$LocationStateCopyWithImpl<$Res, $Val extends LocationState>
     Object? status = null,
     Object? location = freezed,
     Object? rideId = freezed,
+    Object? booking = freezed,
     Object? shouldStart = null,
     Object? errorMessage = freezed,
   }) {
@@ -574,6 +619,10 @@ class _$LocationStateCopyWithImpl<$Res, $Val extends LocationState>
           ? _value.rideId
           : rideId // ignore: cast_nullable_to_non_nullable
               as int?,
+      booking: freezed == booking
+          ? _value.booking
+          : booking // ignore: cast_nullable_to_non_nullable
+              as Ride?,
       shouldStart: null == shouldStart
           ? _value.shouldStart
           : shouldStart // ignore: cast_nullable_to_non_nullable
@@ -583,6 +632,20 @@ class _$LocationStateCopyWithImpl<$Res, $Val extends LocationState>
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
+  }
+
+  /// Create a copy of LocationState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $RideCopyWith<$Res>? get booking {
+    if (_value.booking == null) {
+      return null;
+    }
+
+    return $RideCopyWith<$Res>(_value.booking!, (value) {
+      return _then(_value.copyWith(booking: value) as $Val);
+    });
   }
 }
 
@@ -598,8 +661,12 @@ abstract class _$$LocationStateImplCopyWith<$Res>
       {LocationStatus status,
       Position? location,
       int? rideId,
+      Ride? booking,
       bool shouldStart,
       String? errorMessage});
+
+  @override
+  $RideCopyWith<$Res>? get booking;
 }
 
 /// @nodoc
@@ -618,6 +685,7 @@ class __$$LocationStateImplCopyWithImpl<$Res>
     Object? status = null,
     Object? location = freezed,
     Object? rideId = freezed,
+    Object? booking = freezed,
     Object? shouldStart = null,
     Object? errorMessage = freezed,
   }) {
@@ -634,6 +702,10 @@ class __$$LocationStateImplCopyWithImpl<$Res>
           ? _value.rideId
           : rideId // ignore: cast_nullable_to_non_nullable
               as int?,
+      booking: freezed == booking
+          ? _value.booking
+          : booking // ignore: cast_nullable_to_non_nullable
+              as Ride?,
       shouldStart: null == shouldStart
           ? _value.shouldStart
           : shouldStart // ignore: cast_nullable_to_non_nullable
@@ -653,6 +725,7 @@ class _$LocationStateImpl implements _LocationState {
       {required this.status,
       this.location,
       this.rideId,
+      this.booking,
       this.shouldStart = false,
       this.errorMessage});
 
@@ -663,6 +736,8 @@ class _$LocationStateImpl implements _LocationState {
   @override
   final int? rideId;
   @override
+  final Ride? booking;
+  @override
   @JsonKey()
   final bool shouldStart;
   @override
@@ -670,7 +745,7 @@ class _$LocationStateImpl implements _LocationState {
 
   @override
   String toString() {
-    return 'LocationState(status: $status, location: $location, rideId: $rideId, shouldStart: $shouldStart, errorMessage: $errorMessage)';
+    return 'LocationState(status: $status, location: $location, rideId: $rideId, booking: $booking, shouldStart: $shouldStart, errorMessage: $errorMessage)';
   }
 
   @override
@@ -682,6 +757,7 @@ class _$LocationStateImpl implements _LocationState {
             (identical(other.location, location) ||
                 other.location == location) &&
             (identical(other.rideId, rideId) || other.rideId == rideId) &&
+            (identical(other.booking, booking) || other.booking == booking) &&
             (identical(other.shouldStart, shouldStart) ||
                 other.shouldStart == shouldStart) &&
             (identical(other.errorMessage, errorMessage) ||
@@ -689,8 +765,8 @@ class _$LocationStateImpl implements _LocationState {
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, status, location, rideId, shouldStart, errorMessage);
+  int get hashCode => Object.hash(runtimeType, status, location, rideId,
+      booking, shouldStart, errorMessage);
 
   /// Create a copy of LocationState
   /// with the given fields replaced by the non-null parameter values.
@@ -706,6 +782,7 @@ abstract class _LocationState implements LocationState {
       {required final LocationStatus status,
       final Position? location,
       final int? rideId,
+      final Ride? booking,
       final bool shouldStart,
       final String? errorMessage}) = _$LocationStateImpl;
 
@@ -715,6 +792,8 @@ abstract class _LocationState implements LocationState {
   Position? get location;
   @override
   int? get rideId;
+  @override
+  Ride? get booking;
   @override
   bool get shouldStart;
   @override

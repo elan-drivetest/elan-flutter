@@ -1,4 +1,7 @@
 import 'package:elan/core/styles.dart';
+import 'package:elan/core/validatator/canadian_phone.dart';
+import 'package:elan/presentation/ui/pages/place_picker_page/place_picker_page.dart';
+import 'package:elan/presentation/ui/widgets/common/canadian_phone_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,7 +38,9 @@ class _InstructorEditSheetState extends State<InstructorEditSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.name);
     _emailController = TextEditingController(text: widget.mail);
-    _phoneController = TextEditingController(text: widget.phone);
+    // The API stores E.164 ("+14165550134") but the field displays a mask, so
+    // seed it through the formatter instead of assigning the raw value.
+    _phoneController = CanadianPhoneField.controllerFor(widget.phone);
     _addressController = TextEditingController(text: widget.address);
   }
 
@@ -69,6 +74,24 @@ class _InstructorEditSheetState extends State<InstructorEditSheet> {
     );
   }
 
+  Future<void> _pickAddress() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        // Open on the address they already have, so a correction is a nudge
+        // rather than a hunt across the country view.
+        builder: (_) => PlacePickerPage(
+          initialAddress: _addressController.text.trim(),
+        ),
+      ),
+    );
+    // The picker is a full-screen route pushed over this sheet, so the sheet
+    // can be gone by the time it returns.
+    if (!mounted) return;
+    if (result != null && result.trim().isNotEmpty) {
+      setState(() => _addressController.text = result.trim());
+    }
+  }
+
   void _onSave() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -82,8 +105,13 @@ class _InstructorEditSheetState extends State<InstructorEditSheet> {
       params["email"] = _emailController.text.trim();
     }
 
-    if (_phoneController.text.trim() != widget.phone) {
-      params["phone_number"] = _phoneController.text.trim();
+    // Compare and send the normalised form, never the masked text. The field
+    // shows "(416) 555-0134" while the API stores "+14165550134", so a direct
+    // string compare would report a change on every open and then PATCH the
+    // punctuation straight into the record.
+    final phoneE164 = CanadianPhone.toE164(_phoneController.text);
+    if (phoneE164 != null && phoneE164 != CanadianPhone.toE164(widget.phone)) {
+      params["phone_number"] = phoneE164;
     }
 
     if (_addressController.text.trim() != widget.address) {
@@ -96,8 +124,8 @@ class _InstructorEditSheetState extends State<InstructorEditSheet> {
     }
 
     context.read<InstructorInfoBloc>().add(
-      InstructorInfoEvent.updateInfo(params: params),
-    );
+          InstructorInfoEvent.updateInfo(params: params),
+        );
 
     Navigator.of(context).pop();
   }
@@ -132,42 +160,46 @@ class _InstructorEditSheetState extends State<InstructorEditSheet> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-
                 TextFormField(
                   controller: _nameController,
                   decoration: _inputDecoration("Full Name"),
-                  validator: (v) =>
-                  v == null || v.isEmpty ? "Required" : null,
+                  validator: (v) => v == null || v.isEmpty ? "Required" : null,
                 ),
                 const SizedBox(height: 12),
-
                 TextFormField(
                   controller: _emailController,
                   decoration: _inputDecoration("Email"),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) =>
-                  v == null || v.isEmpty ? "Required" : null,
+                  validator: (v) => v == null || v.isEmpty ? "Required" : null,
                 ),
                 const SizedBox(height: 12),
-
-                TextFormField(
+                CanadianPhoneField(
                   controller: _phoneController,
+                  label: "Phone Number",
+                  // Adopt this sheet's field styling rather than the signup
+                  // form's, so the prefix is the only visible difference.
                   decoration: _inputDecoration("Phone Number"),
-                  keyboardType: TextInputType.phone,
-                  validator: (v) =>
-                  v == null || v.isEmpty ? "Required" : null,
                 ),
                 const SizedBox(height: 12),
-
+                // Address is chosen on the map, never typed — same as signup.
+                // Free text here would let an instructor save something that
+                // cannot be geocoded, and pickup distance (and therefore the
+                // fare) is computed from this address server-side.
                 TextFormField(
                   controller: _addressController,
-                  decoration: _inputDecoration("Address"),
+                  decoration: _inputDecoration("Address").copyWith(
+                    suffixIcon: const Icon(
+                      Icons.map_outlined,
+                      color: Color(0xFF4D8B55),
+                    ),
+                    helperText: "Tap to choose on the map",
+                  ),
                   maxLines: 2,
-                  validator: (v) =>
-                  v == null || v.isEmpty ? "Required" : null,
+                  readOnly: true,
+                  onTap: _pickAddress,
+                  validator: (v) => v == null || v.isEmpty ? "Required" : null,
                 ),
                 const SizedBox(height: 24),
-
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     fixedSize: const Size(double.maxFinite, 54),
@@ -180,7 +212,8 @@ class _InstructorEditSheetState extends State<InstructorEditSheet> {
                   onPressed: _onSave,
                   child: Text(
                     "Save",
-                    style: sansMedium24(color: Colors.white).copyWith(fontSize: 16),
+                    style: sansMedium24(color: Colors.white)
+                        .copyWith(fontSize: 16),
                   ),
                 ),
               ],

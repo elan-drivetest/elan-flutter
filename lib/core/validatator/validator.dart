@@ -1,5 +1,3 @@
-
-
 String? validateName(String? value) {
   String pattern = r'(^[a-zA-Z ]*$)';
   RegExp regExp = RegExp(pattern);

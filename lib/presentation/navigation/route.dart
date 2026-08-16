@@ -7,9 +7,9 @@ import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart';
 import 'package:elan/presentation/bloc/referral_summary_bloc/referral_summary_bloc.dart';
+import 'package:elan/presentation/bloc/ride_route_bloc/ride_route_bloc.dart';
 import 'package:elan/presentation/bloc/registration_bloc/registration_bloc.dart';
 import 'package:elan/presentation/bloc/reset_password_bloc/reset_password_bloc.dart';
-import 'package:elan/presentation/bloc/instructor_summary_bloc/instructor_summary_bloc.dart';
 import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
 import 'package:elan/presentation/ui/pages/add_license_page/add_license_page.dart';
 import 'package:elan/presentation/ui/pages/add_vehicle_page/add_vehicle_page.dart';
@@ -70,10 +70,7 @@ final GoRouter router = GoRouter(
           routes: [
             GoRoute(
               path: PagesName.dashboardPage.path,
-              builder: (context, state) => BlocProvider(
-                create: (context) => getIt<InstructorSummaryBloc>()..add(const InstructorSummaryEvent.getSummary()),
-                child: const DashboardPage(),
-              ),
+              builder: (context, state) => const DashboardPage(),
               routes: [
                 GoRoute(
                   path: PagesName.addVehiclePage.path,
@@ -94,7 +91,13 @@ final GoRouter router = GoRouter(
                   path: PagesName.directionMapPage.path,
                   builder: (context, state) {
                     final rideSession = state.extra as RideSession?;
-                    return DirectionMapPage(rideSession: rideSession);
+                    // Screen-scoped: the leg set belongs to one ride, and a
+                    // fresh instance avoids showing a previous ride's route
+                    // for a frame when reopening.
+                    return BlocProvider(
+                      create: (_) => getIt<RideRouteBloc>(),
+                      child: DirectionMapPage(rideSession: rideSession),
+                    );
                   },
                 ),
                 GoRoute(

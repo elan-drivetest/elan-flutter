@@ -9,6 +9,7 @@ part of 'ride_session.dart';
 _$RideSessionImpl _$$RideSessionImplFromJson(Map<String, dynamic> json) =>
     _$RideSessionImpl(
       id: (json['id'] as num).toInt(),
+      bookingId: (json['booking_id'] as num?)?.toInt(),
       startTime: json['start_time'] == null
           ? null
           : DateTime.parse(json['start_time'] as String),
@@ -35,6 +36,7 @@ _$RideSessionImpl _$$RideSessionImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$RideSessionImplToJson(_$RideSessionImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'booking_id': instance.bookingId,
       'start_time': instance.startTime?.toIso8601String(),
       'end_time': instance.endTime?.toIso8601String(),
       'status': instance.status,

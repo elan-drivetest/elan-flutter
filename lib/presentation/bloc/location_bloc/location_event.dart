@@ -6,6 +6,7 @@ class LocationEvent with _$LocationEvent {
   const factory LocationEvent.checkLocationAccess(
       {@Default(false) bool isRideRequest,
       int? rideId,
+      Ride? booking,
       @Default(false) bool fromBackground}) = CheckLocationAccess;
   const factory LocationEvent.checkBackgroundPermissions() =
       CheckBackgroundPermissions;

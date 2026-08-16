@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Launch-screen palette.
+
+      brand_splash_background MUST match `_splashBackground` in
+      lib/presentation/ui/pages/splash_page.dart and the storyboard background
+      in ios/Runner/Base.lproj/LaunchScreen.storyboard. Any mismatch is visible
+      as a colour flash on the first frame, because the OS splash and Flutter's
+      first frame are painted by different layers.
+    -->
+    <color name="brand_splash_background">#000000</color>
+    <color name="brand_green">#4CAF50</color>
+</resources>

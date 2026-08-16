@@ -29,6 +29,13 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => getIt<BottomNavigationBloc>()),
         BlocProvider(create: (context) => getIt<AuthBloc>()),
+        // Server-owned config. Unauthenticated, so it is fetched immediately at
+        // app start rather than after login, and it never blocks a screen —
+        // state.config falls back to cached-then-default values.
+        BlocProvider(
+          create: (context) =>
+              getIt<PricingConfigBloc>()..add(const PricingConfigEvent.fetch()),
+        ),
         BlocProvider(create: (context) => getIt<InstructorInfoBloc>()),
         BlocProvider(create: (context) => getIt<AvailableRideBloc>()),
         BlocProvider(create: (context) => getIt<UpcomingRideBloc>()),
@@ -48,7 +55,7 @@ class MyApp extends StatelessWidget {
         // close".
         BlocProvider.value(
           value: getIt<PricingConfigBloc>()
-            ..add(const PricingConfigEvent.fetchPricingConfig()),
+            ..add(const PricingConfigEvent.fetch()),
         ),
       ],
       child: MaterialApp.router(

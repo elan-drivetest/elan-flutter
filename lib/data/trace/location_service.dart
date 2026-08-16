@@ -1,7 +1,7 @@
+import 'package:elan/data/trace/location_tracking_policy.dart';
 import 'dart:convert';
 import 'package:elan/core/log/app_log.dart';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -29,7 +29,13 @@ class LocationService {
         playSound: false,
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(30000),
+        // 10 s floor, not 30 s. The ride's reported distance is summed from
+        // these points, and at 100 km/h a 30 s gap leaves ~830 m of road the
+        // server has to straight-line across (§12.6). The 50 m half of the
+        // cadence is handled by a displacement stream in the task handler.
+        eventAction: ForegroundTaskEventAction.repeat(
+          LocationTrackingPolicy.interval.inMilliseconds,
+        ),
         autoRunOnBoot: true,
         autoRunOnMyPackageReplaced: true,
         allowWakeLock: true,

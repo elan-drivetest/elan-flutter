@@ -49,23 +49,34 @@ class InstructorInfoBloc
 
     final result = await repository.updateInstructorInfo(params: event.params);
 
-    result.fold(
+    // Awaited deliberately — see UpcomingRideBloc._onAcceptRide. These two
+    // handlers emit before their first `await`, so they work today, but that is
+    // statement order rather than a guarantee: adding one line above the emit
+    // is enough to start throwing.
+    await result.fold(
       (l) async {
+        if (emit.isDone) return;
         emit(
           state.copyWith(
             status: InstructorInfoStatus.error,
             errorResponse: l,
           ),
         );
-        await Future.delayed(const Duration(milliseconds: 100));
-        add(const InstructorInfoEvent.getInfo());
       },
       (r) async {
+        if (emit.isDone) return;
         emit(state.copyWith(status: InstructorInfoStatus.updateSuccess));
-        await Future.delayed(const Duration(milliseconds: 100));
-        add(const InstructorInfoEvent.getInfo());
       },
     );
+
+    await _reloadAfter(const Duration(milliseconds: 100));
+  }
+
+  /// Re-fetch the profile after an update, guarded on [isClosed].
+  Future<void> _reloadAfter(Duration delay) async {
+    await Future.delayed(delay);
+    if (isClosed) return;
+    add(const InstructorInfoEvent.getInfo());
   }
 
   Future<void> _onUpdateVehicleInfo(
@@ -76,23 +87,23 @@ class InstructorInfoBloc
 
     final result = await repository.updateVehicleInfo(params: event.params);
 
-    result.fold(
+    await result.fold(
       (l) async {
+        if (emit.isDone) return;
         emit(
           state.copyWith(
             status: InstructorInfoStatus.error,
             errorResponse: l,
           ),
         );
-        await Future.delayed(const Duration(milliseconds: 100));
-        add(const InstructorInfoEvent.getInfo());
       },
       (r) async {
+        if (emit.isDone) return;
         emit(state.copyWith(status: InstructorInfoStatus.updateSuccess));
-        await Future.delayed(const Duration(milliseconds: 100));
-        add(const InstructorInfoEvent.getInfo());
       },
     );
+
+    await _reloadAfter(const Duration(milliseconds: 100));
   }
 
   void _emitSuccessFromResponse(

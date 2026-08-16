@@ -14,13 +14,11 @@ import 'package:elan/domain/stripe_onboard_response/stripe_onboard_response.dart
 import 'package:elan/domain/stripe_onboard_url_response/stripe_onboard_url_response.dart';
 import 'package:elan/domain/transfer_response/transfer_response.dart';
 import 'package:elan/domain/vehicle_request_response/vehicle_request_response.dart';
-import 'package:elan/domain/instructor_summary_response/instructor_summary_response.dart';
 import 'package:elan/domain/common/earnings/earnings_summary.dart';
 
 abstract class UserApiService {
   Future<Either<ErrorResponse, FileResponse>> fileUpload({required File file});
   Future<Either<ErrorResponse, InstructorResponse>> getInstructorInfo();
-  Future<Either<ErrorResponse, InstructorSummaryResponse>> getInstructorDashboardSummary();
   Future<Either<ErrorResponse, InstructorResponse>> updateInstructorInfo(
       {required Map<String, String> params});
   Future<Either<ErrorResponse, VehicleRequestResponse>> updateVehicleInfo(

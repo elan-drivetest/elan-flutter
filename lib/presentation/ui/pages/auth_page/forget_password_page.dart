@@ -37,7 +37,9 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       //     backgroundColor: Colors.green,
       //   ),
       // );
-      context.read<ResetPasswordBloc>().add(ResetPasswordEvent.reset(email: _emailController.text));
+      context
+          .read<ResetPasswordBloc>()
+          .add(ResetPasswordEvent.reset(email: _emailController.text));
     }
   }
 
@@ -70,13 +72,14 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: prefixIcon != null 
-              ? Icon(prefixIcon, color: Colors.grey[500], size: 22) 
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, color: Colors.grey[500], size: 22)
               : null,
           suffixIcon: suffixIcon,
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -104,10 +107,13 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        leading: Navigator.canPop(context) ? IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ) : null,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -183,9 +189,9 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     'Enter your email to reset your password',
                     style: TextStyle(
@@ -194,7 +200,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: 48),
 
                   // Email

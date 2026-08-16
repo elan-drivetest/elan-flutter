@@ -18,6 +18,7 @@ class LocationState with _$LocationState {
     required LocationStatus status,
     Position? location,
     int? rideId,
+    Ride? booking,
     @Default(false) bool shouldStart,
     String? errorMessage,
   }) = _LocationState;

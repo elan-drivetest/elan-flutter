@@ -8,7 +8,6 @@ import 'package:elan/domain/complete_ride_response/complete_ride_response.dart';
 import 'package:elan/domain/error_response/error_response.dart';
 import 'package:elan/domain/file_response/file_response.dart';
 import 'package:elan/domain/instructor_response/instructor_response.dart';
-import 'package:elan/domain/instructor_summary_response/instructor_summary_response.dart';
 import 'package:elan/domain/common/earnings/earnings_summary.dart';
 import 'package:elan/domain/referral_code_response/referral_code_response.dart';
 import 'package:elan/domain/referral_code_summary_response/referral_code_summary_response.dart';
@@ -27,7 +26,6 @@ abstract class UserRepository {
 
   Future<Either<ErrorResponse, FileResponse>> fileUpload({required File file});
   Future<Either<ErrorResponse, InstructorResponse>> getInstructorInfo();
-  Future<Either<ErrorResponse, InstructorSummaryResponse>> getInstructorDashboardSummary();
   Future<Either<ErrorResponse, InstructorResponse>> updateInstructorInfo(
       {required Map<String, String> params});
 
@@ -94,11 +92,6 @@ class IUserRepository extends UserRepository {
   @override
   Future<Either<ErrorResponse, InstructorResponse>> getInstructorInfo() {
     return userApiService.getInstructorInfo();
-  }
-
-  @override
-  Future<Either<ErrorResponse, InstructorSummaryResponse>> getInstructorDashboardSummary() {
-    return userApiService.getInstructorDashboardSummary();
   }
 
   @override

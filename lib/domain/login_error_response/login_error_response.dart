@@ -8,19 +8,13 @@ class LoginErrorResponse with _$LoginErrorResponse {
   const factory LoginErrorResponse({
     @JsonKey(name: "status_code") int? statusCode,
     @JsonKey(name: "message") String? message,
-    @JsonKey(
-        name: "errors",
-        fromJson: Errors.fromJson,
-        toJson: Errors.toJson
-    )
+    @JsonKey(name: "errors", fromJson: Errors.fromJson, toJson: Errors.toJson)
     Errors? errors,
   }) = _LoginErrorResponse;
 
   factory LoginErrorResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginErrorResponseFromJson(json);
 }
-
-
 
 @freezed
 class Errors with _$Errors {
@@ -61,9 +55,3 @@ List<String>? _normalizeField(dynamic field) {
   if (field is List) return field.map((e) => e.toString()).toList();
   return null;
 }
-
-
-
-
-
-

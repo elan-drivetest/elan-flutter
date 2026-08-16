@@ -39,11 +39,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        leading: Navigator.canPop(context) ? IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ) : null,
-        title: Text('Profile Settings', style: sansMedium24(color: Colors.black)),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        title:
+            Text('Profile Settings', style: sansMedium24(color: Colors.black)),
         centerTitle: false,
         elevation: 0,
         backgroundColor: Colors.grey[50],
@@ -87,7 +91,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(state.errorResponse?.message ?? 'Failed to upload photo'),
+                        content: Text(state.errorResponse?.message ??
+                            'Failed to upload photo'),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -106,7 +111,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         child: CircularProgressIndicator(),
                       ),
                     );
-                  } else if (state.status == InstructorInfoStatus.updateSuccess) {
+                  } else if (state.status ==
+                      InstructorInfoStatus.updateSuccess) {
                     if (_isActionDialogShowing) {
                       _isActionDialogShowing = false;
                       Navigator.of(context, rootNavigator: true).pop();
@@ -125,7 +131,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     if (state.errorResponse != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(state.errorResponse!.message ?? 'An error occurred'),
+                          content: Text(state.errorResponse!.message ??
+                              'An error occurred'),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -136,11 +143,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               BlocListener<StripeOnboardingBloc, StripeOnboardingState>(
                 listener: (context, state) {
                   if (state.status == StripeOnboardingStatus.success) {
-                    context.read<InstructorInfoBloc>().add(const InstructorInfoEvent.getInfo());
+                    context
+                        .read<InstructorInfoBloc>()
+                        .add(const InstructorInfoEvent.getInfo());
                   } else if (state.status == StripeOnboardingStatus.error) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(state.errorResponse?.message ?? 'Failed to update Stripe account'),
+                        content: Text(state.errorResponse?.message ??
+                            'Failed to update Stripe account'),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -210,13 +220,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                             ProfileSummaryCard(
                               title: 'Car Details',
                               icon: Icons.directions_car,
-                              isComplete: state.vehicleStatus == CarInfoStatus.complete,
+                              isComplete:
+                                  state.vehicleStatus == CarInfoStatus.complete,
                               data: {
                                 'Brand': state.vehicleInfo?.brand ?? '',
                                 'Model': state.vehicleInfo?.model ?? '',
                                 'Year': "${state.vehicleInfo?.year ?? ''}",
                                 'Color': state.vehicleInfo?.color ?? '',
-                                'License Plate': state.vehicleInfo?.licensePlate ?? '',
+                                'License Plate':
+                                    state.vehicleInfo?.licensePlate ?? '',
                               },
                               onEdit: () {
                                 final instructorInfoBloc =
@@ -257,13 +269,19 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                             ProfileSummaryCard(
                               title: 'License Details',
                               icon: Icons.badge,
-                              isComplete: state.licenseStatus == LicenseInfoStatus.complete,
+                              isComplete: state.licenseStatus ==
+                                  LicenseInfoStatus.complete,
                               data: {
-                                'License No': state.instructorInfo?.licenseNumber ?? '',
-                                'Validity Date': state.instructorInfo?.licenseValidityDate != null 
+                                'License No':
+                                    state.instructorInfo?.licenseNumber ?? '',
+                                'Validity Date': state.instructorInfo
+                                            ?.licenseValidityDate !=
+                                        null
                                     ? "${state.instructorInfo!.licenseValidityDate!.year}-${state.instructorInfo!.licenseValidityDate!.month.toString().padLeft(2, '0')}-${state.instructorInfo!.licenseValidityDate!.day.toString().padLeft(2, '0')}"
                                     : '',
-                                'Driving School': state.instructorInfo?.drivingSchoolName ?? '',
+                                'Driving School':
+                                    state.instructorInfo?.drivingSchoolName ??
+                                        '',
                               },
                               onEdit: () {
                                 final instructorInfoBloc =
@@ -311,11 +329,18 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                             ProfileSummaryCard(
                               title: 'Bank Details',
                               icon: Icons.credit_card,
-                              isComplete: state.paymentStatus == PaymentInfoStatus.complete,
+                              isComplete: state.paymentStatus ==
+                                  PaymentInfoStatus.complete,
                               data: {
-                                'Payment Status': state.paymentStatus == PaymentInfoStatus.complete ? 'Complete' : 'Incomplete',
-                                'Account Type': state.instructorInfo?.stripeAccountType ?? '-',
-                                'Country': state.instructorInfo?.stripeCountry ?? '-',
+                                'Payment Status': state.paymentStatus ==
+                                        PaymentInfoStatus.complete
+                                    ? 'Complete'
+                                    : 'Incomplete',
+                                'Account Type':
+                                    state.instructorInfo?.stripeAccountType ??
+                                        '-',
+                                'Country':
+                                    state.instructorInfo?.stripeCountry ?? '-',
                               },
                               onEdit: () {
                                 final instructorInfoBloc =
@@ -332,10 +357,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                                     value: instructorInfoBloc,
                                     child: BankDetailsEditSheet(
                                       paymentStatus: state.paymentStatus,
-                                      stripeAccountType: state.instructorInfo?.stripeAccountType,
-                                      stripeAccountStatus: state.instructorInfo?.stripeAccountStatus,
-                                      stripeAccountId: state.instructorInfo?.stripeAccountId,
-                                      stripeCountry: state.instructorInfo?.stripeCountry,
+                                      stripeAccountType: state
+                                          .instructorInfo?.stripeAccountType,
+                                      stripeAccountStatus: state
+                                          .instructorInfo?.stripeAccountStatus,
+                                      stripeAccountId:
+                                          state.instructorInfo?.stripeAccountId,
+                                      stripeCountry:
+                                          state.instructorInfo?.stripeCountry,
                                     ),
                                   ),
                                 );

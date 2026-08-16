@@ -17,7 +17,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -57,8 +57,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: prefixIcon != null 
-              ? Icon(prefixIcon, color: Colors.grey[500], size: 22) 
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, color: Colors.grey[500], size: 22)
               : null,
           suffixIcon: isPassword
               ? IconButton(
@@ -72,7 +72,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               : null,
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -100,10 +101,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        leading: Navigator.canPop(context) ? IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ) : null,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -119,20 +123,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             );
           } else if (state.status == ResetPasswordStatus.success) {
             Navigator.of(context, rootNavigator: true).pop();
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Password reset successfully!'),
                 backgroundColor: Color(0xFF4CAF50),
               ),
             );
-            
+
             context.go(PagesName.loginPage.path);
           } else if (state.status == ResetPasswordStatus.error) {
             Navigator.of(context, rootNavigator: true).pop();
-            
-            final errorMessage = state.errorResponse?.message ?? "Unknown error occurred";
-            
+
+            final errorMessage =
+                state.errorResponse?.message ?? "Unknown error occurred";
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(errorMessage),
@@ -144,7 +149,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -186,7 +192,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
-
                     _formField(
                       label: 'New Password',
                       controller: _passwordController,
@@ -208,7 +213,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         return null;
                       },
                     ),
-
                     _formField(
                       label: 'Confirm New Password',
                       controller: _confirmPasswordController,
@@ -230,7 +234,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 32),
                     Container(
                       height: 56,
@@ -238,7 +241,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                            color:
+                                const Color(0xFF4CAF50).withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           )

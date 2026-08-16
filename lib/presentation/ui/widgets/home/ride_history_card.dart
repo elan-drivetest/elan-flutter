@@ -1,280 +1,187 @@
+import 'package:elan/core/ride_earnings.dart';
+import 'package:elan/core/app_colors.dart';
+import 'package:elan/presentation/ui/widgets/common/ride_card_parts.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+/// A finished ride.
+///
+/// Shares [RideCardShell] / [RideJourney] with the job board and upcoming
+/// cards — see `ride_card_parts.dart`.
 class RideHistoryCard extends StatelessWidget {
   final String name;
   final String type;
   final String phoneNumber;
+  final double rating;
   final String time;
   final String pickupLocation;
-  final String dropOffLocation;
+  final String testCenterName;
+  final String testCenterAddress;
+
+  /// Whether this was a meet-at-centre booking.
+  ///
+  /// `/rides/completed` carries no `meet_at_center` flag, so the caller derives
+  /// it from the server's own sentinel: the query selects
+  /// `COALESCE(pickup_address, 'Meet at center')`
+  /// (`ride-session.repository.ts:549`). That is an inference on a null pickup
+  /// — the thing §2 warns against for *live* rides — but here the ride is over,
+  /// nothing routes off it, and it is the only signal the endpoint provides.
+  final bool meetAtCentre;
+
   final VoidCallback transfer;
   final VoidCallback start;
+
+  /// Cents. Zero for up to `instructor_payout_delay_days` after the ride —
+  /// the payout cron has not run yet (§14.6), not "you earned nothing".
+  final int? earningsCents;
+
+  /// Wall-clock hours, used to preview the pending payout.
+  final double? totalHours;
+
+  /// Live rate, for that preview only. Never hardcode it.
+  final num? hourlyRateCents;
 
   const RideHistoryCard({
     super.key,
     required this.name,
+    required this.rating,
     required this.time,
     required this.pickupLocation,
-    required this.dropOffLocation,
     required this.type,
     required this.phoneNumber,
     required this.transfer,
     required this.start,
+    this.testCenterName = '',
+    this.testCenterAddress = '',
+    this.meetAtCentre = false,
+    this.earningsCents,
+    this.totalHours,
+    this.hourlyRateCents,
   });
-
-  Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    }
-  }
-
-  List<String> _splitAddress(String address) {
-    final parts = address.split(',');
-    if (parts.length <= 1) return [address];
-    return [
-      parts.take(2).join(',').trim(),
-      parts.skip(2).join(',').trim(),
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {
-    final pickupLines = _splitAddress(pickupLocation);
-    final dropOffLines = _splitAddress(dropOffLocation);
-    final testCenterLines = _splitAddress(dropOffLocation); // Using dropOffLocation for test center like old implementation
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+    return RideCardShell(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RideTypePill(type: type),
+          const SizedBox(height: 16),
+          RideCardCustomer(
+            name: name,
+            subtitle: Row(
+              children: [
+                const Icon(Icons.access_time,
+                    size: 14, color: RideCardColors.mutedText),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    time,
+                    maxLines: 2,
+                    style: const TextStyle(
+                      color: RideCardColors.mutedText,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Header (Type)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                type,
-                style: const TextStyle(
-                  color: Color(0xFF4CAF50),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-            
+          const RideCardDivider(),
+          RideJourney(
+            meetAtCentre: meetAtCentre,
+            pickupAddress: pickupLocation,
+            testCentreName: testCenterName,
+            testCentreAddress: testCenterAddress,
+          ),
+          if (phoneNumber.isNotEmpty) ...[
             const SizedBox(height: 16),
-
-            // Driver Info
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.blue.shade50,
-                  child: const Icon(Icons.person, color: Colors.blue),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.access_time, size: 14, color: Colors.black54),
-                          const SizedBox(width: 4),
-                          Text(
-                            time,
-                            style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w500),
-                          ),
-                          if (phoneNumber.isNotEmpty) ...[
-                            const SizedBox(width: 12),
-                            const Icon(Icons.phone, size: 14, color: Colors.black54),
-                            const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () => _makePhoneCall(phoneNumber),
-                              child: Text(
-                                phoneNumber,
-                                style: const TextStyle(
-                                  color: Colors.blue, 
-                                  fontSize: 13, 
-                                  fontWeight: FontWeight.w500,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-            Divider(color: Colors.grey.shade100, height: 1),
-            const SizedBox(height: 20),
-
-            // Locations section (Timeline style)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Timeline graphics
-                Column(
-                  children: [
-                    const SizedBox(height: 2),
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.blue, width: 3),
-                      ),
-                    ),
-                    Container(
-                      width: 2,
-                      height: 36,
-                      color: Colors.grey.shade200,
-                    ),
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                // Addresses
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Pickup
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Pickup',
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            pickupLines[0],
-                            style: const TextStyle(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w500),
-                          ),
-                          if (pickupLines.length > 1)
-                            Text(
-                              pickupLines[1],
-                              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Drop-off
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Drop-off',
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            dropOffLines[0],
-                            style: const TextStyle(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w500),
-                          ),
-                          if (dropOffLines.length > 1)
-                            Text(
-                              dropOffLines[1],
-                              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-            
-            // Bottom section (Test Center)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade100),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.location_city, size: 16, color: Colors.black54),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Test Center',
-                          style: TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          testCenterLines.join(', '),
-                          style: const TextStyle(fontSize: 13, color: Colors.black87),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            SizedBox(
+              width: double.infinity,
+              child: RideCallButton(name: name, phone: phoneNumber),
             ),
           ],
-        ),
+          const SizedBox(height: 16),
+          _EarningsRow(
+            earningsCents: earningsCents,
+            totalHours: totalHours,
+            hourlyRateCents: hourlyRateCents,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Earnings for a finished ride.
+///
+/// History showed no money at all before, so an instructor could not tell a
+/// paid ride from an unpaid one. It also has to distinguish "paid $64" from
+/// "finished, payout scheduled" — the API reports both as `0` until the cron
+/// runs (§14.6).
+class _EarningsRow extends StatelessWidget {
+  const _EarningsRow({
+    required this.earningsCents,
+    required this.totalHours,
+    required this.hourlyRateCents,
+  });
+
+  final int? earningsCents;
+  final double? totalHours;
+  final num? hourlyRateCents;
+
+  @override
+  Widget build(BuildContext context) {
+    // False, and not fixable here: `GET /v1/rides/completed` returns no
+    // `hourly_rate` (§8.9), so the only rate available to this card is the
+    // current global one. The caption says so.
+    final label = RideEarnings.settled(
+      instructorEarningsCents: earningsCents,
+      totalHours: totalHours,
+      hourlyRateCents: hourlyRateCents,
+      rateIsRideSnapshot: false,
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: RideCardColors.greenTint,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.account_balance_wallet_outlined,
+              size: 16, color: RideCardColors.actionGreen),
+          const SizedBox(width: 8),
+          Text(
+            label.isEstimate ? 'Earnings (est.)' : 'Earned',
+            style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500),
+          ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                label.amount,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: RideCardColors.actionGreen,
+                ),
+              ),
+              if (label.caption != null)
+                Text(
+                  label.caption!,
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

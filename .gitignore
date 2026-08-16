@@ -41,3 +41,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Gradle output. `/build/` above only matches the repo root, so this one
+# was being offered up as untracked on every commit.
+/android/build/

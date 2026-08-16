@@ -49,11 +49,13 @@ class _AddLicensePageState extends State<AddLicensePage> {
   void initState() {
     _licenseNumberController.text = widget.instructorInfo?.licenseNumber ?? "";
     //_validityDateController.text = widget.instructorInfo?.licenseValidityDate ?? "";
-    _drivingLicenseUrlController.text = widget.instructorInfo?.drivingLicenseUrl ?? "";
-    _instructorLicenseUrlController.text = widget.instructorInfo?.instructorLicenseUrl ?? "";
-    _workEligibilityDocUrlController.text = widget.instructorInfo?.workEligibilityDocUrl ?? "";
-    _taxInfoDocUrlController.text =
-        widget.instructorInfo?.taxInfoDocUrl ?? "";
+    _drivingLicenseUrlController.text =
+        widget.instructorInfo?.drivingLicenseUrl ?? "";
+    _instructorLicenseUrlController.text =
+        widget.instructorInfo?.instructorLicenseUrl ?? "";
+    _workEligibilityDocUrlController.text =
+        widget.instructorInfo?.workEligibilityDocUrl ?? "";
+    _taxInfoDocUrlController.text = widget.instructorInfo?.taxInfoDocUrl ?? "";
     super.initState();
   }
 
@@ -73,10 +75,13 @@ class _AddLicensePageState extends State<AddLicensePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: Navigator.canPop(context) ? IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ) : null,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         title: Text(
           'License Info',
           style: ibmPlexSerifH5Style(color: Theme.of(context).primaryColorDark),
@@ -107,7 +112,8 @@ class _AddLicensePageState extends State<AddLicensePage> {
             }
           },
           builder: (context, state) {
-            final isLoading = state.status == InstructorInfoStatus.actionLoading;
+            final isLoading =
+                state.status == InstructorInfoStatus.actionLoading;
             return Form(
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -116,7 +122,8 @@ class _AddLicensePageState extends State<AddLicensePage> {
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 16.0),
                       child: Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
@@ -133,135 +140,159 @@ class _AddLicensePageState extends State<AddLicensePage> {
                         ),
                         child: Column(
                           children: [
-                        _buildTextFormField(
-                          controller: _licenseNumberController,
-                          label: 'License Number',
-                          keyboardType: TextInputType.text,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your license number.';
-                            }
-                            return null;
-                          },
-                        ),
-                        BlocConsumer<DatePickerBloc, DatePickerState>(
-                          listener: (context, state) {
-                            if (state.selectedDate != null) {
-                              final formattedDate = formatDate(
-                                  state.selectedDate!,
-                                  [yyyy, '-', mm, '-', dd]);
-                              _validityDateController.text = formattedDate;
-                            }
-                          },
-                          builder: (context, state) {
-                            return _buildDateFormField(
-                              controller: _validityDateController,
-                              keyboardType: TextInputType.datetime,
-                              label: 'License Validity Date',
+                            _buildTextFormField(
+                              controller: _licenseNumberController,
+                              label: 'License Number',
+                              keyboardType: TextInputType.text,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please select license validity date.';
+                                  return 'Please enter your license number.';
                                 }
                                 return null;
                               },
-                              onTap: () {
-                                final datePickerBloc =
-                                    context.read<DatePickerBloc>();
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => BlocProvider.value(
-                                    value: datePickerBloc,
-                                    child: CustomSingleDatePickerDialog(
-                                      initialSelectedDate: state.selectedDate,
-                                      onSelectionChanged: (args) =>
-                                          datePickerBloc.add(
-                                        DatePickerEvent
-                                            .updateSingleDateSelection(
-                                                args.value),
+                            ),
+                            BlocConsumer<DatePickerBloc, DatePickerState>(
+                              listener: (context, state) {
+                                if (state.selectedDate != null) {
+                                  final formattedDate = formatDate(
+                                      state.selectedDate!,
+                                      [yyyy, '-', mm, '-', dd]);
+                                  _validityDateController.text = formattedDate;
+                                }
+                              },
+                              builder: (context, state) {
+                                return _buildDateFormField(
+                                  controller: _validityDateController,
+                                  keyboardType: TextInputType.datetime,
+                                  label: 'License Validity Date',
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select license validity date.';
+                                    }
+                                    return null;
+                                  },
+                                  onTap: () {
+                                    final datePickerBloc =
+                                        context.read<DatePickerBloc>();
+                                    showDialog(
+                                      context: context,
+                                      builder: (_) => BlocProvider.value(
+                                        value: datePickerBloc,
+                                        child: CustomSingleDatePickerDialog(
+                                          initialSelectedDate:
+                                              state.selectedDate,
+                                          onSelectionChanged: (args) =>
+                                              datePickerBloc.add(
+                                            DatePickerEvent
+                                                .updateSingleDateSelection(
+                                                    args.value),
+                                          ),
+                                          onSubmit: () {},
+                                        ),
                                       ),
-                                      onSubmit: () {},
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
+                            ),
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Driving License (Pdf, Image)',
+                                controller: _drivingLicenseUrlController,
+                                allowedExtensions: const [
+                                  'jpg',
+                                  'jpeg',
+                                  'png',
+                                  'pdf'
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please upload your Driving License file.';
+                                  }
+                                  return null;
+                                },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
+                              ),
+                            ),
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Instructor License (Pdf, Image)',
+                                controller: _instructorLicenseUrlController,
+                                allowedExtensions: const [
+                                  'jpg',
+                                  'jpeg',
+                                  'png',
+                                  'pdf'
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please upload your Instructor License file.';
+                                  }
+                                  return null;
+                                },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
+                              ),
+                            ),
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Work Eligibility Document (Pdf, Image)',
+                                controller: _workEligibilityDocUrlController,
+                                allowedExtensions: const [
+                                  'jpg',
+                                  'jpeg',
+                                  'png',
+                                  'pdf'
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please upload your Work Eligibility document.';
+                                  }
+                                  return null;
+                                },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
+                              ),
+                            ),
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Tax Info Document (Pdf, Image)',
+                                controller: _taxInfoDocUrlController,
+                                allowedExtensions: const [
+                                  'jpg',
+                                  'jpeg',
+                                  'png',
+                                  'pdf'
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please upload your Tax Info document.';
+                                  }
+                                  return null;
+                                },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
+                              ),
+                            ),
+                          ],
                         ),
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Driving License (Pdf, Image)',
-                            controller: _drivingLicenseUrlController,
-                            allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload your Driving License file.';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Instructor License (Pdf, Image)',
-                            controller: _instructorLicenseUrlController,
-                            allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload your Instructor License file.';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Work Eligibility Document (Pdf, Image)',
-                            controller: _workEligibilityDocUrlController,
-                            allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload your Work Eligibility document.';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Tax Info Document (Pdf, Image)',
-                            controller: _taxInfoDocUrlController,
-                            allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload your Tax Info document.';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Padding(
+                  Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ElevatedButton(
-                      onPressed: (isLoading || _isUploading) ? null : _submitForm,
+                      onPressed:
+                          (isLoading || _isUploading) ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (isLoading || _isUploading) ? Colors.grey : const Color(0xFF4D8B55),
+                        backgroundColor: (isLoading || _isUploading)
+                            ? Colors.grey
+                            : const Color(0xFF4D8B55),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -272,7 +303,8 @@ class _AddLicensePageState extends State<AddLicensePage> {
                           ? const SizedBox(
                               height: 24,
                               width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
                             )
                           : const Text(
                               'Add License',

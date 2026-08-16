@@ -26,6 +26,13 @@ mixin _$EarningsSummary {
   int? get withdrawn => throw _privateConstructorUsedError;
   @JsonKey(name: "total_completed_rides")
   int? get totalCompletedRides => throw _privateConstructorUsedError;
+
+  /// The **current global setting**, not any ride's rate (§8.10).
+  ///
+  /// An instructor holding a job accepted last week sees the new rate here
+  /// but is paid the snapshot on that job's session. Only ever display this
+  /// as "current rate"; per-ride figures come from `RideSession.hourly_rate`.
+  /// Deliberately unused today — nothing shows a rate that is not a ride's.
   @JsonKey(name: "hourly_rate")
   int? get hourlyRate => throw _privateConstructorUsedError;
 
@@ -168,6 +175,13 @@ class _$EarningsSummaryImpl implements _EarningsSummary {
   @override
   @JsonKey(name: "total_completed_rides")
   final int? totalCompletedRides;
+
+  /// The **current global setting**, not any ride's rate (§8.10).
+  ///
+  /// An instructor holding a job accepted last week sees the new rate here
+  /// but is paid the snapshot on that job's session. Only ever display this
+  /// as "current rate"; per-ride figures come from `RideSession.hourly_rate`.
+  /// Deliberately unused today — nothing shows a rate that is not a ride's.
   @override
   @JsonKey(name: "hourly_rate")
   final int? hourlyRate;
@@ -234,6 +248,13 @@ abstract class _EarningsSummary implements EarningsSummary {
   @override
   @JsonKey(name: "total_completed_rides")
   int? get totalCompletedRides;
+
+  /// The **current global setting**, not any ride's rate (§8.10).
+  ///
+  /// An instructor holding a job accepted last week sees the new rate here
+  /// but is paid the snapshot on that job's session. Only ever display this
+  /// as "current rate"; per-ride figures come from `RideSession.hourly_rate`.
+  /// Deliberately unused today — nothing shows a rate that is not a ride's.
   @override
   @JsonKey(name: "hourly_rate")
   int? get hourlyRate;

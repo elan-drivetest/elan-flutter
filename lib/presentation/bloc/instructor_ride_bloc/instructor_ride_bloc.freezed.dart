@@ -28,7 +28,8 @@ mixin _$InstructorRideEvent {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)
+            String? timezone,
+            Ride? booking)
         start,
     required TResult Function(int? rideId, double? lat, double? lot) stop,
   }) =>
@@ -45,7 +46,8 @@ mixin _$InstructorRideEvent {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult? Function(int? rideId, double? lat, double? lot)? stop,
   }) =>
@@ -62,7 +64,8 @@ mixin _$InstructorRideEvent {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult Function(int? rideId, double? lat, double? lot)? stop,
     required TResult orElse(),
@@ -164,7 +167,8 @@ class _$RequestDataImpl implements _RequestData {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)
+            String? timezone,
+            Ride? booking)
         start,
     required TResult Function(int? rideId, double? lat, double? lot) stop,
   }) {
@@ -184,7 +188,8 @@ class _$RequestDataImpl implements _RequestData {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult? Function(int? rideId, double? lat, double? lot)? stop,
   }) {
@@ -204,7 +209,8 @@ class _$RequestDataImpl implements _RequestData {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult Function(int? rideId, double? lat, double? lot)? stop,
     required TResult orElse(),
@@ -269,7 +275,10 @@ abstract class _$$StartImplCopyWith<$Res> {
       double? bearing,
       double? altitude,
       int? batteryLevel,
-      String? timezone});
+      String? timezone,
+      Ride? booking});
+
+  $RideCopyWith<$Res>? get booking;
 }
 
 /// @nodoc
@@ -294,6 +303,7 @@ class __$$StartImplCopyWithImpl<$Res>
     Object? altitude = freezed,
     Object? batteryLevel = freezed,
     Object? timezone = freezed,
+    Object? booking = freezed,
   }) {
     return _then(_$StartImpl(
       id: freezed == id
@@ -332,7 +342,25 @@ class __$$StartImplCopyWithImpl<$Res>
           ? _value.timezone
           : timezone // ignore: cast_nullable_to_non_nullable
               as String?,
+      booking: freezed == booking
+          ? _value.booking
+          : booking // ignore: cast_nullable_to_non_nullable
+              as Ride?,
     ));
+  }
+
+  /// Create a copy of InstructorRideEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $RideCopyWith<$Res>? get booking {
+    if (_value.booking == null) {
+      return null;
+    }
+
+    return $RideCopyWith<$Res>(_value.booking!, (value) {
+      return _then(_value.copyWith(booking: value));
+    });
   }
 }
 
@@ -348,7 +376,8 @@ class _$StartImpl implements _Start {
       required this.bearing,
       required this.altitude,
       required this.batteryLevel,
-      required this.timezone});
+      required this.timezone,
+      this.booking});
 
   @override
   final int? id;
@@ -369,9 +398,18 @@ class _$StartImpl implements _Start {
   @override
   final String? timezone;
 
+  /// The booking being started.
+  ///
+  /// Cached so the active-ride screen has a destination: `/rides/current`
+  /// returns a RideSession with no addresses and no booking id at all
+  /// (§8.8), so without this the app cannot say where the instructor is
+  /// going once the ride is under way.
+  @override
+  final Ride? booking;
+
   @override
   String toString() {
-    return 'InstructorRideEvent.start(id: $id, lat: $lat, lot: $lot, accuracy: $accuracy, speed: $speed, bearing: $bearing, altitude: $altitude, batteryLevel: $batteryLevel, timezone: $timezone)';
+    return 'InstructorRideEvent.start(id: $id, lat: $lat, lot: $lot, accuracy: $accuracy, speed: $speed, bearing: $bearing, altitude: $altitude, batteryLevel: $batteryLevel, timezone: $timezone, booking: $booking)';
   }
 
   @override
@@ -391,12 +429,13 @@ class _$StartImpl implements _Start {
             (identical(other.batteryLevel, batteryLevel) ||
                 other.batteryLevel == batteryLevel) &&
             (identical(other.timezone, timezone) ||
-                other.timezone == timezone));
+                other.timezone == timezone) &&
+            (identical(other.booking, booking) || other.booking == booking));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, id, lat, lot, accuracy, speed,
-      bearing, altitude, batteryLevel, timezone);
+      bearing, altitude, batteryLevel, timezone, booking);
 
   /// Create a copy of InstructorRideEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -419,12 +458,13 @@ class _$StartImpl implements _Start {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)
+            String? timezone,
+            Ride? booking)
         start,
     required TResult Function(int? rideId, double? lat, double? lot) stop,
   }) {
     return start(id, lat, lot, accuracy, speed, bearing, altitude, batteryLevel,
-        timezone);
+        timezone, booking);
   }
 
   @override
@@ -440,12 +480,13 @@ class _$StartImpl implements _Start {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult? Function(int? rideId, double? lat, double? lot)? stop,
   }) {
     return start?.call(id, lat, lot, accuracy, speed, bearing, altitude,
-        batteryLevel, timezone);
+        batteryLevel, timezone, booking);
   }
 
   @override
@@ -461,14 +502,15 @@ class _$StartImpl implements _Start {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult Function(int? rideId, double? lat, double? lot)? stop,
     required TResult orElse(),
   }) {
     if (start != null) {
       return start(id, lat, lot, accuracy, speed, bearing, altitude,
-          batteryLevel, timezone);
+          batteryLevel, timezone, booking);
     }
     return orElse();
   }
@@ -518,7 +560,8 @@ abstract class _Start implements InstructorRideEvent {
       required final double? bearing,
       required final double? altitude,
       required final int? batteryLevel,
-      required final String? timezone}) = _$StartImpl;
+      required final String? timezone,
+      final Ride? booking}) = _$StartImpl;
 
   int? get id;
   double? get lat;
@@ -529,6 +572,14 @@ abstract class _Start implements InstructorRideEvent {
   double? get altitude;
   int? get batteryLevel;
   String? get timezone;
+
+  /// The booking being started.
+  ///
+  /// Cached so the active-ride screen has a destination: `/rides/current`
+  /// returns a RideSession with no addresses and no booking id at all
+  /// (§8.8), so without this the app cannot say where the instructor is
+  /// going once the ride is under way.
+  Ride? get booking;
 
   /// Create a copy of InstructorRideEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -631,7 +682,8 @@ class _$StopImpl implements _Stop {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)
+            String? timezone,
+            Ride? booking)
         start,
     required TResult Function(int? rideId, double? lat, double? lot) stop,
   }) {
@@ -651,7 +703,8 @@ class _$StopImpl implements _Stop {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult? Function(int? rideId, double? lat, double? lot)? stop,
   }) {
@@ -671,7 +724,8 @@ class _$StopImpl implements _Stop {
             double? bearing,
             double? altitude,
             int? batteryLevel,
-            String? timezone)?
+            String? timezone,
+            Ride? booking)?
         start,
     TResult Function(int? rideId, double? lat, double? lot)? stop,
     required TResult orElse(),

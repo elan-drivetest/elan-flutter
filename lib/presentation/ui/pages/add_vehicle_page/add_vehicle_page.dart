@@ -75,10 +75,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: Navigator.canPop(context) ? IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ) : null,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         title: Text(
           'Vehicle Info',
           style: ibmPlexSerifH5Style(color: Theme.of(context).primaryColorDark),
@@ -110,7 +113,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
             }
           },
           builder: (context, state) {
-            final isLoading = state.status == InstructorInfoStatus.actionLoading;
+            final isLoading =
+                state.status == InstructorInfoStatus.actionLoading;
             return Form(
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -119,7 +123,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 16.0),
                       child: Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
@@ -136,144 +141,147 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                         ),
                         child: Column(
                           children: [
-                        // Car Brand
-                        _buildTextFormField(
-                          controller: _carBrandController,
-                          label: 'Car Brand',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter the car brand (e.g., Toyota, Honda)';
-                            }
-                            return null;
-                          },
-                        ),
+                            // Car Brand
+                            _buildTextFormField(
+                              controller: _carBrandController,
+                              label: 'Car Brand',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter the car brand (e.g., Toyota, Honda)';
+                                }
+                                return null;
+                              },
+                            ),
 
-                        // Vehicle Registration
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Vehicle Registration (Pdf, Image)',
-                            controller: _vehicleRegistrationController,
-                            allowedExtensions: const ['jpg', 'pdf', 'png'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload a valid vehicle registration document (PDF or image)';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-
-                        // Vehicle Insurance
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Vehicle Insurance (Pdf, Image)',
-                            controller: _vehicleInsuranceController,
-                            allowedExtensions: const ['jpg', 'pdf', 'png'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload a valid vehicle insurance document (PDF or image)';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-
-                        // Car Model and Year
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: _buildTextFormField(
-                                controller: _carModelController,
-                                label: 'Car Model',
-                                keyboardType: TextInputType.text,
+                            // Vehicle Registration
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Vehicle Registration (Pdf, Image)',
+                                controller: _vehicleRegistrationController,
+                                allowedExtensions: const ['jpg', 'pdf', 'png'],
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter a valid car model (e.g., Corolla, Civic)';
+                                    return 'Please upload a valid vehicle registration document (PDF or image)';
                                   }
                                   return null;
                                 },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildTextFormField(
-                                controller: _carYearController,
-                                label: 'Year',
-                                keyboardType: TextInputType.number,
+
+                            // Vehicle Insurance
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Vehicle Insurance (Pdf, Image)',
+                                controller: _vehicleInsuranceController,
+                                allowedExtensions: const ['jpg', 'pdf', 'png'],
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter a valid year (e.g., 2021)';
-                                  }
-                                  if (!RegExp(r'^\d{4}$').hasMatch(value)) {
-                                    return 'Enter a 4-digit year, e.g., 2021';
+                                    return 'Please upload a valid vehicle insurance document (PDF or image)';
                                   }
                                   return null;
                                 },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
                               ),
+                            ),
+
+                            // Car Model and Year
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _buildTextFormField(
+                                    controller: _carModelController,
+                                    label: 'Car Model',
+                                    keyboardType: TextInputType.text,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a valid car model (e.g., Corolla, Civic)';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildTextFormField(
+                                    controller: _carYearController,
+                                    label: 'Year',
+                                    keyboardType: TextInputType.number,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a valid year (e.g., 2021)';
+                                      }
+                                      if (!RegExp(r'^\d{4}$').hasMatch(value)) {
+                                        return 'Enter a 4-digit year, e.g., 2021';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            // Car Color
+                            _buildTextFormField(
+                              controller: _carColorController,
+                              label: 'Car Color',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter the car color (e.g., Red, Blue)';
+                                }
+                                return null;
+                              },
+                            ),
+
+                            // Car Image
+                            BlocProvider(
+                              create: (context) => getIt<FileUploadBloc>(),
+                              child: _UploadField(
+                                label: 'Car Image',
+                                controller: _carImageController,
+                                allowedExtensions: const ['jpg', 'png'],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please upload a valid car image or provide an image URL';
+                                  }
+                                  return null;
+                                },
+                                onUploadStarted: _onUploadStarted,
+                                onUploadFinished: _onUploadFinished,
+                              ),
+                            ),
+
+                            // License Plate No.
+                            _buildTextFormField(
+                              controller: _licensePlateController,
+                              label: 'License Plate No.',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a valid license plate number (e.g., ABC-1234)';
+                                }
+                                return null;
+                              },
                             ),
                           ],
                         ),
-
-                        // Car Color
-                        _buildTextFormField(
-                          controller: _carColorController,
-                          label: 'Car Color',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter the car color (e.g., Red, Blue)';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        // Car Image
-                        BlocProvider(
-                          create: (context) => getIt<FileUploadBloc>(),
-                          child: _UploadField(
-                            label: 'Car Image',
-                            controller: _carImageController,
-                            allowedExtensions: const ['jpg', 'png'],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please upload a valid car image or provide an image URL';
-                              }
-                              return null;
-                            },
-                            onUploadStarted: _onUploadStarted,
-                            onUploadFinished: _onUploadFinished,
-                          ),
-                        ),
-
-                        // License Plate No.
-                        _buildTextFormField(
-                          controller: _licensePlateController,
-                          label: 'License Plate No.',
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a valid license plate number (e.g., ABC-1234)';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              // Add Car Button
-              Padding(
+                  // Add Car Button
+                  Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ElevatedButton(
-                      onPressed: (isLoading || _isUploading) ? null : _submitForm,
+                      onPressed:
+                          (isLoading || _isUploading) ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (isLoading || _isUploading) ? Colors.grey : const Color(0xFF4D8B55),
+                        backgroundColor: (isLoading || _isUploading)
+                            ? Colors.grey
+                            : const Color(0xFF4D8B55),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -284,7 +292,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                           ? const SizedBox(
                               height: 24,
                               width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
                             )
                           : const Text(
                               'Add Vehicle',
@@ -335,7 +344,9 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       final params = {
         "brand": _carBrandController.text.trim(),
         "model": _carModelController.text.trim(),
-        "year": _carYearController.text.trim().toString(), // <-- ensure this is a string!
+        "year": _carYearController.text
+            .trim()
+            .toString(), // <-- ensure this is a string!
         "color": _carColorController.text.trim(),
         "license_plate": _licensePlateController.text.trim(),
         "registration_doc_url": _vehicleRegistrationController.text.trim(),
@@ -344,9 +355,9 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         "status": "ACTIVE",
       };
 
-      context.read<InstructorInfoBloc>().add(
-          InstructorInfoEvent.updateVehicleInfo(params: params)
-      );
+      context
+          .read<InstructorInfoBloc>()
+          .add(InstructorInfoEvent.updateVehicleInfo(params: params));
     }
   }
 }

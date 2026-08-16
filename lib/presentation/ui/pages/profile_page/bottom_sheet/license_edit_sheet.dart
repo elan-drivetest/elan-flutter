@@ -67,7 +67,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
         TextEditingController(text: widget.drivingLicenseUrl);
     _licenseValidityDateController =
         TextEditingController(text: widget.licenseValidityDate);
-    _licenseNumberController = TextEditingController(text: widget.licenseNumber);
+    _licenseNumberController =
+        TextEditingController(text: widget.licenseNumber);
     _drivingSchoolNameController =
         TextEditingController(text: widget.drivingSchoolName);
   }
@@ -116,7 +117,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
                     label: 'Tax Info Document (Pdf, Image)',
                     controller: _taxInfoDocController,
                     allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                    validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Required" : null,
                     onUploadStarted: _onUploadStarted,
                     onUploadFinished: _onUploadFinished,
                   ),
@@ -128,7 +130,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
                     label: 'Work Eligibility Document (Pdf, Image)',
                     controller: _workEligibilityDocController,
                     allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                    validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Required" : null,
                     onUploadStarted: _onUploadStarted,
                     onUploadFinished: _onUploadFinished,
                   ),
@@ -140,7 +143,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
                     label: 'Instructor License (Pdf, Image)',
                     controller: _instructorLicenseController,
                     allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                    validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Required" : null,
                     onUploadStarted: _onUploadStarted,
                     onUploadFinished: _onUploadFinished,
                   ),
@@ -152,7 +156,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
                     label: 'Driving License (Pdf, Image)',
                     controller: _drivingLicenseController,
                     allowedExtensions: const ['jpg', 'jpeg', 'png', 'pdf'],
-                    validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Required" : null,
                     onUploadStarted: _onUploadStarted,
                     onUploadFinished: _onUploadFinished,
                   ),
@@ -183,7 +188,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     fixedSize: const Size(double.maxFinite, 54),
-                    backgroundColor: _isUploading ? Colors.grey : const Color(0xFF4D8B55),
+                    backgroundColor:
+                        _isUploading ? Colors.grey : const Color(0xFF4D8B55),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -194,10 +200,12 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
                         )
                       : Text("Save License Details",
-                          style: sansMedium24(color: Colors.white).copyWith(fontSize: 16)),
+                          style: sansMedium24(color: Colors.white)
+                              .copyWith(fontSize: 16)),
                 ),
               ],
             ),
@@ -219,7 +227,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
         labelText: label,
         filled: true,
         fillColor: Colors.grey[50],
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -248,7 +257,8 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
       controller: controller,
       readOnly: true,
       onTap: () async {
-        final initialDate = DateTime.tryParse(controller.text) ?? DateTime.now();
+        final initialDate =
+            DateTime.tryParse(controller.text) ?? DateTime.now();
         final picked = await showDatePicker(
           context: context,
           initialDate: initialDate,
@@ -268,14 +278,16 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
           },
         );
         if (picked != null) {
-          controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+          controller.text =
+              "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
         }
       },
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.grey[50],
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -380,7 +392,8 @@ class _UploadField extends StatelessWidget {
               labelText: label,
               filled: true,
               fillColor: Colors.grey[50],
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
@@ -391,17 +404,19 @@ class _UploadField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4D8B55), width: 1.5),
+                borderSide:
+                    const BorderSide(color: Color(0xFF4D8B55), width: 1.5),
               ),
               suffixIcon: state.status == FileUploadStatus.loading
                   ? const Padding(
-                padding: EdgeInsets.all(12),
-                child: SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF4D8B55)),
-                ),
-              )
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Color(0xFF4D8B55)),
+                      ),
+                    )
                   : const Icon(Icons.upload_file, color: Color(0xFF4D8B55)),
             ),
             validator: validator,
