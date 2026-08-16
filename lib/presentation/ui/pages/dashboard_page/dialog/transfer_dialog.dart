@@ -1,3 +1,4 @@
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/presentation/ui/widgets/common/custom_dialog_button_with_border.dart';
 import 'package:elan/presentation/ui/widgets/common/custom_dialog_button_with_loader.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,33 @@ class _TransferDialogState extends State<TransferDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Advisory only — the server is the authority on the cutoff.
+                // We surface the rule so the instructor isn't surprised by a
+                // rejection, but we never block the request client-side.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Transfers must be requested at least '
+                        '${context.pricing.rideTransferCutoffLabel} '
+                        'before the test time.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
                 _buildTextFormField(
                   controller: widget.reason,
                   label: "Reason",

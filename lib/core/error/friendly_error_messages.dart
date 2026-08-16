@@ -10,7 +10,8 @@ class FriendlyErrorMessages {
   const FriendlyErrorMessages._();
 
   /// Generic copy used when nothing more specific is known.
-  static const String generic = 'Something went wrong. Please try again.';
+  static const String generic =
+      'Something went wrong. Please try again.';
 
   /// Shown when the device has no / poor connectivity.
   static const String network =
@@ -59,7 +60,8 @@ class FriendlyErrorMessages {
     'unauthorized': 'Your session has expired. Please sign in again.',
     'invalid token.': 'Your session is invalid. Please sign in again.',
     'invalid token': 'Your session is invalid. Please sign in again.',
-    'the token has expired.': 'Your session has expired. Please sign in again.',
+    'the token has expired.':
+        'Your session has expired. Please sign in again.',
     'too many requests':
         'Too many attempts. Please wait a moment and try again.',
 
@@ -79,13 +81,15 @@ class FriendlyErrorMessages {
         'A phone number is required to send your verification code.',
 
     // ---- OTP ----
-    'otpresendcooldown': 'Please wait a minute before requesting another code.',
+    'otpresendcooldown':
+        'Please wait a minute before requesting another code.',
     'otptoomanyrequests':
         'You\'ve requested too many codes. Please try again later.',
     'otpnotfound':
         'No active verification code found. Please request a new one.',
     'otpexpired': 'This code has expired. Please request a new one.',
-    'otpmaxattempts': 'Too many incorrect attempts. Please request a new code.',
+    'otpmaxattempts':
+        'Too many incorrect attempts. Please request a new code.',
     'otpinvalid': 'That code is incorrect. Please try again.',
 
     // ---- Forgot password ----
@@ -118,7 +122,8 @@ class FriendlyErrorMessages {
     'booking not found': 'This booking is no longer available.',
     'booking already accepted':
         'This booking has already been taken by another instructor.',
-    'test date has already passed': 'This test date has already passed.',
+    'test date has already passed':
+        'This test date has already passed.',
     'you already have a booking on this date':
         'You already have a ride booked on this date.',
     'ride not found': 'We couldn\'t find that ride.',
@@ -126,14 +131,17 @@ class FriendlyErrorMessages {
     'booking is not paid or is no longer active':
         'This booking isn\'t paid or is no longer active.',
     'ride session has already started': 'This ride has already started.',
-    'ride session can be started within 6 hours of test date':
-        'A ride can only be started within 6 hours of the test time.',
-    'you are not assigned to this ride': 'You aren\'t assigned to this ride.',
+    // NOTE: the start-window and transfer-cutoff messages are NOT listed here.
+    // They embed an hour count driven by `/v1/pricing-config`
+    // (ride_start_window_hours / ride_transfer_cutoff_hours), so an exact-match
+    // key would silently stop matching the moment ops change the config.
+    // They are handled by [_resolveRideWindow] instead.
+    'you are not assigned to this ride':
+        'You aren\'t assigned to this ride.',
     'ride session can not be transferred':
         'This ride can no longer be transferred.',
-    'transfer requests must be made at least 6 hours before the start time':
-        'Transfers must be requested at least 6 hours before the start time.',
-    'ride session cannot be stopped': 'This ride can\'t be stopped right now.',
+    'ride session cannot be stopped':
+        'This ride can\'t be stopped right now.',
     'something went wrong': generic,
 
     // ---- Referral codes ----
@@ -174,6 +182,10 @@ class FriendlyErrorMessages {
     final direct = _codes[key];
     if (direct != null) return direct;
 
+    // Config-driven ride window messages, matched by prefix.
+    final rideWindow = _resolveRideWindow(key);
+    if (rideWindow != null) return rideWindow;
+
     // Templated codes: `needLoginViaProvider:google`, `Unable to calc...: X`.
     final head = key.split(':').first.trim();
     for (final entry in _templatePrefixes.entries) {
@@ -189,6 +201,34 @@ class FriendlyErrorMessages {
     return null;
   }
 
+  static final RegExp _hoursPattern = RegExp(r'(\d+)\s*hour');
+
+  /// Handles the two backend messages whose hour count comes from
+  /// `/v1/pricing-config` and can therefore change without a client release.
+  ///
+  /// The number is read back out of the server's own message rather than from
+  /// the local config, so the copy is always consistent with whatever rule the
+  /// server actually enforced — even if the app's cached config is stale.
+  static String? _resolveRideWindow(String key) {
+    final hours = _hoursPattern.firstMatch(key)?.group(1);
+
+    final label = hours == null ? null : '$hours hour${hours == '1' ? '' : 's'}';
+
+    if (key.startsWith('ride session can be started within')) {
+      return label != null
+          ? 'A ride can only be started within $label of the test time.'
+          : 'This ride can\'t be started yet.';
+    }
+
+    if (key.startsWith('transfer requests must be made at least')) {
+      return label != null
+          ? 'Transfers must be requested at least $label before the start time.'
+          : 'It\'s too late to transfer this ride.';
+    }
+
+    return null;
+  }
+
   /// Friendly fallback for an HTTP status when the code is unknown.
   static String forStatus(int? status) =>
       _statusFallback[status ?? 0] ?? generic;
@@ -199,8 +239,7 @@ class FriendlyErrorMessages {
     if (!_looksLikeValidation(lower)) return null;
 
     final field = _fieldFromValidation(raw);
-    final label =
-        field != null ? (fieldLabels[field] ?? _titleize(field)) : null;
+    final label = field != null ? (fieldLabels[field] ?? _titleize(field)) : null;
 
     if (lower.contains('must be an email')) {
       return 'Please enter a valid email address.';

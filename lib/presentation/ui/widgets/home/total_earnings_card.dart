@@ -1,3 +1,4 @@
+import 'package:elan/core/extension/pricing_config_extension.dart';
 import 'package:elan/core/styles.dart';
 import 'package:flutter/material.dart';
 
@@ -86,6 +87,20 @@ class TotalEarningsCard extends StatelessWidget {
                 ],
               ),
             ),
+            // Only shown once the real config has loaded, so we never state a
+            // payout term we aren't sure about.
+            if (context.pricing.isLoaded) ...[
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Earnings are released '
+                  '${context.pricing.payoutDelayLabel} after a completed ride.',
+                  textAlign: TextAlign.center,
+                  style: sansDevanagariRegular11(color: Colors.black54),
+                ),
+              ),
+            ],
           ],
         ),
       ),

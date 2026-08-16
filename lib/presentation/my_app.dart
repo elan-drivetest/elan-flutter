@@ -49,6 +49,14 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => getIt<ConfirmEmailBloc>()),
         BlocProvider(create: (context) => getIt<DirectionBloc>()),
         BlocProvider(create: (context) => getIt<EarningsSummaryBloc>()),
+        // `.value` because PricingConfigBloc is a get_it @lazySingleton —
+        // BlocProvider(create:) would close the singleton on dispose, and any
+        // later `add()` would throw "Cannot add new events after calling
+        // close".
+        BlocProvider.value(
+          value: getIt<PricingConfigBloc>()
+            ..add(const PricingConfigEvent.fetch()),
+        ),
       ],
       child: MaterialApp.router(
         title: 'Elan',
