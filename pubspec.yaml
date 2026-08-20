@@ -1,5 +1,8 @@
 name: elan
-description: "A new Flutter project."
+# `name` is the Dart package name and is load-bearing — every `package:elan/...`
+# import depends on it. The user-facing name is "Elan Instructor", set in
+# AndroidManifest.xml, ios/Runner/Info.plist and MaterialApp.title.
+description: "Elan Instructor — accept road-test rides, track them live, and take payouts."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.1+5

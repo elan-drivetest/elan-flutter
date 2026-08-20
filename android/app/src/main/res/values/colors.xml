@@ -11,4 +11,13 @@
     -->
     <color name="brand_splash_background">#000000</color>
     <color name="brand_green">#4CAF50</color>
+
+    <!--
+      Background layer of the adaptive launcher icon. Deliberately the same
+      black as brand_splash_background: the icon, the OS splash and the Flutter
+      splash are all on screen within the same second, and a mismatch reads as
+      a flash. Kept as its own name because an adaptive icon background is a
+      brand decision in its own right, not a splash detail.
+    -->
+    <color name="ic_launcher_background">#000000</color>
 </resources>

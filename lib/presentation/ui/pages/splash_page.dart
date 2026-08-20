@@ -1,5 +1,11 @@
+import 'dart:async';
+
+import 'package:elan/core/cache/cache_manager_impl.dart';
+import 'package:elan/core/log/app_log.dart';
+import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart';
+import 'package:elan/presentation/navigation/launch_destination.dart';
 import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:elan/presentation/ui/dialog/location_dialog/open_setting_dialog.dart';
 import 'package:elan/presentation/ui/dialog/location_dialog/permission_warning_dialog.dart';
@@ -8,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Splash backdrop. Must stay in sync with the two native launch screens —
 /// `android/app/src/main/res/values/colors.xml` (`brand_splash_background`) and
@@ -27,36 +32,84 @@ class _SplashPageState extends State<SplashPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool? _isFirstTime;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  /// One store, shared with the rest of the app. The previous bare
+  /// `FlutterSecureStorage()` used a different Android backend to
+  /// [CacheManager], so this flag was being written somewhere nothing else
+  /// touched — and when it failed to come back, the launch fell into the
+  /// first-run branch, which never checked auth at all.
+  final _cacheManager = getIt<CacheManagerImpl>();
+
+  /// Set once we have routed away, so the auth listener and the onboarding
+  /// lookup — which finish in either order — cannot both navigate.
+  bool _navigated = false;
 
   @override
   void initState() {
     super.initState();
-    _checkFirstLaunch();
+
+    // Auth is checked on **every** launch, independently of onboarding.
+    //
+    // These used to be coupled: the refresh only ran on the
+    // already-onboarded branch, so any launch that did not find the
+    // onboarding flag — a reinstall, a cleared store, or the storage-backend
+    // mismatch fixed above — walked a signed-in instructor through the
+    // carousel and dropped them on the login screen with valid cookies
+    // sitting on disk. "Have you seen the intro" and "are you signed in" are
+    // unrelated questions and are now asked separately.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<AuthBloc>().add(const AuthEvent.refresh());
+      context
+          .read<LocationBloc>()
+          .add(const LocationEvent.checkAllPermissions());
+    });
+
+    unawaited(_checkFirstLaunch());
   }
 
   Future<void> _checkFirstLaunch() async {
-    final String? hasLaunched = await _storage.read(key: 'has_launched');
-    if (hasLaunched == null) {
-      await _storage.write(key: 'has_launched', value: 'true');
-      if (mounted) {
-        setState(() {
-          _isFirstTime = true;
-        });
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _isFirstTime = false;
-        });
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        context.read<AuthBloc>().add(const AuthEvent.refresh());
-        context
-            .read<LocationBloc>()
-            .add(const LocationEvent.checkAllPermissions());
-      });
+    final seenOnboarding = await _cacheManager.getHasSeenOnboarding();
+    if (!seenOnboarding) {
+      await _cacheManager.setHasSeenOnboarding();
+    }
+    if (!mounted) return;
+
+    AppLog.d('splash: seenOnboarding=$seenOnboarding');
+    setState(() => _isFirstTime = !seenOnboarding);
+
+    // The auth result may already have arrived while this was reading storage,
+    // in which case the listener has nothing left to fire.
+    _resolveDestination();
+  }
+
+  /// Decides where the launch ends, from whatever both checks have settled on.
+  ///
+  /// Called from the auth listener and from [_checkFirstLaunch] because the two
+  /// complete in an unpredictable order — a warm storage read can easily beat a
+  /// network round-trip, or lose to it.
+  void _resolveDestination() {
+    if (!mounted || _navigated) return;
+
+    final destination = resolveLaunchDestination(
+      authStatus: context.read<AuthBloc>().state.status,
+      hasSeenOnboarding: _isFirstTime == null ? null : !_isFirstTime!,
+    );
+
+    switch (destination) {
+      case LaunchDestination.undecided:
+      // The carousel is this route's own body, so there is nowhere to go — it
+      // is already on screen.
+      case LaunchDestination.onboarding:
+        return;
+      case LaunchDestination.dashboard:
+        _navigated = true;
+        AppLog.d('splash: session restored -> dashboard');
+        context.go(PagesName.dashboardPage.path);
+      case LaunchDestination.login:
+        _navigated = true;
+        AppLog.d('splash: no session -> login');
+        context.go(PagesName.loginPage.path);
     }
   }
 
@@ -86,12 +139,13 @@ class _SplashPageState extends State<SplashPage> {
           // ── Auth: navigate when the session check completes ──────────────
           BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
-              if (state.status == AuthStatus.success) {
-                context.go(PagesName.dashboardPage.path);
-              } else if (state.status == AuthStatus.refreshFailed ||
-                  state.status == AuthStatus.error) {
-                context.go(PagesName.loginPage.path);
-              }
+              // `isAuthenticated` covers restoredUnverified as well as
+              // success: a launch that could not reach the server, on a device
+              // with a stored session, goes to the dashboard. The screens there
+              // fetch their own data and a genuinely dead session surfaces as a
+              // 401, which CookieRefreshInterceptor turns into a real logout.
+              AppLog.d('splash: auth -> ${state.status}');
+              _resolveDestination();
             },
           ),
 

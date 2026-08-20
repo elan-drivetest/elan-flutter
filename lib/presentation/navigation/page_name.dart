@@ -15,7 +15,11 @@ enum PagesName {
   rideMapPage(title: "Ride Map Page", path: "ride-map-page"),
   upcomingRideMapPage(title: "Upcoming Ride Map Page", path: "upcoming-ride-map-page"),
   availableRidesPage(title: "Available Rides Page", path: "/available-rides-page"),
-  referralCodePage(title: "Referral Code Page", path: "/referral-code-page");
+  referralCodePage(title: "Referral Code Page", path: "/referral-code-page"),
+
+  /// Post-signup hand-off. Root-level (leading `/`) because it replaces the
+  /// auth stack rather than nesting under login.
+  welcomePage(title: "Welcome Page", path: "/welcome-page");
 
   const PagesName({required this.title, required this.path});
   final String title;

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Launch screen for API < 31. On API 31+ this is ignored entirely in favour of
-  values-v31/styles.xml, which uses the platform SplashScreen API.
-
-  Background colour is shared with the Flutter splash and the iOS storyboard —
-  see values/colors.xml for why that matters.
+  Launch screen for API 21..30. Kept byte-identical to drawable/launch_background.xml
+  — the v21 qualifier exists only because Flutter's template ships it; there is
+  no API-21-specific behaviour here. Change both together.
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/brand_splash_background" />
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@mipmap/ic_launcher_foreground" />
     </item>
 </layer-list>

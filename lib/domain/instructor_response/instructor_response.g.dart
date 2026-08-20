@@ -45,6 +45,8 @@ _$InstructorImpl _$$InstructorImplFromJson(Map<String, dynamic> json) =>
       walletBalance: (json['wallet_balance'] as num?)?.toInt(),
       stripeAccountId: json['stripe_account_id'] as String?,
       stripeAccountStatus: json['stripe_account_status'] as String?,
+      stripePayoutsEnabled: json['stripe_payouts_enabled'] as bool?,
+      stripeChargesEnabled: json['stripe_charges_enabled'] as bool?,
       stripeAccountType: json['stripe_account_type'] as String?,
       stripeCountry: json['stripe_country'] as String?,
     );
@@ -63,6 +65,8 @@ Map<String, dynamic> _$$InstructorImplToJson(_$InstructorImpl instance) =>
       'wallet_balance': instance.walletBalance,
       'stripe_account_id': instance.stripeAccountId,
       'stripe_account_status': instance.stripeAccountStatus,
+      'stripe_payouts_enabled': instance.stripePayoutsEnabled,
+      'stripe_charges_enabled': instance.stripeChargesEnabled,
       'stripe_account_type': instance.stripeAccountType,
       'stripe_country': instance.stripeCountry,
     };

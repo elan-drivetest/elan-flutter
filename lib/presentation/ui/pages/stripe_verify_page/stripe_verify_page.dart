@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:elan/core/styles.dart';
 import 'package:elan/core/log/app_log.dart';
 import 'package:elan/presentation/bloc/instructor_info_bloc/instructor_info_bloc.dart';
@@ -122,13 +124,7 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
 
               // 1. Detect Stripe onboarding completion
               if (request.url.contains('/onboarding/complete')) {
-                context
-                    .read<StripeOnboardingBloc>()
-                    .add(StripeOnboardingEvent.getInfo());
-                context
-                    .read<InstructorInfoBloc>()
-                    .add(InstructorInfoEvent.getInfo());
-                if (mounted) Navigator.of(context).pop();
+                unawaited(_onOnboardingComplete());
                 return NavigationDecision.prevent;
               }
 
@@ -207,6 +203,29 @@ class _StripeVerifyPageState extends State<StripeVerifyPage> {
         errorMessage = 'Failed to load page: $error';
       });
     }
+  }
+
+  /// Stripe has redirected to the return URL. Reconcile, then leave.
+  ///
+  /// The order matters and is not interchangeable. `refreshStatus` makes the
+  /// server re-query Stripe and rewrite the instructor row — including
+  /// `profile_completion_percentage`; only once that has landed is it worth
+  /// refetching the profile. Dispatching both together (which is what this used
+  /// to do) let the profile read beat the Stripe round-trip and return the
+  /// pre-onboarding row, so the dashboard greeted a finished instructor with
+  /// *"Add A Bank To Get Paid"* and a completion percentage that had not moved.
+  ///
+  /// Both blocs are app-scoped (`my_app.dart`), so they are captured up front
+  /// and outlive this page — the pop happens immediately for the user while the
+  /// reconciliation continues behind it.
+  Future<void> _onOnboardingComplete() async {
+    final stripeBloc = context.read<StripeOnboardingBloc>();
+    final instructorBloc = context.read<InstructorInfoBloc>();
+
+    if (mounted) Navigator.of(context).pop();
+
+    await stripeBloc.refreshStatus();
+    instructorBloc.add(const InstructorInfoEvent.getInfo());
   }
 
   @override

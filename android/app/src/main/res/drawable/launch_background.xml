@@ -5,12 +5,18 @@
 
   Background colour is shared with the Flutter splash and the iOS storyboard —
   see values/colors.xml for why that matters.
+
+  Draws the adaptive icon's foreground layer rather than `ic_launcher`. The
+  legacy icon carries its own opaque black square, which would sit invisibly on
+  the black backdrop anyway, and its mark is smaller — the foreground layer is
+  transparent and renders the mark at roughly the size API 31+ shows, so the
+  splash looks the same either side of the version split.
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/brand_splash_background" />
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@mipmap/ic_launcher_foreground" />
     </item>
 </layer-list>

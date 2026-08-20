@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:elan/core/cache/cache_manager_impl.dart';
 import 'package:elan/core/endpoints/api_endpoints.dart';
 import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart';
@@ -22,6 +23,11 @@ class CookieRefreshInterceptor extends Interceptor {
 
   bool _isLoggingOut = false;
 
+  /// The server has spoken about *this session*, as opposed to failing to
+  /// answer. Only these end it.
+  static bool _isRejection(int? statusCode) =>
+      statusCode == 401 || statusCode == 403;
+
   void _handleUnauthorized() async {
     if (_isLoggingOut) return;
     _isLoggingOut = true;
@@ -31,6 +37,13 @@ class CookieRefreshInterceptor extends Interceptor {
       await cookieJar.deleteAll();
     } catch (e) {
       log('⚠️ Error clearing cookies: $e');
+    }
+    // Drop the marker too, or the next launch would restore a session the
+    // server has already rejected (see Key.hasSession).
+    try {
+      await getIt<CacheManagerImpl>().clearHasSession();
+    } catch (e) {
+      log('⚠️ Error clearing session marker: $e');
     }
     getIt<AuthBloc>().add(const AuthEvent.logout());
 
@@ -78,7 +91,12 @@ class CookieRefreshInterceptor extends Interceptor {
         } else {
           log('⚠️ Refresh failed (${res.statusCode})');
           _refreshCompleter?.complete();
-          _handleUnauthorized();
+          // validateStatus lets anything under 500 through, so this branch sees
+          // 4xx as well as the 401 we care about. A 429 or a transient 4xx is
+          // not a reason to destroy the session.
+          if (_isRejection(res.statusCode)) {
+            _handleUnauthorized();
+          }
           return handler.next(err);
         }
       }
@@ -87,7 +105,15 @@ class CookieRefreshInterceptor extends Interceptor {
       return handler.resolve(retry);
     } catch (e) {
       _refreshCompleter?.complete();
-      _handleUnauthorized();
+      // Only a rejection ends the session. This used to call
+      // _handleUnauthorized() for *any* thrown error, so one dropped
+      // connection during a retry deleted the cookies and signed the
+      // instructor out mid-session.
+      if (e is DioException && _isRejection(e.response?.statusCode)) {
+        _handleUnauthorized();
+      } else {
+        log('⚠️ Refresh could not complete (${e.runtimeType}); keeping session');
+      }
       return handler.next(err);
     } finally {
       _isRefreshing = false;

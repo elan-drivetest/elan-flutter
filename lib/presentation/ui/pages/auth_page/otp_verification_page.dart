@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/otp_verification_bloc/otp_verification_bloc.dart';
+import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -139,7 +140,14 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 },
               );
             } else {
-              context.go(PagesName.loginPage.path);
+              // Signup verification already signed them in: the endpoint ends
+              // with `issueAuthCookies` (auth.service.ts:906), so the cookies
+              // for this session are on disk by the time we get here. Adopt the
+              // session rather than sending them to a login form for the
+              // credentials they just proved, then hand off via the welcome
+              // screen.
+              context.read<AuthBloc>().add(const AuthEvent.sessionEstablished());
+              context.go(PagesName.welcomePage.path);
             }
           } else if (state.status == OtpVerificationStatus.error) {
             // message is already friendly; otp field carries the raw code.

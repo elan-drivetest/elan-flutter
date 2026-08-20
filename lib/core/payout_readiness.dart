@@ -41,6 +41,40 @@ enum PayoutReadiness {
   bool get canAccept => this != notConnected && this != pendingVerification;
 }
 
+/// Whether to show the dashboard's *"Add A Bank To Get Paid"* card.
+///
+/// The app has two signals about payout setup and they disagree constantly:
+///
+/// * `cachedPaymentIncomplete` — derived from the instructor row that
+///   `GET /v1/auth/instructor/me` serves. Only reconciled with Stripe by the
+///   `account.updated` webhook or by a call to `/stripe-onboarding-status`, so
+///   right after onboarding it still reads `'pending'` from account creation.
+/// * [live] — from `/stripe-onboarding-status`, which asks Stripe directly and
+///   returns `payouts_enabled`: the exact field the server gates accepts on.
+///
+/// The card gating on the cached row alone is why an instructor who has fully
+/// onboarded — bank attached, payouts enabled — was still told to add a bank.
+/// [live] wins wherever it has an opinion; the cache only breaks ties.
+bool shouldPromptBankSetup({
+  required bool cachedPaymentIncomplete,
+  required PayoutReadiness live,
+}) {
+  switch (live) {
+    // Stripe says they can be paid. Nothing the stale row claims outranks that.
+    case PayoutReadiness.ready:
+      return false;
+    // Both are statements *from Stripe* that setup is unfinished — no account
+    // at all, or an account whose payouts are still switched off.
+    case PayoutReadiness.notConnected:
+    case PayoutReadiness.pendingVerification:
+      return true;
+    // The check has not run yet, or failed for a reason that says nothing about
+    // onboarding. Fall back to the cache rather than guessing.
+    case PayoutReadiness.unknown:
+      return cachedPaymentIncomplete;
+  }
+}
+
 /// Resolves [PayoutReadiness] from whatever the status endpoint returned.
 ///
 /// Kept out of the bloc so the fail-open rule can be tested directly — it is

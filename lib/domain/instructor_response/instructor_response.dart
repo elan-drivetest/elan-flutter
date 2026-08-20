@@ -30,7 +30,28 @@ class Instructor with _$Instructor {
     @JsonKey(name: "transfer_count") int? transferCount,
     @JsonKey(name: "wallet_balance") int? walletBalance,
     @JsonKey(name: "stripe_account_id") String? stripeAccountId,
+
+    /// `'verified' | 'pending' | 'unverified'` — **or** `'active' | 'incomplete'`.
+    ///
+    /// Two backend writers disagree on the vocabulary for this one column:
+    /// `instructors.service.ts` writes the first set, and the `account.updated`
+    /// webhook (`stripe.service.ts:1121`) writes the second. Treat it as a hint,
+    /// never as the payout gate — that is [stripePayoutsEnabled].
     @JsonKey(name: "stripe_account_status") String? stripeAccountStatus,
+
+    /// The field the server actually enforces on accept (`rides.service.ts:180`).
+    ///
+    /// **Currently always null here.** The backend marks it
+    /// `@Expose({ groups: ['admin'] })` while `GET /v1/auth/instructor/me`
+    /// serializes with `groups: ['me']`, so it is stripped before it reaches the
+    /// app. Declared anyway so the moment that group widens, every payment check
+    /// starts using the authoritative value with no client release — until then
+    /// the null branch falls back to [stripeAccountStatus], and the live
+    /// `/stripe-onboarding-status` call is what the UI really trusts.
+    @JsonKey(name: "stripe_payouts_enabled") bool? stripePayoutsEnabled,
+
+    /// Same serialization caveat as [stripePayoutsEnabled] — expect null.
+    @JsonKey(name: "stripe_charges_enabled") bool? stripeChargesEnabled,
     @JsonKey(name: "stripe_account_type") String? stripeAccountType,
     @JsonKey(name: "stripe_country") String? stripeCountry,
   }) = _Instructor;

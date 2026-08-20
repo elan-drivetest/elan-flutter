@@ -30,5 +30,6 @@ const _$AuthStatusEnumMap = {
   AuthStatus.success: 'success',
   AuthStatus.refreshFailed: 'refreshFailed',
   AuthStatus.logout: 'logout',
+  AuthStatus.restoredUnverified: 'restoredUnverified',
   AuthStatus.error: 'error',
 };

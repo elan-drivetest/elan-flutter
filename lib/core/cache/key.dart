@@ -29,7 +29,32 @@ enum Key {
   /// endpoint, and `/rides/upcoming` drops a ride the moment it starts. So this
   /// remains the **only** copy of the booking being driven. Written when the
   /// instructor taps Start, cleared at Stop.
-  activeBooking("ACTIVE_BOOKING");
+  activeBooking("ACTIVE_BOOKING"),
+
+  /// Whether auth cookies were last known to exist on disk.
+  ///
+  /// The cookies themselves are httpOnly and live in the `PersistCookieJar`,
+  /// which the app cannot inspect for validity — it can only find out by making
+  /// a request. That made every launch a coin toss: if the refresh call failed
+  /// for *any* reason, including no connection, the splash sent the instructor
+  /// to the login screen even though their session was perfectly good.
+  ///
+  /// This marker records "we have had a working session on this device". It
+  /// lets a failed refresh be read correctly: a **401 means the server rejected
+  /// us** and the session is over, while a timeout or a 5xx means we simply
+  /// could not ask, and the instructor stays signed in. Set on login, on signup
+  /// OTP verification and on every successful refresh; cleared only on explicit
+  /// logout or a server-rejected session.
+  hasSession("HAS_SESSION"),
+
+  /// Whether the onboarding carousel has been shown on this device.
+  ///
+  /// Lives here rather than in a `FlutterSecureStorage()` of its own, which is
+  /// where it used to sit. That bare instance took the plugin's *default*
+  /// Android backend while [CacheManager] is configured for
+  /// `encryptedSharedPreferences` — two different stores, one of which nothing
+  /// else in the app used or verified.
+  hasSeenOnboarding("HAS_SEEN_ONBOARDING");
 
   final String keyValue;
 

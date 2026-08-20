@@ -1,5 +1,7 @@
 import 'package:elan/core/booking_time.dart';
+import 'dart:async';
 import 'dart:developer';
+import 'package:elan/core/payout_readiness.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elan/core/app_colors.dart';
@@ -59,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     context.read<InstructorInfoBloc>().add(InstructorInfoEvent.getInfo());
     context.read<InstructorRideBloc>().add(InstructorRideEvent.requestData());
-    context.read<StripeOnboardingBloc>().add(StripeOnboardingEvent.getInfo());
+    unawaited(_reconcileStripeStatus());
     context.read<UpcomingRideBloc>().add(UpcomingRideEvent.requestData());
     context.read<CompleteRideBloc>().add(CompleteRideEvent.requestData());
     // EarningsSummaryBloc is app-scoped, so unlike the other blocs above it is
@@ -76,6 +78,25 @@ class _DashboardPageState extends State<DashboardPage> {
   void getInfo() async {
     //timeZone = await FlutterNativeTimezone.getLocalTimezone();
     batteryLevel = await battery.batteryLevel;
+  }
+
+  /// Force the instructor row back into agreement with Stripe, then re-read it.
+  ///
+  /// Deliberately *not* awaited by `initState`: the profile fetch above fires
+  /// first so the dashboard paints immediately, and this reconciliation lands
+  /// behind it. The second `getInfo` is what picks up a corrected
+  /// `profile_completion_percentage` — the status endpoint recalculates it
+  /// server-side, and nothing else on this screen would ever re-read it.
+  ///
+  /// Without the await between the two, the profile read beats the Stripe
+  /// round-trip and returns the stale row; see [StripeOnboardingRefresh].
+  Future<void> _reconcileStripeStatus() async {
+    final stripeBloc = context.read<StripeOnboardingBloc>();
+    final instructorBloc = context.read<InstructorInfoBloc>();
+
+    await stripeBloc.refreshStatus();
+    if (!mounted) return;
+    instructorBloc.add(const InstructorInfoEvent.getInfo());
   }
 
   void _updateServiceStatus() async {
@@ -336,7 +357,20 @@ class _DashboardPageState extends State<DashboardPage> {
                       );
                     }
                     if (state.status == InstructorInfoStatus.success) {
-                      if (state.paymentStatus == PaymentInfoStatus.incomplete ||
+                      // A live `/stripe-onboarding-status` result outranks the
+                      // cached profile row, which lags behind Stripe until
+                      // something reconciles it. Computed once and used for both
+                      // the section gate and the card below, so they cannot
+                      // disagree and leave a heading with nothing under it.
+                      final needsBankSetup = shouldPromptBankSetup(
+                        cachedPaymentIncomplete:
+                            state.paymentStatus == PaymentInfoStatus.incomplete,
+                        live: context
+                            .watch<StripeOnboardingBloc>()
+                            .state
+                            .payoutReadiness,
+                      );
+                      if (needsBankSetup ||
                           state.licenseStatus == LicenseInfoStatus.incomplete ||
                           state.vehicleStatus == CarInfoStatus.incomplete) {
                         return SliverMainAxisGroup(slivers: [
@@ -362,8 +396,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                             ),
                           ),
-                          if (state.paymentStatus ==
-                              PaymentInfoStatus.incomplete)
+                          if (needsBankSetup)
                             BlocConsumer<StripeOnboardingBloc,
                                 StripeOnboardingState>(
                               // The `update` -> push-verify-page case is

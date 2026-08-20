@@ -55,4 +55,20 @@ class CacheManagerImpl {
       _cache.setString(Key.activeBooking.keyValue, rawJson);
   Future<void> clearActiveBooking() =>
       _cache.remove(Key.activeBooking.keyValue);
+
+  /// See [Key.hasSession] — the flag that keeps a network blip from being
+  /// mistaken for a logout.
+  Future<bool> getHasSession() async =>
+      (await _cache.getBool(Key.hasSession.keyValue)) ?? false;
+
+  Future<void> setHasSession() => _cache.setBool(Key.hasSession.keyValue, true);
+
+  Future<void> clearHasSession() => _cache.remove(Key.hasSession.keyValue);
+
+  /// See [Key.hasSeenOnboarding].
+  Future<bool> getHasSeenOnboarding() async =>
+      (await _cache.getBool(Key.hasSeenOnboarding.keyValue)) ?? false;
+
+  Future<void> setHasSeenOnboarding() =>
+      _cache.setBool(Key.hasSeenOnboarding.keyValue, true);
 }

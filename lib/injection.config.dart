@@ -178,15 +178,16 @@ extension GetItInjectableX on _i174.GetIt {
             ));
     gh.lazySingleton<_i1051.CookieRefreshService>(
         () => _i1051.CookieRefreshService(gh<_i47.AuthRepository>()));
-    gh.factory<_i641.ResetPasswordBloc>(
-        () => _i641.ResetPasswordBloc(gh<_i1047.PublicRepository>()));
-    gh.factory<_i868.PricingConfigBloc>(
-        () => _i868.PricingConfigBloc(gh<_i506.PricingConfigRepository>()));
     gh.factory<_i676.AuthBloc>(() => _i676.AuthBloc(
           gh<_i47.AuthRepository>(),
           gh<_i557.PersistCookieJar>(),
           gh<_i1051.CookieRefreshService>(),
+          gh<_i275.CacheManagerImpl>(),
         ));
+    gh.factory<_i641.ResetPasswordBloc>(
+        () => _i641.ResetPasswordBloc(gh<_i1047.PublicRepository>()));
+    gh.factory<_i868.PricingConfigBloc>(
+        () => _i868.PricingConfigBloc(gh<_i506.PricingConfigRepository>()));
     return this;
   }
 }

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:elan/data/api_service/google_maps_api_service.dart';
+import 'package:elan/data/location_request_service/location_request_service.dart';
 import 'package:elan/injection.dart';
+import 'package:geolocator/geolocator.dart';
 
 class PlacePickerPage extends StatefulWidget {
   const PlacePickerPage({super.key, this.initialAddress});
@@ -29,22 +31,35 @@ class _PlacePickerPageState extends State<PlacePickerPage>
   final _searchController = TextEditingController();
   final _focusNode = FocusNode();
   final _apiService = getIt<GoogleMapsApiService>();
+  final _locationService = getIt<LocationRequestService>();
 
   GoogleMapController? _mapController;
 
+  /// Shown before anything has been resolved, and while a lookup is in flight.
+  /// Tracked as constants because Confirm has to be able to tell a real address
+  /// from these — returning one of them as the instructor's address is how
+  /// "Move map to select location" used to end up saved as a pickup point.
+  static const String _promptLabel = 'Move map to select location';
+  static const String _fetchingLabel = 'Fetching address...';
+
   // Approximate center of Canada
   LatLng _currentCenter = const LatLng(56.1304, -106.3468);
-  String _currentAddress = 'Move map to select location';
+  String _currentAddress = _promptLabel;
+
+  /// A locate-me request is in flight. Guards the button against double taps
+  /// and drives its spinner.
+  bool _isLocating = false;
 
   /// Country view when starting blank, street level when opening on a known
   /// address.
   static const double _countryZoom = 4;
   static const double _addressZoom = 16;
 
-  /// Set once [PlacePickerPage.initialAddress] has been resolved, so the map
-  /// knows whether to open wide or close in. Geocoding may finish before or
-  /// after the map is created, so both paths check this.
-  bool _seededFromInitialAddress = false;
+  /// Set once a precise target is known — either [PlacePickerPage.initialAddress]
+  /// resolved, or a GPS fix arrived — so the map opens at street zoom rather
+  /// than the country view. Either can land before or after the map is created,
+  /// so both orderings check this.
+  bool _hasFocusedTarget = false;
 
   List<Map<String, dynamic>> _predictions = [];
   bool _isDragging = false;
@@ -62,7 +77,14 @@ class _PlacePickerPageState extends State<PlacePickerPage>
       duration: const Duration(seconds: 2),
     )..repeat(reverse: false);
 
-    unawaited(_seedFromInitialAddress());
+    if ((widget.initialAddress?.trim().isNotEmpty ?? false)) {
+      unawaited(_seedFromInitialAddress());
+    } else {
+      // Nothing to open on, so open on the instructor. Panning from the middle
+      // of Canada to your own street every time is the slowest possible way to
+      // enter an address you are almost certainly standing at.
+      unawaited(_goToCurrentLocation(userInitiated: false));
+    }
   }
 
   /// Resolves [PlacePickerPage.initialAddress] to coordinates and centres there.
@@ -83,7 +105,7 @@ class _PlacePickerPageState extends State<PlacePickerPage>
       setState(() {
         _currentCenter = target;
         _currentAddress = address;
-        _seededFromInitialAddress = true;
+        _hasFocusedTarget = true;
         _searchController.text = address;
       });
 
@@ -98,6 +120,93 @@ class _PlacePickerPageState extends State<PlacePickerPage>
       // No network, or an address Google cannot resolve. The picker still works
       // from the default view, so there is nothing useful to tell the user.
     }
+  }
+
+  /// Centres the map on the device's GPS fix.
+  ///
+  /// Shared by the automatic first load and the locate-me button, because the
+  /// two differ only in how loudly they may fail. [userInitiated] taps get a
+  /// reason when something goes wrong; the silent first load falls back to the
+  /// country view, which is exactly where it would have started anyway.
+  ///
+  /// The address is deliberately **not** reverse-geocoded here — moving the
+  /// camera fires `onCameraIdle`, which already does it. Doing both would spend
+  /// two Places lookups on one move.
+  Future<void> _goToCurrentLocation({required bool userInitiated}) async {
+    if (_isLocating) return;
+    if (mounted) setState(() => _isLocating = true);
+
+    try {
+      if (!await _locationService.isLocationServiceEnabled()) {
+        _reportLocationProblem(
+            userInitiated, 'Turn on location services to use your position.');
+        return;
+      }
+
+      var permission = await _locationService.checkPermission();
+
+      // Ask once, and only from the state where asking does something. On
+      // deniedForever the OS dialog never appears, so re-requesting would just
+      // stall silently.
+      if (permission == LocationPermission.denied) {
+        permission = await _locationService.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
+        _reportLocationProblem(
+            userInitiated, 'Location permission is needed to find you.');
+        return;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _reportLocationProblem(
+          userInitiated,
+          'Location is blocked for Elan. Enable it in Settings.',
+          action: const SnackBarAction(
+            label: 'Settings',
+            textColor: Colors.white,
+            onPressed: Geolocator.openAppSettings,
+          ),
+        );
+        return;
+      }
+
+      final result = await _locationService.getCurrentLocation();
+      if (!mounted) return;
+
+      await result.fold(
+        (message) async => _reportLocationProblem(
+            userInitiated, message ?? 'Could not get your location.'),
+        (position) async {
+          final target = LatLng(position.latitude, position.longitude);
+          setState(() {
+            _currentCenter = target;
+            _hasFocusedTarget = true;
+            if (_currentAddress == _promptLabel) {
+              _currentAddress = _fetchingLabel;
+            }
+          });
+          await _mapController?.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: target, zoom: _addressZoom),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      _reportLocationProblem(userInitiated, 'Could not get your location.');
+    } finally {
+      if (mounted) setState(() => _isLocating = false);
+    }
+  }
+
+  /// Silent on the automatic first load, spoken when the instructor asked.
+  void _reportLocationProblem(bool userInitiated, String message,
+      {SnackBarAction? action}) {
+    if (!userInitiated || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), action: action),
+    );
   }
 
   @override
@@ -179,6 +288,59 @@ class _PlacePickerPageState extends State<PlacePickerPage>
     }
   }
 
+  /// Whether [_currentAddress] is a real address rather than one of the
+  /// placeholders. Confirm is disabled until this is true — otherwise the
+  /// literal string "Move map to select location" could be saved as an address.
+  bool get _hasResolvedAddress =>
+      _currentAddress.trim().isNotEmpty &&
+      _currentAddress != _promptLabel &&
+      _currentAddress != _fetchingLabel;
+
+  /// Locate-me control.
+  ///
+  /// Hand-rolled rather than `myLocationButtonEnabled: true`, because the
+  /// platform button anchors under the top-right of the map — directly behind
+  /// this screen's floating search bar. This one lives above the confirm panel
+  /// where nothing overlaps it, and can show progress: a GPS fix can take
+  /// several seconds, and a button that looks inert for that long gets tapped
+  /// again.
+  Widget _buildLocateMeButton() {
+    return Semantics(
+      button: true,
+      label: 'Use my current location',
+      child: Material(
+        color: Colors.white,
+        elevation: 4,
+        shadowColor: Colors.black.withValues(alpha: 0.25),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: _isLocating
+              ? null
+              : () => unawaited(_goToCurrentLocation(userInitiated: true)),
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: _isLocating
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                      ),
+                    )
+                  : const Icon(Icons.my_location,
+                      color: Color(0xFF4CAF50), size: 24),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,7 +351,7 @@ class _PlacePickerPageState extends State<PlacePickerPage>
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: _currentCenter,
-              zoom: _seededFromInitialAddress ? _addressZoom : _countryZoom,
+              zoom: _hasFocusedTarget ? _addressZoom : _countryZoom,
             ),
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
@@ -201,7 +363,7 @@ class _PlacePickerPageState extends State<PlacePickerPage>
               // Covers the other ordering: geocoding resolved before the map
               // existed, so initialCameraPosition may have been built with the
               // pre-seed values.
-              if (_seededFromInitialAddress) {
+              if (_hasFocusedTarget) {
                 unawaited(controller.animateCamera(
                   CameraUpdate.newCameraPosition(
                     CameraPosition(target: _currentCenter, zoom: _addressZoom),
@@ -461,119 +623,140 @@ class _PlacePickerPageState extends State<PlacePickerPage>
             ),
           ),
 
-          // 4. Beautiful Bottom Confirm Panel
+          // 4. Locate-me button + bottom confirm panel.
+          //
+          // One Positioned holding both, so the button is laid out directly
+          // above the panel and cannot drift over it on short screens. The
+          // panel slides away with AnimatedSlide while the map is being
+          // dragged, but that is a transform — it keeps its layout slot, so the
+          // button stays anchored instead of jumping down and back.
           Positioned(
             left: 20,
             right: 20,
             bottom: 30,
-            child: AnimatedSlide(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic,
-              offset: _isDragging ? const Offset(0, 1.5) : Offset.zero,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 300),
-                opacity: _isDragging ? 0 : 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.5)),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15))
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildLocateMeButton(),
+                const SizedBox(height: 12),
+                AnimatedSlide(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  offset: _isDragging ? const Offset(0, 1.5) : Offset.zero,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _isDragging ? 0 : 1,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.5)),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 15))
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF4CAF50)
-                                      .withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Icon(Icons.near_me,
-                                    color: Color(0xFF4CAF50)),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF4CAF50)
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(Icons.near_me,
+                                        color: Color(0xFF4CAF50)),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Current Selection',
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.5),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _currentAddress,
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.black87),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Current Selection',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.5),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _currentAddress,
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.black87),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                              const SizedBox(height: 24),
+                              Container(
+                                width: double.infinity,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF4CAF50)
+                                            .withValues(alpha: 0.4),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                      )
+                                    ]),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF4CAF50),
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor:
+                                        Colors.grey.shade300,
+                                    disabledForegroundColor:
+                                        Colors.grey.shade600,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(16)),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: _hasResolvedAddress
+                                      ? () => Navigator.of(context)
+                                          .pop(_currentAddress)
+                                      : null,
+                                  child: const Text(
+                                    'Confirm Location',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
-                          Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF4CAF50)
-                                        .withValues(alpha: 0.4),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 8),
-                                  )
-                                ]),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4CAF50),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16)),
-                                elevation: 0,
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop(_currentAddress);
-                              },
-                              child: const Text(
-                                'Confirm Location',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],

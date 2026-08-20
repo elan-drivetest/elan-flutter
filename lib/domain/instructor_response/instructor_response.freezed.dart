@@ -300,8 +300,31 @@ mixin _$Instructor {
   int? get walletBalance => throw _privateConstructorUsedError;
   @JsonKey(name: "stripe_account_id")
   String? get stripeAccountId => throw _privateConstructorUsedError;
+
+  /// `'verified' | 'pending' | 'unverified'` — **or** `'active' | 'incomplete'`.
+  ///
+  /// Two backend writers disagree on the vocabulary for this one column:
+  /// `instructors.service.ts` writes the first set, and the `account.updated`
+  /// webhook (`stripe.service.ts:1121`) writes the second. Treat it as a hint,
+  /// never as the payout gate — that is [stripePayoutsEnabled].
   @JsonKey(name: "stripe_account_status")
   String? get stripeAccountStatus => throw _privateConstructorUsedError;
+
+  /// The field the server actually enforces on accept (`rides.service.ts:180`).
+  ///
+  /// **Currently always null here.** The backend marks it
+  /// `@Expose({ groups: ['admin'] })` while `GET /v1/auth/instructor/me`
+  /// serializes with `groups: ['me']`, so it is stripped before it reaches the
+  /// app. Declared anyway so the moment that group widens, every payment check
+  /// starts using the authoritative value with no client release — until then
+  /// the null branch falls back to [stripeAccountStatus], and the live
+  /// `/stripe-onboarding-status` call is what the UI really trusts.
+  @JsonKey(name: "stripe_payouts_enabled")
+  bool? get stripePayoutsEnabled => throw _privateConstructorUsedError;
+
+  /// Same serialization caveat as [stripePayoutsEnabled] — expect null.
+  @JsonKey(name: "stripe_charges_enabled")
+  bool? get stripeChargesEnabled => throw _privateConstructorUsedError;
   @JsonKey(name: "stripe_account_type")
   String? get stripeAccountType => throw _privateConstructorUsedError;
   @JsonKey(name: "stripe_country")
@@ -337,6 +360,8 @@ abstract class $InstructorCopyWith<$Res> {
       @JsonKey(name: "wallet_balance") int? walletBalance,
       @JsonKey(name: "stripe_account_id") String? stripeAccountId,
       @JsonKey(name: "stripe_account_status") String? stripeAccountStatus,
+      @JsonKey(name: "stripe_payouts_enabled") bool? stripePayoutsEnabled,
+      @JsonKey(name: "stripe_charges_enabled") bool? stripeChargesEnabled,
       @JsonKey(name: "stripe_account_type") String? stripeAccountType,
       @JsonKey(name: "stripe_country") String? stripeCountry});
 }
@@ -368,6 +393,8 @@ class _$InstructorCopyWithImpl<$Res, $Val extends Instructor>
     Object? walletBalance = freezed,
     Object? stripeAccountId = freezed,
     Object? stripeAccountStatus = freezed,
+    Object? stripePayoutsEnabled = freezed,
+    Object? stripeChargesEnabled = freezed,
     Object? stripeAccountType = freezed,
     Object? stripeCountry = freezed,
   }) {
@@ -420,6 +447,14 @@ class _$InstructorCopyWithImpl<$Res, $Val extends Instructor>
           ? _value.stripeAccountStatus
           : stripeAccountStatus // ignore: cast_nullable_to_non_nullable
               as String?,
+      stripePayoutsEnabled: freezed == stripePayoutsEnabled
+          ? _value.stripePayoutsEnabled
+          : stripePayoutsEnabled // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      stripeChargesEnabled: freezed == stripeChargesEnabled
+          ? _value.stripeChargesEnabled
+          : stripeChargesEnabled // ignore: cast_nullable_to_non_nullable
+              as bool?,
       stripeAccountType: freezed == stripeAccountType
           ? _value.stripeAccountType
           : stripeAccountType // ignore: cast_nullable_to_non_nullable
@@ -454,6 +489,8 @@ abstract class _$$InstructorImplCopyWith<$Res>
       @JsonKey(name: "wallet_balance") int? walletBalance,
       @JsonKey(name: "stripe_account_id") String? stripeAccountId,
       @JsonKey(name: "stripe_account_status") String? stripeAccountStatus,
+      @JsonKey(name: "stripe_payouts_enabled") bool? stripePayoutsEnabled,
+      @JsonKey(name: "stripe_charges_enabled") bool? stripeChargesEnabled,
       @JsonKey(name: "stripe_account_type") String? stripeAccountType,
       @JsonKey(name: "stripe_country") String? stripeCountry});
 }
@@ -483,6 +520,8 @@ class __$$InstructorImplCopyWithImpl<$Res>
     Object? walletBalance = freezed,
     Object? stripeAccountId = freezed,
     Object? stripeAccountStatus = freezed,
+    Object? stripePayoutsEnabled = freezed,
+    Object? stripeChargesEnabled = freezed,
     Object? stripeAccountType = freezed,
     Object? stripeCountry = freezed,
   }) {
@@ -535,6 +574,14 @@ class __$$InstructorImplCopyWithImpl<$Res>
           ? _value.stripeAccountStatus
           : stripeAccountStatus // ignore: cast_nullable_to_non_nullable
               as String?,
+      stripePayoutsEnabled: freezed == stripePayoutsEnabled
+          ? _value.stripePayoutsEnabled
+          : stripePayoutsEnabled // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      stripeChargesEnabled: freezed == stripeChargesEnabled
+          ? _value.stripeChargesEnabled
+          : stripeChargesEnabled // ignore: cast_nullable_to_non_nullable
+              as bool?,
       stripeAccountType: freezed == stripeAccountType
           ? _value.stripeAccountType
           : stripeAccountType // ignore: cast_nullable_to_non_nullable
@@ -564,6 +611,8 @@ class _$InstructorImpl implements _Instructor {
       @JsonKey(name: "wallet_balance") this.walletBalance,
       @JsonKey(name: "stripe_account_id") this.stripeAccountId,
       @JsonKey(name: "stripe_account_status") this.stripeAccountStatus,
+      @JsonKey(name: "stripe_payouts_enabled") this.stripePayoutsEnabled,
+      @JsonKey(name: "stripe_charges_enabled") this.stripeChargesEnabled,
       @JsonKey(name: "stripe_account_type") this.stripeAccountType,
       @JsonKey(name: "stripe_country") this.stripeCountry});
 
@@ -603,9 +652,34 @@ class _$InstructorImpl implements _Instructor {
   @override
   @JsonKey(name: "stripe_account_id")
   final String? stripeAccountId;
+
+  /// `'verified' | 'pending' | 'unverified'` — **or** `'active' | 'incomplete'`.
+  ///
+  /// Two backend writers disagree on the vocabulary for this one column:
+  /// `instructors.service.ts` writes the first set, and the `account.updated`
+  /// webhook (`stripe.service.ts:1121`) writes the second. Treat it as a hint,
+  /// never as the payout gate — that is [stripePayoutsEnabled].
   @override
   @JsonKey(name: "stripe_account_status")
   final String? stripeAccountStatus;
+
+  /// The field the server actually enforces on accept (`rides.service.ts:180`).
+  ///
+  /// **Currently always null here.** The backend marks it
+  /// `@Expose({ groups: ['admin'] })` while `GET /v1/auth/instructor/me`
+  /// serializes with `groups: ['me']`, so it is stripped before it reaches the
+  /// app. Declared anyway so the moment that group widens, every payment check
+  /// starts using the authoritative value with no client release — until then
+  /// the null branch falls back to [stripeAccountStatus], and the live
+  /// `/stripe-onboarding-status` call is what the UI really trusts.
+  @override
+  @JsonKey(name: "stripe_payouts_enabled")
+  final bool? stripePayoutsEnabled;
+
+  /// Same serialization caveat as [stripePayoutsEnabled] — expect null.
+  @override
+  @JsonKey(name: "stripe_charges_enabled")
+  final bool? stripeChargesEnabled;
   @override
   @JsonKey(name: "stripe_account_type")
   final String? stripeAccountType;
@@ -615,7 +689,7 @@ class _$InstructorImpl implements _Instructor {
 
   @override
   String toString() {
-    return 'Instructor(drivingSchoolName: $drivingSchoolName, licenseNumber: $licenseNumber, licenseValidityDate: $licenseValidityDate, drivingLicenseUrl: $drivingLicenseUrl, instructorLicenseUrl: $instructorLicenseUrl, workEligibilityDocUrl: $workEligibilityDocUrl, taxInfoDocUrl: $taxInfoDocUrl, profileCompletionPercentage: $profileCompletionPercentage, transferCount: $transferCount, walletBalance: $walletBalance, stripeAccountId: $stripeAccountId, stripeAccountStatus: $stripeAccountStatus, stripeAccountType: $stripeAccountType, stripeCountry: $stripeCountry)';
+    return 'Instructor(drivingSchoolName: $drivingSchoolName, licenseNumber: $licenseNumber, licenseValidityDate: $licenseValidityDate, drivingLicenseUrl: $drivingLicenseUrl, instructorLicenseUrl: $instructorLicenseUrl, workEligibilityDocUrl: $workEligibilityDocUrl, taxInfoDocUrl: $taxInfoDocUrl, profileCompletionPercentage: $profileCompletionPercentage, transferCount: $transferCount, walletBalance: $walletBalance, stripeAccountId: $stripeAccountId, stripeAccountStatus: $stripeAccountStatus, stripePayoutsEnabled: $stripePayoutsEnabled, stripeChargesEnabled: $stripeChargesEnabled, stripeAccountType: $stripeAccountType, stripeCountry: $stripeCountry)';
   }
 
   @override
@@ -649,6 +723,10 @@ class _$InstructorImpl implements _Instructor {
                 other.stripeAccountId == stripeAccountId) &&
             (identical(other.stripeAccountStatus, stripeAccountStatus) ||
                 other.stripeAccountStatus == stripeAccountStatus) &&
+            (identical(other.stripePayoutsEnabled, stripePayoutsEnabled) ||
+                other.stripePayoutsEnabled == stripePayoutsEnabled) &&
+            (identical(other.stripeChargesEnabled, stripeChargesEnabled) ||
+                other.stripeChargesEnabled == stripeChargesEnabled) &&
             (identical(other.stripeAccountType, stripeAccountType) ||
                 other.stripeAccountType == stripeAccountType) &&
             (identical(other.stripeCountry, stripeCountry) ||
@@ -671,6 +749,8 @@ class _$InstructorImpl implements _Instructor {
       walletBalance,
       stripeAccountId,
       stripeAccountStatus,
+      stripePayoutsEnabled,
+      stripeChargesEnabled,
       stripeAccountType,
       stripeCountry);
 
@@ -708,6 +788,8 @@ abstract class _Instructor implements Instructor {
       @JsonKey(name: "wallet_balance") final int? walletBalance,
       @JsonKey(name: "stripe_account_id") final String? stripeAccountId,
       @JsonKey(name: "stripe_account_status") final String? stripeAccountStatus,
+      @JsonKey(name: "stripe_payouts_enabled") final bool? stripePayoutsEnabled,
+      @JsonKey(name: "stripe_charges_enabled") final bool? stripeChargesEnabled,
       @JsonKey(name: "stripe_account_type") final String? stripeAccountType,
       @JsonKey(name: "stripe_country")
       final String? stripeCountry}) = _$InstructorImpl;
@@ -748,9 +830,34 @@ abstract class _Instructor implements Instructor {
   @override
   @JsonKey(name: "stripe_account_id")
   String? get stripeAccountId;
+
+  /// `'verified' | 'pending' | 'unverified'` — **or** `'active' | 'incomplete'`.
+  ///
+  /// Two backend writers disagree on the vocabulary for this one column:
+  /// `instructors.service.ts` writes the first set, and the `account.updated`
+  /// webhook (`stripe.service.ts:1121`) writes the second. Treat it as a hint,
+  /// never as the payout gate — that is [stripePayoutsEnabled].
   @override
   @JsonKey(name: "stripe_account_status")
   String? get stripeAccountStatus;
+
+  /// The field the server actually enforces on accept (`rides.service.ts:180`).
+  ///
+  /// **Currently always null here.** The backend marks it
+  /// `@Expose({ groups: ['admin'] })` while `GET /v1/auth/instructor/me`
+  /// serializes with `groups: ['me']`, so it is stripped before it reaches the
+  /// app. Declared anyway so the moment that group widens, every payment check
+  /// starts using the authoritative value with no client release — until then
+  /// the null branch falls back to [stripeAccountStatus], and the live
+  /// `/stripe-onboarding-status` call is what the UI really trusts.
+  @override
+  @JsonKey(name: "stripe_payouts_enabled")
+  bool? get stripePayoutsEnabled;
+
+  /// Same serialization caveat as [stripePayoutsEnabled] — expect null.
+  @override
+  @JsonKey(name: "stripe_charges_enabled")
+  bool? get stripeChargesEnabled;
   @override
   @JsonKey(name: "stripe_account_type")
   String? get stripeAccountType;

@@ -21,6 +21,7 @@ import 'package:elan/presentation/bloc/reset_password_bloc/reset_password_bloc.d
 import 'package:elan/presentation/ui/pages/direction_map_page/direction_map_page.dart';
 import 'package:elan/presentation/ui/pages/ride_map_page/ride_map_page.dart';
 import 'package:elan/presentation/ui/pages/stripe_verify_page/stripe_verify_page.dart';
+import 'package:elan/presentation/ui/pages/welcome_page/welcome_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -218,6 +219,10 @@ final GoRouter router = GoRouter(
         final url = state.extra as String;
         return StripeVerifyPage(onboardUrl: url);
       },
+    ),
+    GoRoute(
+      path: PagesName.welcomePage.path,
+      builder: (context, state) => WelcomePage(name: state.extra as String?),
     ),
 
     // Deep link handler for email confirmation

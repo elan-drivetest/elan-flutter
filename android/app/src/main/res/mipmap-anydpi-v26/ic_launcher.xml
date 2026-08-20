@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive launcher icon, Android 8 (API 26) and up.
+
+  The launcher masks these layers to whatever shape the OEM ships — circle,
+  squircle, teardrop — so the artwork cannot be full-bleed. `ic_launcher_foreground`
+  is drawn on a 108 dp canvas with the mark sized against the inner 72 dp the
+  mask is guaranteed to show; see tool/generate_app_icons.py for the arithmetic.
+
+  The legacy square PNGs in mipmap-*/ are still required: API 25 and below, and
+  a few launchers and system surfaces, ignore this file entirely.
+
+  <monochrome> supplies the Android 13+ themed icon. Only its alpha is used —
+  the system tints the silhouette to match the user's wallpaper palette.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+</adaptive-icon>

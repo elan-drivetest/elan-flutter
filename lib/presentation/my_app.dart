@@ -59,7 +59,9 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp.router(
-        title: 'Elan',
+        // Android's task switcher reads this, so it has to match the launcher
+        // label in AndroidManifest.xml rather than being a shorter nickname.
+        title: 'Elan Instructor',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
