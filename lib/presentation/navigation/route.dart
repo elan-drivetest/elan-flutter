@@ -36,6 +36,32 @@ import 'package:elan/presentation/ui/pages/dashboard_page/dashboard_page.dart';
 import 'package:elan/presentation/ui/pages/available_rides_page/available_rides_page.dart';
 import 'package:elan/presentation/ui/pages/referral_code_page/referral_code_page.dart';
 
+/// Deep-link path for email confirmation. Named because the auth guard below
+/// and the route itself both have to agree on it.
+const String _confirmEmailPath = '/confirm-email';
+
+/// Routes an instructor without a session is allowed to be on.
+///
+/// The guard used to compare against the login path *exactly*, which made
+/// every nested auth page unreachable: `refreshFailed` is the normal state on
+/// a cold start with no cookies, so pushing `/login-page/registration-page` or
+/// `/login-page/forget-password-page` was immediately redirected back to
+/// `/login-page`. It read as "the button does nothing".
+///
+/// Splash is public because it routes itself (and owns the onboarding
+/// carousel); welcome is public because the post-signup hand-off navigates
+/// there in the same frame as `AuthEvent.sessionEstablished()`, before the
+/// bloc has emitted `success`.
+bool _isPublicRoute(String path) {
+  if (path == PagesName.splashPage.path ||
+      path == PagesName.welcomePage.path ||
+      path == _confirmEmailPath) {
+    return true;
+  }
+  final String login = PagesName.loginPage.path;
+  return path == login || path.startsWith('$login/');
+}
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorDashboardKey = GlobalKey<NavigatorState>();
 final _shellNavigatorRidesKey = GlobalKey<NavigatorState>();
@@ -48,10 +74,11 @@ final GoRouter router = GoRouter(
     try {
       final authState = context.read<AuthBloc>().state;
 
-      // If auth failed/logged out and we're not already on Login, send user there
+      // If auth failed/logged out and we're not already somewhere public,
+      // send user to Login.
       if ((authState.status == AuthStatus.refreshFailed ||
               authState.status == AuthStatus.logout) &&
-          state.uri.path != PagesName.loginPage.path) {
+          !_isPublicRoute(state.uri.path)) {
         return PagesName.loginPage.path;
       }
     } catch (e) {
@@ -227,7 +254,7 @@ final GoRouter router = GoRouter(
 
     // Deep link handler for email confirmation
     GoRoute(
-      path: '/confirm-email',
+      path: _confirmEmailPath,
       redirect: (context, state) {
         AppLog.d('🔗 Deep link received: ${state.uri}');
         AppLog.d('🔗 Matched location: ${state.matchedLocation}');
