@@ -363,7 +363,9 @@ class _AvailableRidesPageState extends State<AvailableRidesPage> {
                                   // see a Toronto test at the wrong hour.
                                   time: BookingTime.dayMonthTime(
                                       ride.testDate, ride.timezone),
-                                  price: RideEarnings.estimate(
+                                  // The actual payout, not an estimate — the
+                                  // server freezes it onto the ride at accept.
+                                  price: RideEarnings.jobPay(
                                           ridePriceCents: ride.ridePrice)
                                       .amount,
                                   type: ride.testType ?? "",

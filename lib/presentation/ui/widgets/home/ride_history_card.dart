@@ -1,5 +1,7 @@
+import 'package:elan/core/instructor_pay.dart';
 import 'package:elan/core/ride_earnings.dart';
 import 'package:elan/core/app_colors.dart';
+import 'package:elan/presentation/ui/widgets/common/pay_breakdown_panel.dart';
 import 'package:elan/presentation/ui/widgets/common/ride_card_parts.dart';
 import 'package:flutter/material.dart';
 
@@ -30,15 +32,16 @@ class RideHistoryCard extends StatelessWidget {
   final VoidCallback transfer;
   final VoidCallback start;
 
-  /// Cents. Zero for up to `instructor_payout_delay_days` after the ride —
-  /// the payout cron has not run yet (§14.6), not "you earned nothing".
-  final int? earningsCents;
-
-  /// Wall-clock hours, used to preview the pending payout.
-  final double? totalHours;
-
-  /// Live rate, for that preview only. Never hardcode it.
-  final num? hourlyRateCents;
+  /// What this ride paid, base and driving, straight off `/rides/completed`.
+  ///
+  /// `instructorEarnings` is written at accept now, so it is correct the
+  /// moment the ride appears here — the card no longer previews it from
+  /// `totalHours x hourlyRate` while the payout cron catches up. Under the
+  /// flat-base model that preview would miss the whole base.
+  ///
+  /// Rides accepted before pay v2 carry no breakdown; the panel hides itself
+  /// and the total stands alone.
+  final InstructorPay pay;
 
   const RideHistoryCard({
     super.key,
@@ -53,9 +56,7 @@ class RideHistoryCard extends StatelessWidget {
     this.testCenterName = '',
     this.testCenterAddress = '',
     this.meetAtCentre = false,
-    this.earningsCents,
-    this.totalHours,
-    this.hourlyRateCents,
+    required this.pay,
   });
 
   @override
@@ -104,45 +105,35 @@ class RideHistoryCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          _EarningsRow(
-            earningsCents: earningsCents,
-            totalHours: totalHours,
-            hourlyRateCents: hourlyRateCents,
-          ),
+          // Pre-v2 rides have no breakdown to show, so they fall back to the
+          // single "Earned" row below.
+          if (pay.hasBreakdown)
+            PayBreakdownPanel(pay: pay, title: 'Earned')
+          else
+            _EarningsRow(earningsCents: pay.totalCents),
         ],
       ),
     );
   }
 }
 
-/// Earnings for a finished ride.
+/// The total for a ride with no breakdown.
 ///
-/// History showed no money at all before, so an instructor could not tell a
-/// paid ride from an unpaid one. It also has to distinguish "paid $64" from
-/// "finished, payout scheduled" — the API reports both as `0` until the cron
-/// runs (§14.6).
+/// Only reached for rides accepted before pay v2 — those settle on the old
+/// wall-clock arithmetic and carry no `baseAmount`, but their
+/// `instructorEarnings` is still correct. Anything newer renders
+/// [PayBreakdownPanel] instead.
+///
+/// It still has to distinguish "paid $64" from a figure the response did not
+/// carry, which is why an absent total reads "Pending" rather than $0.00.
 class _EarningsRow extends StatelessWidget {
-  const _EarningsRow({
-    required this.earningsCents,
-    required this.totalHours,
-    required this.hourlyRateCents,
-  });
+  const _EarningsRow({required this.earningsCents});
 
   final int? earningsCents;
-  final double? totalHours;
-  final num? hourlyRateCents;
 
   @override
   Widget build(BuildContext context) {
-    // False, and not fixable here: `GET /v1/rides/completed` returns no
-    // `hourly_rate` (§8.9), so the only rate available to this card is the
-    // current global one. The caption says so.
-    final label = RideEarnings.settled(
-      instructorEarningsCents: earningsCents,
-      totalHours: totalHours,
-      hourlyRateCents: hourlyRateCents,
-      rateIsRideSnapshot: false,
-    );
+    final label = RideEarnings.settled(instructorEarningsCents: earningsCents);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -156,30 +147,20 @@ class _EarningsRow extends StatelessWidget {
               size: 16, color: RideCardColors.actionGreen),
           const SizedBox(width: 8),
           Text(
-            label.isEstimate ? 'Earnings (est.)' : 'Earned',
+            'Earned',
             style: TextStyle(
                 fontSize: 13,
                 color: Colors.grey.shade700,
                 fontWeight: FontWeight.w500),
           ),
           const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                label.amount,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: RideCardColors.actionGreen,
-                ),
-              ),
-              if (label.caption != null)
-                Text(
-                  label.caption!,
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                ),
-            ],
+          Text(
+            label.amount,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              color: RideCardColors.actionGreen,
+            ),
           ),
         ],
       ),

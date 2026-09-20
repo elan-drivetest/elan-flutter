@@ -1,3 +1,4 @@
+import 'package:elan/core/instructor_pay.dart';
 import 'package:elan/core/booking_time.dart';
 import 'dart:async';
 import 'dart:developer';
@@ -1014,6 +1015,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                           "Loading Address Long Long",
                                       type: "Driving Test",
                                       phoneNumber: "1234567890",
+                                      pay: const InstructorPay(
+                                        totalCents: 14400,
+                                        baseCents: 12000,
+                                        transportationHours: 0.6,
+                                        transportationCents: 2400,
+                                        hourlyRateCents: 4000,
+                                      ),
                                       transfer: () {},
                                       start: () {},
                                     );
@@ -1089,17 +1097,14 @@ class _DashboardPageState extends State<DashboardPage> {
                                           ride.dropoffLocation ?? "",
                                       type: ride.testType ?? "",
                                       phoneNumber: "",
-                                      // instructorEarnings stays 0 until the
-                                      // payout cron runs (§14.6), so the card
-                                      // previews it from the hours actually
-                                      // worked and the live rate.
-                                      earningsCents: ride.instructorEarnings,
-                                      totalHours: ride.totalHours,
-                                      hourlyRateCents: context
-                                          .watch<PricingConfigBloc>()
-                                          .state
-                                          .config
-                                          .instructorRate,
+                                      // Base + driving, frozen at accept and
+                                      // correct on arrival. The old
+                                      // totalHours x live-rate preview is
+                                      // gone: it now misses the flat base
+                                      // entirely, and the payout cron no
+                                      // longer gates the figure.
+                                      pay: InstructorPay.fromCompletedRide(
+                                          ride),
                                       transfer: () {},
                                       start: () {},
                                     );

@@ -14,10 +14,18 @@ class RideCard extends StatelessWidget {
   final String testCenterAddress;
   final String phoneNumber;
 
-  /// The **estimate** for the whole job, already formatted — not a rate.
+  /// What the job **pays**, already formatted — a total, never a rate, so it
+  /// must not be suffixed "/hr".
   ///
-  /// `/rides/available` computes `ride_price` per booking (§7.1); it is a total
-  /// for the job, so it must never be suffixed "/hr".
+  /// No longer an estimate. `ride_price` is computed once and frozen onto the
+  /// ride at accept, so this is the figure that settles — do not caption it
+  /// "est." or "~".
+  ///
+  /// Deliberately **not** broken down here. The board is a scanning surface —
+  /// the instructor is comparing jobs, not auditing one — and a base/driving
+  /// panel on every card buried the journey and the Accept button under
+  /// figures nobody reads in a list. The breakdown lives on the detail sheet,
+  /// one tap away.
   final String price;
 
   final String type;

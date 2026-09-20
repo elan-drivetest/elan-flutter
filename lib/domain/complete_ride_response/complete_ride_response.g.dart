@@ -36,6 +36,10 @@ _$CompleteRideImpl _$$CompleteRideImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['dateTime'] as String),
       testType: json['testType'] as String?,
       instructorEarnings: (json['instructorEarnings'] as num?)?.toInt(),
+      baseAmount: (json['baseAmount'] as num?)?.toInt(),
+      transportationHours: _toDouble(json['transportationHours']),
+      hourlyRate: (json['hourlyRate'] as num?)?.toInt(),
+      transportationAmount: (json['transportationAmount'] as num?)?.toInt(),
       totalDistance: _toDouble(json['totalDistance']),
       totalHours: _toDouble(json['totalHours']),
     );
@@ -50,6 +54,10 @@ Map<String, dynamic> _$$CompleteRideImplToJson(_$CompleteRideImpl instance) =>
       'dateTime': instance.dateTime?.toIso8601String(),
       'testType': instance.testType,
       'instructorEarnings': instance.instructorEarnings,
+      'baseAmount': instance.baseAmount,
+      'transportationHours': instance.transportationHours,
+      'hourlyRate': instance.hourlyRate,
+      'transportationAmount': instance.transportationAmount,
       'totalDistance': instance.totalDistance,
       'totalHours': instance.totalHours,
     };

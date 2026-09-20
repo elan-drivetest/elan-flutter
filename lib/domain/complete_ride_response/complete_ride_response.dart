@@ -26,11 +26,34 @@ class CompleteRide with _$CompleteRide {
     @JsonKey(name: "dateTime") DateTime? dateTime,
     @JsonKey(name: "testType") String? testType,
 
-    /// Cents. **Zero until the payout cron runs**, up to
-    /// `instructor_payout_delay_days` (default 7) after the ride
-    /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
-    /// legitimately reports 0 and must not be shown as "earned $0.00".
+    /// Cents. `baseAmount + transportationAmount`, and **correct
+    /// immediately** — it is written when the job is accepted, not when the
+    /// payout cron runs.
+    ///
+    /// It used to stay 0 until the transfer went out, up to
+    /// `instructor_payout_delay_days` (7) after the ride, which is why this
+    /// card used to preview `totalHours x hourlyRate` client-side. That
+    /// workaround is gone: under the flat-base model it produces a number
+    /// wrong by the whole base.
     @JsonKey(name: "instructorEarnings") int? instructorEarnings,
+
+    /// Cents. The flat road-test portion, as frozen at accept.
+    ///
+    /// `0` for rides accepted before the pay-v2 deploy — those settle on the
+    /// old wall-clock arithmetic and have no breakdown to show, so guard the
+    /// breakdown UI on `baseAmount > 0` and fall back to the total alone.
+    @JsonKey(name: "baseAmount") int? baseAmount,
+
+    /// Paid driving hours (pickup → centre → back). `0` for meet-at-centre.
+    @JsonKey(name: "transportationHours", fromJson: _toDouble)
+    double? transportationHours,
+
+    /// Cents per transportation hour, snapshotted at accept. Same field name
+    /// as before; it no longer prices the road test.
+    @JsonKey(name: "hourlyRate") int? hourlyRate,
+
+    /// Cents. `round(transportationHours x hourlyRate)`.
+    @JsonKey(name: "transportationAmount") int? transportationAmount,
 
     /// Kilometres actually driven, and safe to label as such (§5.2).
     ///
@@ -51,8 +74,10 @@ class CompleteRide with _$CompleteRide {
     /// Arrives as a string like `"0.400000"` — a `decimal` column (§12.2).
     @JsonKey(name: "totalDistance", fromJson: _toDouble) double? totalDistance,
 
-    /// Wall-clock hours from Start to Stop. This is what the instructor is
-    /// actually paid on. Also a string on the wire.
+    /// Wall-clock hours from Start to Stop. **Reporting only** — it no longer
+    /// drives pay, so never label it, or anything derived from it, as
+    /// earnings. It is the ride's duration and nothing more. Also a string on
+    /// the wire.
     @JsonKey(name: "totalHours", fromJson: _toDouble) double? totalHours,
   }) = _CompleteRide;
 

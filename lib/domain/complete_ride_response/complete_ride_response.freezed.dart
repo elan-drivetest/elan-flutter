@@ -246,12 +246,38 @@ mixin _$CompleteRide {
   @JsonKey(name: "testType")
   String? get testType => throw _privateConstructorUsedError;
 
-  /// Cents. **Zero until the payout cron runs**, up to
-  /// `instructor_payout_delay_days` (default 7) after the ride
-  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
-  /// legitimately reports 0 and must not be shown as "earned $0.00".
+  /// Cents. `baseAmount + transportationAmount`, and **correct
+  /// immediately** — it is written when the job is accepted, not when the
+  /// payout cron runs.
+  ///
+  /// It used to stay 0 until the transfer went out, up to
+  /// `instructor_payout_delay_days` (7) after the ride, which is why this
+  /// card used to preview `totalHours x hourlyRate` client-side. That
+  /// workaround is gone: under the flat-base model it produces a number
+  /// wrong by the whole base.
   @JsonKey(name: "instructorEarnings")
   int? get instructorEarnings => throw _privateConstructorUsedError;
+
+  /// Cents. The flat road-test portion, as frozen at accept.
+  ///
+  /// `0` for rides accepted before the pay-v2 deploy — those settle on the
+  /// old wall-clock arithmetic and have no breakdown to show, so guard the
+  /// breakdown UI on `baseAmount > 0` and fall back to the total alone.
+  @JsonKey(name: "baseAmount")
+  int? get baseAmount => throw _privateConstructorUsedError;
+
+  /// Paid driving hours (pickup → centre → back). `0` for meet-at-centre.
+  @JsonKey(name: "transportationHours", fromJson: _toDouble)
+  double? get transportationHours => throw _privateConstructorUsedError;
+
+  /// Cents per transportation hour, snapshotted at accept. Same field name
+  /// as before; it no longer prices the road test.
+  @JsonKey(name: "hourlyRate")
+  int? get hourlyRate => throw _privateConstructorUsedError;
+
+  /// Cents. `round(transportationHours x hourlyRate)`.
+  @JsonKey(name: "transportationAmount")
+  int? get transportationAmount => throw _privateConstructorUsedError;
 
   /// Kilometres actually driven, and safe to label as such (§5.2).
   ///
@@ -273,8 +299,10 @@ mixin _$CompleteRide {
   @JsonKey(name: "totalDistance", fromJson: _toDouble)
   double? get totalDistance => throw _privateConstructorUsedError;
 
-  /// Wall-clock hours from Start to Stop. This is what the instructor is
-  /// actually paid on. Also a string on the wire.
+  /// Wall-clock hours from Start to Stop. **Reporting only** — it no longer
+  /// drives pay, so never label it, or anything derived from it, as
+  /// earnings. It is the ride's duration and nothing more. Also a string on
+  /// the wire.
   @JsonKey(name: "totalHours", fromJson: _toDouble)
   double? get totalHours => throw _privateConstructorUsedError;
 
@@ -303,6 +331,11 @@ abstract class $CompleteRideCopyWith<$Res> {
       @JsonKey(name: "dateTime") DateTime? dateTime,
       @JsonKey(name: "testType") String? testType,
       @JsonKey(name: "instructorEarnings") int? instructorEarnings,
+      @JsonKey(name: "baseAmount") int? baseAmount,
+      @JsonKey(name: "transportationHours", fromJson: _toDouble)
+      double? transportationHours,
+      @JsonKey(name: "hourlyRate") int? hourlyRate,
+      @JsonKey(name: "transportationAmount") int? transportationAmount,
       @JsonKey(name: "totalDistance", fromJson: _toDouble)
       double? totalDistance,
       @JsonKey(name: "totalHours", fromJson: _toDouble) double? totalHours});
@@ -331,6 +364,10 @@ class _$CompleteRideCopyWithImpl<$Res, $Val extends CompleteRide>
     Object? dateTime = freezed,
     Object? testType = freezed,
     Object? instructorEarnings = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? hourlyRate = freezed,
+    Object? transportationAmount = freezed,
     Object? totalDistance = freezed,
     Object? totalHours = freezed,
   }) {
@@ -367,6 +404,22 @@ class _$CompleteRideCopyWithImpl<$Res, $Val extends CompleteRide>
           ? _value.instructorEarnings
           : instructorEarnings // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      hourlyRate: freezed == hourlyRate
+          ? _value.hourlyRate
+          : hourlyRate // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
       totalDistance: freezed == totalDistance
           ? _value.totalDistance
           : totalDistance // ignore: cast_nullable_to_non_nullable
@@ -396,6 +449,11 @@ abstract class _$$CompleteRideImplCopyWith<$Res>
       @JsonKey(name: "dateTime") DateTime? dateTime,
       @JsonKey(name: "testType") String? testType,
       @JsonKey(name: "instructorEarnings") int? instructorEarnings,
+      @JsonKey(name: "baseAmount") int? baseAmount,
+      @JsonKey(name: "transportationHours", fromJson: _toDouble)
+      double? transportationHours,
+      @JsonKey(name: "hourlyRate") int? hourlyRate,
+      @JsonKey(name: "transportationAmount") int? transportationAmount,
       @JsonKey(name: "totalDistance", fromJson: _toDouble)
       double? totalDistance,
       @JsonKey(name: "totalHours", fromJson: _toDouble) double? totalHours});
@@ -422,6 +480,10 @@ class __$$CompleteRideImplCopyWithImpl<$Res>
     Object? dateTime = freezed,
     Object? testType = freezed,
     Object? instructorEarnings = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? hourlyRate = freezed,
+    Object? transportationAmount = freezed,
     Object? totalDistance = freezed,
     Object? totalHours = freezed,
   }) {
@@ -458,6 +520,22 @@ class __$$CompleteRideImplCopyWithImpl<$Res>
           ? _value.instructorEarnings
           : instructorEarnings // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      hourlyRate: freezed == hourlyRate
+          ? _value.hourlyRate
+          : hourlyRate // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
       totalDistance: freezed == totalDistance
           ? _value.totalDistance
           : totalDistance // ignore: cast_nullable_to_non_nullable
@@ -482,6 +560,11 @@ class _$CompleteRideImpl implements _CompleteRide {
       @JsonKey(name: "dateTime") this.dateTime,
       @JsonKey(name: "testType") this.testType,
       @JsonKey(name: "instructorEarnings") this.instructorEarnings,
+      @JsonKey(name: "baseAmount") this.baseAmount,
+      @JsonKey(name: "transportationHours", fromJson: _toDouble)
+      this.transportationHours,
+      @JsonKey(name: "hourlyRate") this.hourlyRate,
+      @JsonKey(name: "transportationAmount") this.transportationAmount,
       @JsonKey(name: "totalDistance", fromJson: _toDouble) this.totalDistance,
       @JsonKey(name: "totalHours", fromJson: _toDouble) this.totalHours});
 
@@ -510,13 +593,43 @@ class _$CompleteRideImpl implements _CompleteRide {
   @JsonKey(name: "testType")
   final String? testType;
 
-  /// Cents. **Zero until the payout cron runs**, up to
-  /// `instructor_payout_delay_days` (default 7) after the ride
-  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
-  /// legitimately reports 0 and must not be shown as "earned $0.00".
+  /// Cents. `baseAmount + transportationAmount`, and **correct
+  /// immediately** — it is written when the job is accepted, not when the
+  /// payout cron runs.
+  ///
+  /// It used to stay 0 until the transfer went out, up to
+  /// `instructor_payout_delay_days` (7) after the ride, which is why this
+  /// card used to preview `totalHours x hourlyRate` client-side. That
+  /// workaround is gone: under the flat-base model it produces a number
+  /// wrong by the whole base.
   @override
   @JsonKey(name: "instructorEarnings")
   final int? instructorEarnings;
+
+  /// Cents. The flat road-test portion, as frozen at accept.
+  ///
+  /// `0` for rides accepted before the pay-v2 deploy — those settle on the
+  /// old wall-clock arithmetic and have no breakdown to show, so guard the
+  /// breakdown UI on `baseAmount > 0` and fall back to the total alone.
+  @override
+  @JsonKey(name: "baseAmount")
+  final int? baseAmount;
+
+  /// Paid driving hours (pickup → centre → back). `0` for meet-at-centre.
+  @override
+  @JsonKey(name: "transportationHours", fromJson: _toDouble)
+  final double? transportationHours;
+
+  /// Cents per transportation hour, snapshotted at accept. Same field name
+  /// as before; it no longer prices the road test.
+  @override
+  @JsonKey(name: "hourlyRate")
+  final int? hourlyRate;
+
+  /// Cents. `round(transportationHours x hourlyRate)`.
+  @override
+  @JsonKey(name: "transportationAmount")
+  final int? transportationAmount;
 
   /// Kilometres actually driven, and safe to label as such (§5.2).
   ///
@@ -539,15 +652,17 @@ class _$CompleteRideImpl implements _CompleteRide {
   @JsonKey(name: "totalDistance", fromJson: _toDouble)
   final double? totalDistance;
 
-  /// Wall-clock hours from Start to Stop. This is what the instructor is
-  /// actually paid on. Also a string on the wire.
+  /// Wall-clock hours from Start to Stop. **Reporting only** — it no longer
+  /// drives pay, so never label it, or anything derived from it, as
+  /// earnings. It is the ride's duration and nothing more. Also a string on
+  /// the wire.
   @override
   @JsonKey(name: "totalHours", fromJson: _toDouble)
   final double? totalHours;
 
   @override
   String toString() {
-    return 'CompleteRide(id: $id, customerName: $customerName, testCenterName: $testCenterName, pickupLocation: $pickupLocation, dropoffLocation: $dropoffLocation, dateTime: $dateTime, testType: $testType, instructorEarnings: $instructorEarnings, totalDistance: $totalDistance, totalHours: $totalHours)';
+    return 'CompleteRide(id: $id, customerName: $customerName, testCenterName: $testCenterName, pickupLocation: $pickupLocation, dropoffLocation: $dropoffLocation, dateTime: $dateTime, testType: $testType, instructorEarnings: $instructorEarnings, baseAmount: $baseAmount, transportationHours: $transportationHours, hourlyRate: $hourlyRate, transportationAmount: $transportationAmount, totalDistance: $totalDistance, totalHours: $totalHours)';
   }
 
   @override
@@ -570,6 +685,14 @@ class _$CompleteRideImpl implements _CompleteRide {
                 other.testType == testType) &&
             (identical(other.instructorEarnings, instructorEarnings) ||
                 other.instructorEarnings == instructorEarnings) &&
+            (identical(other.baseAmount, baseAmount) ||
+                other.baseAmount == baseAmount) &&
+            (identical(other.transportationHours, transportationHours) ||
+                other.transportationHours == transportationHours) &&
+            (identical(other.hourlyRate, hourlyRate) ||
+                other.hourlyRate == hourlyRate) &&
+            (identical(other.transportationAmount, transportationAmount) ||
+                other.transportationAmount == transportationAmount) &&
             (identical(other.totalDistance, totalDistance) ||
                 other.totalDistance == totalDistance) &&
             (identical(other.totalHours, totalHours) ||
@@ -588,6 +711,10 @@ class _$CompleteRideImpl implements _CompleteRide {
       dateTime,
       testType,
       instructorEarnings,
+      baseAmount,
+      transportationHours,
+      hourlyRate,
+      transportationAmount,
       totalDistance,
       totalHours);
 
@@ -617,6 +744,11 @@ abstract class _CompleteRide implements CompleteRide {
       @JsonKey(name: "dateTime") final DateTime? dateTime,
       @JsonKey(name: "testType") final String? testType,
       @JsonKey(name: "instructorEarnings") final int? instructorEarnings,
+      @JsonKey(name: "baseAmount") final int? baseAmount,
+      @JsonKey(name: "transportationHours", fromJson: _toDouble)
+      final double? transportationHours,
+      @JsonKey(name: "hourlyRate") final int? hourlyRate,
+      @JsonKey(name: "transportationAmount") final int? transportationAmount,
       @JsonKey(name: "totalDistance", fromJson: _toDouble)
       final double? totalDistance,
       @JsonKey(name: "totalHours", fromJson: _toDouble)
@@ -647,13 +779,43 @@ abstract class _CompleteRide implements CompleteRide {
   @JsonKey(name: "testType")
   String? get testType;
 
-  /// Cents. **Zero until the payout cron runs**, up to
-  /// `instructor_payout_delay_days` (default 7) after the ride
-  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §14.6) — so a recent completed ride
-  /// legitimately reports 0 and must not be shown as "earned $0.00".
+  /// Cents. `baseAmount + transportationAmount`, and **correct
+  /// immediately** — it is written when the job is accepted, not when the
+  /// payout cron runs.
+  ///
+  /// It used to stay 0 until the transfer went out, up to
+  /// `instructor_payout_delay_days` (7) after the ride, which is why this
+  /// card used to preview `totalHours x hourlyRate` client-side. That
+  /// workaround is gone: under the flat-base model it produces a number
+  /// wrong by the whole base.
   @override
   @JsonKey(name: "instructorEarnings")
   int? get instructorEarnings;
+
+  /// Cents. The flat road-test portion, as frozen at accept.
+  ///
+  /// `0` for rides accepted before the pay-v2 deploy — those settle on the
+  /// old wall-clock arithmetic and have no breakdown to show, so guard the
+  /// breakdown UI on `baseAmount > 0` and fall back to the total alone.
+  @override
+  @JsonKey(name: "baseAmount")
+  int? get baseAmount;
+
+  /// Paid driving hours (pickup → centre → back). `0` for meet-at-centre.
+  @override
+  @JsonKey(name: "transportationHours", fromJson: _toDouble)
+  double? get transportationHours;
+
+  /// Cents per transportation hour, snapshotted at accept. Same field name
+  /// as before; it no longer prices the road test.
+  @override
+  @JsonKey(name: "hourlyRate")
+  int? get hourlyRate;
+
+  /// Cents. `round(transportationHours x hourlyRate)`.
+  @override
+  @JsonKey(name: "transportationAmount")
+  int? get transportationAmount;
 
   /// Kilometres actually driven, and safe to label as such (§5.2).
   ///
@@ -676,8 +838,10 @@ abstract class _CompleteRide implements CompleteRide {
   @JsonKey(name: "totalDistance", fromJson: _toDouble)
   double? get totalDistance;
 
-  /// Wall-clock hours from Start to Stop. This is what the instructor is
-  /// actually paid on. Also a string on the wire.
+  /// Wall-clock hours from Start to Stop. **Reporting only** — it no longer
+  /// drives pay, so never label it, or anything derived from it, as
+  /// earnings. It is the ride's duration and nothing more. Also a string on
+  /// the wire.
   @override
   @JsonKey(name: "totalHours", fromJson: _toDouble)
   double? get totalHours;

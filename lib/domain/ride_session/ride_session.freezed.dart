@@ -59,10 +59,31 @@ mixin _$RideSession {
   double? get dropoffLatitude => throw _privateConstructorUsedError;
   @JsonKey(name: 'dropoff_longitude', fromJson: _toDouble)
   double? get dropoffLongitude => throw _privateConstructorUsedError;
+
+  /// Wall-clock hours Start → Stop. Reporting only since pay v2 — it does
+  /// not determine the payout any more.
   @JsonKey(name: 'total_hours', fromJson: _toDouble)
   double? get totalHours => throw _privateConstructorUsedError;
+
+  /// Cents per **transportation** hour, snapshotted at accept.
   @JsonKey(name: 'hourly_rate')
   int? get hourlyRate => throw _privateConstructorUsedError;
+
+  /// Cents. The flat road-test portion frozen onto this session at accept
+  /// (`instructor_rate x 3`). `0`/null on sessions created before pay v2.
+  @JsonKey(name: 'base_amount')
+  int? get baseAmount => throw _privateConstructorUsedError;
+
+  /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+  @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+  double? get transportationHours => throw _privateConstructorUsedError;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @JsonKey(name: 'transportation_amount')
+  int? get transportationAmount => throw _privateConstructorUsedError;
+
+  /// Cents. `base_amount + transportation_amount`, written at accept — no
+  /// longer zero until the payout cron runs.
   @JsonKey(name: 'instructor_earnings')
   int? get instructorEarnings => throw _privateConstructorUsedError;
   @JsonKey(name: 'payment_scheduled_at')
@@ -104,6 +125,10 @@ abstract class $RideSessionCopyWith<$Res> {
       double? dropoffLongitude,
       @JsonKey(name: 'total_hours', fromJson: _toDouble) double? totalHours,
       @JsonKey(name: 'hourly_rate') int? hourlyRate,
+      @JsonKey(name: 'base_amount') int? baseAmount,
+      @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+      double? transportationHours,
+      @JsonKey(name: 'transportation_amount') int? transportationAmount,
       @JsonKey(name: 'instructor_earnings') int? instructorEarnings,
       @JsonKey(name: 'payment_scheduled_at') DateTime? paymentScheduledAt,
       @JsonKey(name: 'payment_processed_at') DateTime? paymentProcessedAt});
@@ -136,6 +161,9 @@ class _$RideSessionCopyWithImpl<$Res, $Val extends RideSession>
     Object? dropoffLongitude = freezed,
     Object? totalHours = freezed,
     Object? hourlyRate = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? transportationAmount = freezed,
     Object? instructorEarnings = freezed,
     Object? paymentScheduledAt = freezed,
     Object? paymentProcessedAt = freezed,
@@ -189,6 +217,18 @@ class _$RideSessionCopyWithImpl<$Res, $Val extends RideSession>
           ? _value.hourlyRate
           : hourlyRate // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
       instructorEarnings: freezed == instructorEarnings
           ? _value.instructorEarnings
           : instructorEarnings // ignore: cast_nullable_to_non_nullable
@@ -231,6 +271,10 @@ abstract class _$$RideSessionImplCopyWith<$Res>
       double? dropoffLongitude,
       @JsonKey(name: 'total_hours', fromJson: _toDouble) double? totalHours,
       @JsonKey(name: 'hourly_rate') int? hourlyRate,
+      @JsonKey(name: 'base_amount') int? baseAmount,
+      @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+      double? transportationHours,
+      @JsonKey(name: 'transportation_amount') int? transportationAmount,
       @JsonKey(name: 'instructor_earnings') int? instructorEarnings,
       @JsonKey(name: 'payment_scheduled_at') DateTime? paymentScheduledAt,
       @JsonKey(name: 'payment_processed_at') DateTime? paymentProcessedAt});
@@ -261,6 +305,9 @@ class __$$RideSessionImplCopyWithImpl<$Res>
     Object? dropoffLongitude = freezed,
     Object? totalHours = freezed,
     Object? hourlyRate = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? transportationAmount = freezed,
     Object? instructorEarnings = freezed,
     Object? paymentScheduledAt = freezed,
     Object? paymentProcessedAt = freezed,
@@ -314,6 +361,18 @@ class __$$RideSessionImplCopyWithImpl<$Res>
           ? _value.hourlyRate
           : hourlyRate // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
       instructorEarnings: freezed == instructorEarnings
           ? _value.instructorEarnings
           : instructorEarnings // ignore: cast_nullable_to_non_nullable
@@ -350,6 +409,10 @@ class _$RideSessionImpl implements _RideSession {
       this.dropoffLongitude,
       @JsonKey(name: 'total_hours', fromJson: _toDouble) this.totalHours,
       @JsonKey(name: 'hourly_rate') this.hourlyRate,
+      @JsonKey(name: 'base_amount') this.baseAmount,
+      @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+      this.transportationHours,
+      @JsonKey(name: 'transportation_amount') this.transportationAmount,
       @JsonKey(name: 'instructor_earnings') this.instructorEarnings,
       @JsonKey(name: 'payment_scheduled_at') this.paymentScheduledAt,
       @JsonKey(name: 'payment_processed_at') this.paymentProcessedAt});
@@ -406,12 +469,36 @@ class _$RideSessionImpl implements _RideSession {
   @override
   @JsonKey(name: 'dropoff_longitude', fromJson: _toDouble)
   final double? dropoffLongitude;
+
+  /// Wall-clock hours Start → Stop. Reporting only since pay v2 — it does
+  /// not determine the payout any more.
   @override
   @JsonKey(name: 'total_hours', fromJson: _toDouble)
   final double? totalHours;
+
+  /// Cents per **transportation** hour, snapshotted at accept.
   @override
   @JsonKey(name: 'hourly_rate')
   final int? hourlyRate;
+
+  /// Cents. The flat road-test portion frozen onto this session at accept
+  /// (`instructor_rate x 3`). `0`/null on sessions created before pay v2.
+  @override
+  @JsonKey(name: 'base_amount')
+  final int? baseAmount;
+
+  /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+  @override
+  @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+  final double? transportationHours;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @override
+  @JsonKey(name: 'transportation_amount')
+  final int? transportationAmount;
+
+  /// Cents. `base_amount + transportation_amount`, written at accept — no
+  /// longer zero until the payout cron runs.
   @override
   @JsonKey(name: 'instructor_earnings')
   final int? instructorEarnings;
@@ -424,7 +511,7 @@ class _$RideSessionImpl implements _RideSession {
 
   @override
   String toString() {
-    return 'RideSession(id: $id, bookingId: $bookingId, startTime: $startTime, endTime: $endTime, status: $status, totalDistance: $totalDistance, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, dropoffLatitude: $dropoffLatitude, dropoffLongitude: $dropoffLongitude, totalHours: $totalHours, hourlyRate: $hourlyRate, instructorEarnings: $instructorEarnings, paymentScheduledAt: $paymentScheduledAt, paymentProcessedAt: $paymentProcessedAt)';
+    return 'RideSession(id: $id, bookingId: $bookingId, startTime: $startTime, endTime: $endTime, status: $status, totalDistance: $totalDistance, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, dropoffLatitude: $dropoffLatitude, dropoffLongitude: $dropoffLongitude, totalHours: $totalHours, hourlyRate: $hourlyRate, baseAmount: $baseAmount, transportationHours: $transportationHours, transportationAmount: $transportationAmount, instructorEarnings: $instructorEarnings, paymentScheduledAt: $paymentScheduledAt, paymentProcessedAt: $paymentProcessedAt)';
   }
 
   @override
@@ -453,6 +540,12 @@ class _$RideSessionImpl implements _RideSession {
                 other.totalHours == totalHours) &&
             (identical(other.hourlyRate, hourlyRate) ||
                 other.hourlyRate == hourlyRate) &&
+            (identical(other.baseAmount, baseAmount) ||
+                other.baseAmount == baseAmount) &&
+            (identical(other.transportationHours, transportationHours) ||
+                other.transportationHours == transportationHours) &&
+            (identical(other.transportationAmount, transportationAmount) ||
+                other.transportationAmount == transportationAmount) &&
             (identical(other.instructorEarnings, instructorEarnings) ||
                 other.instructorEarnings == instructorEarnings) &&
             (identical(other.paymentScheduledAt, paymentScheduledAt) ||
@@ -477,6 +570,9 @@ class _$RideSessionImpl implements _RideSession {
       dropoffLongitude,
       totalHours,
       hourlyRate,
+      baseAmount,
+      transportationHours,
+      transportationAmount,
       instructorEarnings,
       paymentScheduledAt,
       paymentProcessedAt);
@@ -517,6 +613,10 @@ abstract class _RideSession implements RideSession {
       @JsonKey(name: 'total_hours', fromJson: _toDouble)
       final double? totalHours,
       @JsonKey(name: 'hourly_rate') final int? hourlyRate,
+      @JsonKey(name: 'base_amount') final int? baseAmount,
+      @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+      final double? transportationHours,
+      @JsonKey(name: 'transportation_amount') final int? transportationAmount,
       @JsonKey(name: 'instructor_earnings') final int? instructorEarnings,
       @JsonKey(name: 'payment_scheduled_at') final DateTime? paymentScheduledAt,
       @JsonKey(name: 'payment_processed_at')
@@ -574,12 +674,36 @@ abstract class _RideSession implements RideSession {
   @override
   @JsonKey(name: 'dropoff_longitude', fromJson: _toDouble)
   double? get dropoffLongitude;
+
+  /// Wall-clock hours Start → Stop. Reporting only since pay v2 — it does
+  /// not determine the payout any more.
   @override
   @JsonKey(name: 'total_hours', fromJson: _toDouble)
   double? get totalHours;
+
+  /// Cents per **transportation** hour, snapshotted at accept.
   @override
   @JsonKey(name: 'hourly_rate')
   int? get hourlyRate;
+
+  /// Cents. The flat road-test portion frozen onto this session at accept
+  /// (`instructor_rate x 3`). `0`/null on sessions created before pay v2.
+  @override
+  @JsonKey(name: 'base_amount')
+  int? get baseAmount;
+
+  /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+  @override
+  @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+  double? get transportationHours;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @override
+  @JsonKey(name: 'transportation_amount')
+  int? get transportationAmount;
+
+  /// Cents. `base_amount + transportation_amount`, written at accept — no
+  /// longer zero until the payout cron runs.
   @override
   @JsonKey(name: 'instructor_earnings')
   int? get instructorEarnings;

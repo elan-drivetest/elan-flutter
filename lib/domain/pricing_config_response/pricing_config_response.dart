@@ -10,7 +10,11 @@ class PricingConfigResponse with _$PricingConfigResponse {
     @JsonKey(name: "base_rate") num? baseRate,
     @JsonKey(name: "normal_rate") num? normalRate,
     @JsonKey(name: "instructor_rate") num? instructorRate,
+
+    /// Derived, read-only — `instructor_rate x 3`. Never writable.
+    @JsonKey(name: "instructor_base_price") num? instructorBasePrice,
     @JsonKey(name: "average_distance_per_hour") num? averageDistancePerHour,
+    @JsonKey(name: "max_pickup_distance_km") num? maxPickupDistanceKm,
     @JsonKey(name: "instructor_referral_price") num? instructorReferralPrice,
     @JsonKey(name: "admin_referral_price") num? adminReferralPrice,
     @JsonKey(name: "referral_min_rides") int? referralMinRides,

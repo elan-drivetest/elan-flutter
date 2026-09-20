@@ -40,7 +40,21 @@ class AcceptResponse with _$AcceptResponse {
     @JsonKey(name: "dropoff_longitude", fromJson: _toDouble)
     double? dropoffLongitude,
     @JsonKey(name: "total_hours", fromJson: _toDouble) double? totalHours,
+
+    /// Cents per **transportation** hour, snapshotted at accept (pay v2).
     @JsonKey(name: "hourly_rate") int? hourlyRate,
+
+    /// Cents. Flat road-test portion frozen at accept (`instructor_rate x 3`).
+    @JsonKey(name: "base_amount") int? baseAmount,
+
+    /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+    @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+    double? transportationHours,
+
+    /// Cents. `round(transportation_hours x hourly_rate)`.
+    @JsonKey(name: "transportation_amount") int? transportationAmount,
+
+    /// Cents. `base_amount + transportation_amount`, correct from accept.
     @JsonKey(name: "instructor_earnings") int? instructorEarnings,
     @JsonKey(name: "payment_scheduled_at") DateTime? paymentScheduledAt,
     @JsonKey(name: "payment_processed_at") DateTime? paymentProcessedAt,

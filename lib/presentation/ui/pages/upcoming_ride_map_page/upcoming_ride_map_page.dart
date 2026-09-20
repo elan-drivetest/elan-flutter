@@ -156,8 +156,10 @@ class _UpcomingRideMapPageState extends State<UpcomingRideMapPage> {
     final formattedDate =
         BookingTime.format(widget.rideInfo.testDate, widget.rideInfo.timezone);
 
+    // The job's actual pay, not an estimate — the full base/driving breakdown
+    // is in the sheet this panel opens.
     final priceStr =
-        RideEarnings.estimate(ridePriceCents: widget.rideInfo.ridePrice).amount;
+        RideEarnings.jobPay(ridePriceCents: widget.rideInfo.ridePrice).amount;
 
     return Scaffold(
         extendBodyBehindAppBar: true,

@@ -29,8 +29,14 @@ mixin _$PricingConfigResponse {
   num? get normalRate => throw _privateConstructorUsedError;
   @JsonKey(name: "instructor_rate")
   num? get instructorRate => throw _privateConstructorUsedError;
+
+  /// Derived, read-only — `instructor_rate x 3`. Never writable.
+  @JsonKey(name: "instructor_base_price")
+  num? get instructorBasePrice => throw _privateConstructorUsedError;
   @JsonKey(name: "average_distance_per_hour")
   num? get averageDistancePerHour => throw _privateConstructorUsedError;
+  @JsonKey(name: "max_pickup_distance_km")
+  num? get maxPickupDistanceKm => throw _privateConstructorUsedError;
   @JsonKey(name: "instructor_referral_price")
   num? get instructorReferralPrice => throw _privateConstructorUsedError;
   @JsonKey(name: "admin_referral_price")
@@ -77,7 +83,9 @@ abstract class $PricingConfigResponseCopyWith<$Res> {
       @JsonKey(name: "base_rate") num? baseRate,
       @JsonKey(name: "normal_rate") num? normalRate,
       @JsonKey(name: "instructor_rate") num? instructorRate,
+      @JsonKey(name: "instructor_base_price") num? instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour") num? averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") num? maxPickupDistanceKm,
       @JsonKey(name: "instructor_referral_price") num? instructorReferralPrice,
       @JsonKey(name: "admin_referral_price") num? adminReferralPrice,
       @JsonKey(name: "referral_min_rides") int? referralMinRides,
@@ -115,7 +123,9 @@ class _$PricingConfigResponseCopyWithImpl<$Res,
     Object? baseRate = freezed,
     Object? normalRate = freezed,
     Object? instructorRate = freezed,
+    Object? instructorBasePrice = freezed,
     Object? averageDistancePerHour = freezed,
+    Object? maxPickupDistanceKm = freezed,
     Object? instructorReferralPrice = freezed,
     Object? adminReferralPrice = freezed,
     Object? referralMinRides = freezed,
@@ -146,9 +156,17 @@ class _$PricingConfigResponseCopyWithImpl<$Res,
           ? _value.instructorRate
           : instructorRate // ignore: cast_nullable_to_non_nullable
               as num?,
+      instructorBasePrice: freezed == instructorBasePrice
+          ? _value.instructorBasePrice
+          : instructorBasePrice // ignore: cast_nullable_to_non_nullable
+              as num?,
       averageDistancePerHour: freezed == averageDistancePerHour
           ? _value.averageDistancePerHour
           : averageDistancePerHour // ignore: cast_nullable_to_non_nullable
+              as num?,
+      maxPickupDistanceKm: freezed == maxPickupDistanceKm
+          ? _value.maxPickupDistanceKm
+          : maxPickupDistanceKm // ignore: cast_nullable_to_non_nullable
               as num?,
       instructorReferralPrice: freezed == instructorReferralPrice
           ? _value.instructorReferralPrice
@@ -216,7 +234,9 @@ abstract class _$$PricingConfigResponseImplCopyWith<$Res>
       @JsonKey(name: "base_rate") num? baseRate,
       @JsonKey(name: "normal_rate") num? normalRate,
       @JsonKey(name: "instructor_rate") num? instructorRate,
+      @JsonKey(name: "instructor_base_price") num? instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour") num? averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") num? maxPickupDistanceKm,
       @JsonKey(name: "instructor_referral_price") num? instructorReferralPrice,
       @JsonKey(name: "admin_referral_price") num? adminReferralPrice,
       @JsonKey(name: "referral_min_rides") int? referralMinRides,
@@ -252,7 +272,9 @@ class __$$PricingConfigResponseImplCopyWithImpl<$Res>
     Object? baseRate = freezed,
     Object? normalRate = freezed,
     Object? instructorRate = freezed,
+    Object? instructorBasePrice = freezed,
     Object? averageDistancePerHour = freezed,
+    Object? maxPickupDistanceKm = freezed,
     Object? instructorReferralPrice = freezed,
     Object? adminReferralPrice = freezed,
     Object? referralMinRides = freezed,
@@ -283,9 +305,17 @@ class __$$PricingConfigResponseImplCopyWithImpl<$Res>
           ? _value.instructorRate
           : instructorRate // ignore: cast_nullable_to_non_nullable
               as num?,
+      instructorBasePrice: freezed == instructorBasePrice
+          ? _value.instructorBasePrice
+          : instructorBasePrice // ignore: cast_nullable_to_non_nullable
+              as num?,
       averageDistancePerHour: freezed == averageDistancePerHour
           ? _value.averageDistancePerHour
           : averageDistancePerHour // ignore: cast_nullable_to_non_nullable
+              as num?,
+      maxPickupDistanceKm: freezed == maxPickupDistanceKm
+          ? _value.maxPickupDistanceKm
+          : maxPickupDistanceKm // ignore: cast_nullable_to_non_nullable
               as num?,
       instructorReferralPrice: freezed == instructorReferralPrice
           ? _value.instructorReferralPrice
@@ -347,7 +377,9 @@ class _$PricingConfigResponseImpl implements _PricingConfigResponse {
       @JsonKey(name: "base_rate") this.baseRate,
       @JsonKey(name: "normal_rate") this.normalRate,
       @JsonKey(name: "instructor_rate") this.instructorRate,
+      @JsonKey(name: "instructor_base_price") this.instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour") this.averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") this.maxPickupDistanceKm,
       @JsonKey(name: "instructor_referral_price") this.instructorReferralPrice,
       @JsonKey(name: "admin_referral_price") this.adminReferralPrice,
       @JsonKey(name: "referral_min_rides") this.referralMinRides,
@@ -379,9 +411,17 @@ class _$PricingConfigResponseImpl implements _PricingConfigResponse {
   @override
   @JsonKey(name: "instructor_rate")
   final num? instructorRate;
+
+  /// Derived, read-only — `instructor_rate x 3`. Never writable.
+  @override
+  @JsonKey(name: "instructor_base_price")
+  final num? instructorBasePrice;
   @override
   @JsonKey(name: "average_distance_per_hour")
   final num? averageDistancePerHour;
+  @override
+  @JsonKey(name: "max_pickup_distance_km")
+  final num? maxPickupDistanceKm;
   @override
   @JsonKey(name: "instructor_referral_price")
   final num? instructorReferralPrice;
@@ -421,7 +461,7 @@ class _$PricingConfigResponseImpl implements _PricingConfigResponse {
 
   @override
   String toString() {
-    return 'PricingConfigResponse(baseDistance: $baseDistance, baseRate: $baseRate, normalRate: $normalRate, instructorRate: $instructorRate, averageDistancePerHour: $averageDistancePerHour, instructorReferralPrice: $instructorReferralPrice, adminReferralPrice: $adminReferralPrice, referralMinRides: $referralMinRides, bookingMinLeadDays: $bookingMinLeadDays, refundFullHours: $refundFullHours, refundPartialHours: $refundPartialHours, refundPartialPercentage: $refundPartialPercentage, failureCouponPercentage: $failureCouponPercentage, failureCouponValidityMonths: $failureCouponValidityMonths, instructorPayoutDelayDays: $instructorPayoutDelayDays, rideStartWindowHours: $rideStartWindowHours, rideTransferCutoffHours: $rideTransferCutoffHours)';
+    return 'PricingConfigResponse(baseDistance: $baseDistance, baseRate: $baseRate, normalRate: $normalRate, instructorRate: $instructorRate, instructorBasePrice: $instructorBasePrice, averageDistancePerHour: $averageDistancePerHour, maxPickupDistanceKm: $maxPickupDistanceKm, instructorReferralPrice: $instructorReferralPrice, adminReferralPrice: $adminReferralPrice, referralMinRides: $referralMinRides, bookingMinLeadDays: $bookingMinLeadDays, refundFullHours: $refundFullHours, refundPartialHours: $refundPartialHours, refundPartialPercentage: $refundPartialPercentage, failureCouponPercentage: $failureCouponPercentage, failureCouponValidityMonths: $failureCouponValidityMonths, instructorPayoutDelayDays: $instructorPayoutDelayDays, rideStartWindowHours: $rideStartWindowHours, rideTransferCutoffHours: $rideTransferCutoffHours)';
   }
 
   @override
@@ -437,8 +477,12 @@ class _$PricingConfigResponseImpl implements _PricingConfigResponse {
                 other.normalRate == normalRate) &&
             (identical(other.instructorRate, instructorRate) ||
                 other.instructorRate == instructorRate) &&
+            (identical(other.instructorBasePrice, instructorBasePrice) ||
+                other.instructorBasePrice == instructorBasePrice) &&
             (identical(other.averageDistancePerHour, averageDistancePerHour) ||
                 other.averageDistancePerHour == averageDistancePerHour) &&
+            (identical(other.maxPickupDistanceKm, maxPickupDistanceKm) ||
+                other.maxPickupDistanceKm == maxPickupDistanceKm) &&
             (identical(
                     other.instructorReferralPrice, instructorReferralPrice) ||
                 other.instructorReferralPrice == instructorReferralPrice) &&
@@ -474,25 +518,28 @@ class _$PricingConfigResponseImpl implements _PricingConfigResponse {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      baseDistance,
-      baseRate,
-      normalRate,
-      instructorRate,
-      averageDistancePerHour,
-      instructorReferralPrice,
-      adminReferralPrice,
-      referralMinRides,
-      bookingMinLeadDays,
-      refundFullHours,
-      refundPartialHours,
-      refundPartialPercentage,
-      failureCouponPercentage,
-      failureCouponValidityMonths,
-      instructorPayoutDelayDays,
-      rideStartWindowHours,
-      rideTransferCutoffHours);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        baseDistance,
+        baseRate,
+        normalRate,
+        instructorRate,
+        instructorBasePrice,
+        averageDistancePerHour,
+        maxPickupDistanceKm,
+        instructorReferralPrice,
+        adminReferralPrice,
+        referralMinRides,
+        bookingMinLeadDays,
+        refundFullHours,
+        refundPartialHours,
+        refundPartialPercentage,
+        failureCouponPercentage,
+        failureCouponValidityMonths,
+        instructorPayoutDelayDays,
+        rideStartWindowHours,
+        rideTransferCutoffHours
+      ]);
 
   /// Create a copy of PricingConfigResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -517,8 +564,10 @@ abstract class _PricingConfigResponse implements PricingConfigResponse {
       @JsonKey(name: "base_rate") final num? baseRate,
       @JsonKey(name: "normal_rate") final num? normalRate,
       @JsonKey(name: "instructor_rate") final num? instructorRate,
+      @JsonKey(name: "instructor_base_price") final num? instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour")
       final num? averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") final num? maxPickupDistanceKm,
       @JsonKey(name: "instructor_referral_price")
       final num? instructorReferralPrice,
       @JsonKey(name: "admin_referral_price") final num? adminReferralPrice,
@@ -553,9 +602,17 @@ abstract class _PricingConfigResponse implements PricingConfigResponse {
   @override
   @JsonKey(name: "instructor_rate")
   num? get instructorRate;
+
+  /// Derived, read-only — `instructor_rate x 3`. Never writable.
+  @override
+  @JsonKey(name: "instructor_base_price")
+  num? get instructorBasePrice;
   @override
   @JsonKey(name: "average_distance_per_hour")
   num? get averageDistancePerHour;
+  @override
+  @JsonKey(name: "max_pickup_distance_km")
+  num? get maxPickupDistanceKm;
   @override
   @JsonKey(name: "instructor_referral_price")
   num? get instructorReferralPrice;

@@ -19,6 +19,13 @@ part 'pricing_config.g.dart';
 /// The `@Default`s below mirror `PUBLIC_CONFIG_FALLBACKS` in the backend's
 /// `settings.service.ts` exactly. They are a last resort for when the fetch
 /// fails — never a source of truth. Keep them in sync if the server's change.
+///
+/// **Never compute instructor pay from these values.** They are for copy that
+/// is not about a specific job ("instructors earn $120 + $40/hr driving"). The
+/// authoritative per-job number is `ride_price` on the booking and the
+/// authoritative per-ride number is `instructorEarnings` — an accepted job
+/// keeps the rate it was accepted at, so anything recomputed here drifts the
+/// moment an admin edits a setting.
 @freezed
 class PricingConfig with _$PricingConfig {
   const factory PricingConfig({
@@ -27,26 +34,39 @@ class PricingConfig with _$PricingConfig {
     @JsonKey(name: "base_rate") @Default(100) num baseRate,
     @JsonKey(name: "normal_rate") @Default(50) num normalRate,
 
-    // ── Instructor economics ──
-    /// Cents per hour. Note the server's own fallback is 8000, which disagrees
-    /// with the seeded 4000 — mirrored deliberately so this app never advertises
-    /// a rate the server would not use.
-    @JsonKey(name: "instructor_rate") @Default(8000) num instructorRate,
+    // ── Instructor economics (pay v2) ──
+    /// Cents per hour — **the single pay lever**.
+    ///
+    /// A ride pays `instructor_rate x 3` for the road test itself plus
+    /// `instructor_rate` per hour of driving the customer. The server's own
+    /// fallback used to be 8000 against a seeded 4000; both are 4000 now, so
+    /// this default finally matches what the server would use.
+    @JsonKey(name: "instructor_rate") @Default(4000) num instructorRate,
+
+    /// Cents. **Derived and read-only** — `instructor_rate x 3`, the flat
+    /// road-test portion. It is not a stored setting and not admin-editable;
+    /// it is published so nothing has to hardcode the x3.
+    @JsonKey(name: "instructor_base_price")
+    @Default(12000)
+    num instructorBasePrice,
+
+    /// Legacy fallback only. Used server-side to derive transportation hours
+    /// for bookings taken before `pickup_duration` was recorded.
     @JsonKey(name: "average_distance_per_hour")
     @Default(50)
     num averageDistancePerHour,
 
-    /// Hours a road test itself is assumed to occupy the instructor.
+    /// Kilometres. The furthest pickup the booking flow will accept. Was
+    /// already resolved server-side but undeclared; now published.
+    @JsonKey(name: "max_pickup_distance_km")
+    @Default(300)
+    num maxPickupDistanceKm,
+
+    /// Hours a road test is assumed to occupy the instructor.
     ///
-    /// Added to `/v1/pricing-config` when the estimate was reworked: a job is
-    /// now quoted as `test_duration_hours + addon/60 + roundTripKm/avgPerHour`,
-    /// which is why a meet-at-centre booking is quoted ~1 h instead of $0
-    /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §7.1).
-    ///
-    /// The app does **not** reproduce that formula — `addon_duration` is not
-    /// exposed to instructors (§14.11), so a job with a booked lesson cannot be
-    /// recomputed client-side. Always display the server's `ride_price` /
-    /// `total_ride_hour`.
+    /// **Display only — it no longer affects pay.** The road test is covered by
+    /// the flat base now, so neither this nor the add-on lesson contributes a
+    /// cent. Nothing in this app may compute pay from it.
     @JsonKey(name: "test_duration_hours") @Default(1) num testDurationHours,
 
     // ── Referrals ──

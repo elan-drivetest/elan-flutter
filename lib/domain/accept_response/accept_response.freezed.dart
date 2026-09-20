@@ -44,8 +44,24 @@ mixin _$AcceptResponse {
   double? get dropoffLongitude => throw _privateConstructorUsedError;
   @JsonKey(name: "total_hours", fromJson: _toDouble)
   double? get totalHours => throw _privateConstructorUsedError;
+
+  /// Cents per **transportation** hour, snapshotted at accept (pay v2).
   @JsonKey(name: "hourly_rate")
   int? get hourlyRate => throw _privateConstructorUsedError;
+
+  /// Cents. Flat road-test portion frozen at accept (`instructor_rate x 3`).
+  @JsonKey(name: "base_amount")
+  int? get baseAmount => throw _privateConstructorUsedError;
+
+  /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+  @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+  double? get transportationHours => throw _privateConstructorUsedError;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @JsonKey(name: "transportation_amount")
+  int? get transportationAmount => throw _privateConstructorUsedError;
+
+  /// Cents. `base_amount + transportation_amount`, correct from accept.
   @JsonKey(name: "instructor_earnings")
   int? get instructorEarnings => throw _privateConstructorUsedError;
   @JsonKey(name: "payment_scheduled_at")
@@ -87,6 +103,10 @@ abstract class $AcceptResponseCopyWith<$Res> {
       double? dropoffLongitude,
       @JsonKey(name: "total_hours", fromJson: _toDouble) double? totalHours,
       @JsonKey(name: "hourly_rate") int? hourlyRate,
+      @JsonKey(name: "base_amount") int? baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+      double? transportationHours,
+      @JsonKey(name: "transportation_amount") int? transportationAmount,
       @JsonKey(name: "instructor_earnings") int? instructorEarnings,
       @JsonKey(name: "payment_scheduled_at") DateTime? paymentScheduledAt,
       @JsonKey(name: "payment_processed_at") DateTime? paymentProcessedAt});
@@ -119,6 +139,9 @@ class _$AcceptResponseCopyWithImpl<$Res, $Val extends AcceptResponse>
     Object? dropoffLongitude = freezed,
     Object? totalHours = freezed,
     Object? hourlyRate = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? transportationAmount = freezed,
     Object? instructorEarnings = freezed,
     Object? paymentScheduledAt = freezed,
     Object? paymentProcessedAt = freezed,
@@ -172,6 +195,18 @@ class _$AcceptResponseCopyWithImpl<$Res, $Val extends AcceptResponse>
           ? _value.hourlyRate
           : hourlyRate // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
       instructorEarnings: freezed == instructorEarnings
           ? _value.instructorEarnings
           : instructorEarnings // ignore: cast_nullable_to_non_nullable
@@ -214,6 +249,10 @@ abstract class _$$AcceptResponseImplCopyWith<$Res>
       double? dropoffLongitude,
       @JsonKey(name: "total_hours", fromJson: _toDouble) double? totalHours,
       @JsonKey(name: "hourly_rate") int? hourlyRate,
+      @JsonKey(name: "base_amount") int? baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+      double? transportationHours,
+      @JsonKey(name: "transportation_amount") int? transportationAmount,
       @JsonKey(name: "instructor_earnings") int? instructorEarnings,
       @JsonKey(name: "payment_scheduled_at") DateTime? paymentScheduledAt,
       @JsonKey(name: "payment_processed_at") DateTime? paymentProcessedAt});
@@ -244,6 +283,9 @@ class __$$AcceptResponseImplCopyWithImpl<$Res>
     Object? dropoffLongitude = freezed,
     Object? totalHours = freezed,
     Object? hourlyRate = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? transportationAmount = freezed,
     Object? instructorEarnings = freezed,
     Object? paymentScheduledAt = freezed,
     Object? paymentProcessedAt = freezed,
@@ -297,6 +339,18 @@ class __$$AcceptResponseImplCopyWithImpl<$Res>
           ? _value.hourlyRate
           : hourlyRate // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
       instructorEarnings: freezed == instructorEarnings
           ? _value.instructorEarnings
           : instructorEarnings // ignore: cast_nullable_to_non_nullable
@@ -333,6 +387,10 @@ class _$AcceptResponseImpl implements _AcceptResponse {
       this.dropoffLongitude,
       @JsonKey(name: "total_hours", fromJson: _toDouble) this.totalHours,
       @JsonKey(name: "hourly_rate") this.hourlyRate,
+      @JsonKey(name: "base_amount") this.baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+      this.transportationHours,
+      @JsonKey(name: "transportation_amount") this.transportationAmount,
       @JsonKey(name: "instructor_earnings") this.instructorEarnings,
       @JsonKey(name: "payment_scheduled_at") this.paymentScheduledAt,
       @JsonKey(name: "payment_processed_at") this.paymentProcessedAt});
@@ -375,9 +433,28 @@ class _$AcceptResponseImpl implements _AcceptResponse {
   @override
   @JsonKey(name: "total_hours", fromJson: _toDouble)
   final double? totalHours;
+
+  /// Cents per **transportation** hour, snapshotted at accept (pay v2).
   @override
   @JsonKey(name: "hourly_rate")
   final int? hourlyRate;
+
+  /// Cents. Flat road-test portion frozen at accept (`instructor_rate x 3`).
+  @override
+  @JsonKey(name: "base_amount")
+  final int? baseAmount;
+
+  /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+  @override
+  @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+  final double? transportationHours;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @override
+  @JsonKey(name: "transportation_amount")
+  final int? transportationAmount;
+
+  /// Cents. `base_amount + transportation_amount`, correct from accept.
   @override
   @JsonKey(name: "instructor_earnings")
   final int? instructorEarnings;
@@ -390,7 +467,7 @@ class _$AcceptResponseImpl implements _AcceptResponse {
 
   @override
   String toString() {
-    return 'AcceptResponse(id: $id, bookingId: $bookingId, startTime: $startTime, endTime: $endTime, status: $status, totalDistance: $totalDistance, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, dropoffLatitude: $dropoffLatitude, dropoffLongitude: $dropoffLongitude, totalHours: $totalHours, hourlyRate: $hourlyRate, instructorEarnings: $instructorEarnings, paymentScheduledAt: $paymentScheduledAt, paymentProcessedAt: $paymentProcessedAt)';
+    return 'AcceptResponse(id: $id, bookingId: $bookingId, startTime: $startTime, endTime: $endTime, status: $status, totalDistance: $totalDistance, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, dropoffLatitude: $dropoffLatitude, dropoffLongitude: $dropoffLongitude, totalHours: $totalHours, hourlyRate: $hourlyRate, baseAmount: $baseAmount, transportationHours: $transportationHours, transportationAmount: $transportationAmount, instructorEarnings: $instructorEarnings, paymentScheduledAt: $paymentScheduledAt, paymentProcessedAt: $paymentProcessedAt)';
   }
 
   @override
@@ -419,6 +496,12 @@ class _$AcceptResponseImpl implements _AcceptResponse {
                 other.totalHours == totalHours) &&
             (identical(other.hourlyRate, hourlyRate) ||
                 other.hourlyRate == hourlyRate) &&
+            (identical(other.baseAmount, baseAmount) ||
+                other.baseAmount == baseAmount) &&
+            (identical(other.transportationHours, transportationHours) ||
+                other.transportationHours == transportationHours) &&
+            (identical(other.transportationAmount, transportationAmount) ||
+                other.transportationAmount == transportationAmount) &&
             (identical(other.instructorEarnings, instructorEarnings) ||
                 other.instructorEarnings == instructorEarnings) &&
             (identical(other.paymentScheduledAt, paymentScheduledAt) ||
@@ -443,6 +526,9 @@ class _$AcceptResponseImpl implements _AcceptResponse {
       dropoffLongitude,
       totalHours,
       hourlyRate,
+      baseAmount,
+      transportationHours,
+      transportationAmount,
       instructorEarnings,
       paymentScheduledAt,
       paymentProcessedAt);
@@ -484,6 +570,10 @@ abstract class _AcceptResponse implements AcceptResponse {
       @JsonKey(name: "total_hours", fromJson: _toDouble)
       final double? totalHours,
       @JsonKey(name: "hourly_rate") final int? hourlyRate,
+      @JsonKey(name: "base_amount") final int? baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+      final double? transportationHours,
+      @JsonKey(name: "transportation_amount") final int? transportationAmount,
       @JsonKey(name: "instructor_earnings") final int? instructorEarnings,
       @JsonKey(name: "payment_scheduled_at") final DateTime? paymentScheduledAt,
       @JsonKey(name: "payment_processed_at")
@@ -527,9 +617,28 @@ abstract class _AcceptResponse implements AcceptResponse {
   @override
   @JsonKey(name: "total_hours", fromJson: _toDouble)
   double? get totalHours;
+
+  /// Cents per **transportation** hour, snapshotted at accept (pay v2).
   @override
   @JsonKey(name: "hourly_rate")
   int? get hourlyRate;
+
+  /// Cents. Flat road-test portion frozen at accept (`instructor_rate x 3`).
+  @override
+  @JsonKey(name: "base_amount")
+  int? get baseAmount;
+
+  /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+  @override
+  @JsonKey(name: "transportation_hours", fromJson: _toDouble)
+  double? get transportationHours;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @override
+  @JsonKey(name: "transportation_amount")
+  int? get transportationAmount;
+
+  /// Cents. `base_amount + transportation_amount`, correct from accept.
   @override
   @JsonKey(name: "instructor_earnings")
   int? get instructorEarnings;

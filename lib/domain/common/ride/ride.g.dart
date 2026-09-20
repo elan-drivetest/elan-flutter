@@ -31,6 +31,11 @@ _$RideImpl _$$RideImplFromJson(Map<String, dynamic> json) => _$RideImpl(
       phoneNumber: json['phone_number'] as String?,
       totalRideHour: _parseDouble(json['total_ride_hour']),
       ridePrice: (json['ride_price'] as num?)?.toInt(),
+      baseAmount: (json['base_amount'] as num?)?.toInt(),
+      transportationHours: _parseDouble(json['transportation_hours']),
+      hourlyRate: (json['hourly_rate'] as num?)?.toInt(),
+      transportationAmount: (json['transportation_amount'] as num?)?.toInt(),
+      pickupDuration: (json['pickup_duration'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$RideImplToJson(_$RideImpl instance) =>
@@ -57,4 +62,9 @@ Map<String, dynamic> _$$RideImplToJson(_$RideImpl instance) =>
       'phone_number': instance.phoneNumber,
       'total_ride_hour': instance.totalRideHour,
       'ride_price': instance.ridePrice,
+      'base_amount': instance.baseAmount,
+      'transportation_hours': instance.transportationHours,
+      'hourly_rate': instance.hourlyRate,
+      'transportation_amount': instance.transportationAmount,
+      'pickup_duration': instance.pickupDuration,
     };

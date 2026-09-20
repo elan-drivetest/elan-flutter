@@ -1,3 +1,4 @@
+import 'package:elan/core/money.dart';
 import 'package:elan/domain/pricing_config/pricing_config.dart';
 import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:flutter/widgets.dart';
@@ -26,9 +27,27 @@ class PricingConfigView {
 
   // ---- Rates (cents) ----
 
-  /// Instructor hourly rate. Fallback for `EarningsSummary.hourlyRate`, which
-  /// is null until the dashboard summary resolves.
-  num get instructorRate => _config?.instructorRate ?? 6000;
+  /// Cents per hour of **driving the customer** — the single pay lever.
+  ///
+  /// For copy that is not about a specific job. Never price a job from it: an
+  /// accepted ride keeps the rate it was accepted at, so this drifts from the
+  /// server the moment an admin edits the setting. Per-job money is
+  /// `ride_price`; per-ride money is `instructorEarnings`.
+  num get instructorRate => _config?.instructorRate ?? 4000;
+
+  /// Cents. The flat road-test portion, `instructor_rate x 3`.
+  ///
+  /// Server-derived and read-only — published precisely so nothing here has to
+  /// hardcode the multiplier.
+  num get instructorBasePrice => _config?.instructorBasePrice ?? 12000;
+
+  /// Kilometres. The furthest pickup the booking flow accepts.
+  num get maxPickupDistanceKm => _config?.maxPickupDistanceKm ?? 300;
+
+  /// `"$120.00 base + $40.00/hr driving"` — how pay works, for screens that
+  /// explain it away from any particular job.
+  String get payModelLabel =>
+      '${Money.format(instructorBasePrice)} base + ${Money.rate(instructorRate)} driving';
 
   num get baseRate => _config?.baseRate ?? 200;
 

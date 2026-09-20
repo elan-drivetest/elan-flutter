@@ -39,8 +39,26 @@ class RideSession with _$RideSession {
     double? dropoffLatitude,
     @JsonKey(name: 'dropoff_longitude', fromJson: _toDouble)
     double? dropoffLongitude,
+    /// Wall-clock hours Start → Stop. Reporting only since pay v2 — it does
+    /// not determine the payout any more.
     @JsonKey(name: 'total_hours', fromJson: _toDouble) double? totalHours,
+
+    /// Cents per **transportation** hour, snapshotted at accept.
     @JsonKey(name: 'hourly_rate') int? hourlyRate,
+
+    /// Cents. The flat road-test portion frozen onto this session at accept
+    /// (`instructor_rate x 3`). `0`/null on sessions created before pay v2.
+    @JsonKey(name: 'base_amount') int? baseAmount,
+
+    /// Paid driving hours, frozen at accept. `0` for meet-at-centre.
+    @JsonKey(name: 'transportation_hours', fromJson: _toDouble)
+    double? transportationHours,
+
+    /// Cents. `round(transportation_hours x hourly_rate)`.
+    @JsonKey(name: 'transportation_amount') int? transportationAmount,
+
+    /// Cents. `base_amount + transportation_amount`, written at accept — no
+    /// longer zero until the payout cron runs.
     @JsonKey(name: 'instructor_earnings') int? instructorEarnings,
     @JsonKey(name: 'payment_scheduled_at') DateTime? paymentScheduledAt,
     @JsonKey(name: 'payment_processed_at') DateTime? paymentProcessedAt,

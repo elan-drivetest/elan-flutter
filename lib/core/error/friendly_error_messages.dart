@@ -117,8 +117,11 @@ class FriendlyErrorMessages {
         'Please finish bank onboarding before accepting rides.',
 
     // ---- Rides ----
-    'ride pricing is temporarily unavailable':
-        'Ride pricing is temporarily unavailable. Please try again shortly.',
+    // NOTE: 'ride pricing is temporarily unavailable' used to be mapped here.
+    // The job board 500'd whenever a pricing setting was blank or
+    // non-numeric — one bad keystroke in the admin panel hid every job from
+    // every instructor. The server now falls back per key and always returns
+    // the list, so that error no longer occurs and the mapping is gone.
     'booking not found': 'This booking is no longer available.',
     'booking already accepted':
         'This booking has already been taken by another instructor.',

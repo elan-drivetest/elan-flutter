@@ -27,26 +27,37 @@ mixin _$PricingConfig {
   num get baseRate => throw _privateConstructorUsedError;
   @JsonKey(name: "normal_rate")
   num get normalRate =>
-      throw _privateConstructorUsedError; // ── Instructor economics ──
-  /// Cents per hour. Note the server's own fallback is 8000, which disagrees
-  /// with the seeded 4000 — mirrored deliberately so this app never advertises
-  /// a rate the server would not use.
+      throw _privateConstructorUsedError; // ── Instructor economics (pay v2) ──
+  /// Cents per hour — **the single pay lever**.
+  ///
+  /// A ride pays `instructor_rate x 3` for the road test itself plus
+  /// `instructor_rate` per hour of driving the customer. The server's own
+  /// fallback used to be 8000 against a seeded 4000; both are 4000 now, so
+  /// this default finally matches what the server would use.
   @JsonKey(name: "instructor_rate")
   num get instructorRate => throw _privateConstructorUsedError;
+
+  /// Cents. **Derived and read-only** — `instructor_rate x 3`, the flat
+  /// road-test portion. It is not a stored setting and not admin-editable;
+  /// it is published so nothing has to hardcode the x3.
+  @JsonKey(name: "instructor_base_price")
+  num get instructorBasePrice => throw _privateConstructorUsedError;
+
+  /// Legacy fallback only. Used server-side to derive transportation hours
+  /// for bookings taken before `pickup_duration` was recorded.
   @JsonKey(name: "average_distance_per_hour")
   num get averageDistancePerHour => throw _privateConstructorUsedError;
 
-  /// Hours a road test itself is assumed to occupy the instructor.
+  /// Kilometres. The furthest pickup the booking flow will accept. Was
+  /// already resolved server-side but undeclared; now published.
+  @JsonKey(name: "max_pickup_distance_km")
+  num get maxPickupDistanceKm => throw _privateConstructorUsedError;
+
+  /// Hours a road test is assumed to occupy the instructor.
   ///
-  /// Added to `/v1/pricing-config` when the estimate was reworked: a job is
-  /// now quoted as `test_duration_hours + addon/60 + roundTripKm/avgPerHour`,
-  /// which is why a meet-at-centre booking is quoted ~1 h instead of $0
-  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §7.1).
-  ///
-  /// The app does **not** reproduce that formula — `addon_duration` is not
-  /// exposed to instructors (§14.11), so a job with a booked lesson cannot be
-  /// recomputed client-side. Always display the server's `ride_price` /
-  /// `total_ride_hour`.
+  /// **Display only — it no longer affects pay.** The road test is covered by
+  /// the flat base now, so neither this nor the add-on lesson contributes a
+  /// cent. Nothing in this app may compute pay from it.
   @JsonKey(name: "test_duration_hours")
   num get testDurationHours =>
       throw _privateConstructorUsedError; // ── Referrals ──
@@ -101,7 +112,9 @@ abstract class $PricingConfigCopyWith<$Res> {
       @JsonKey(name: "base_rate") num baseRate,
       @JsonKey(name: "normal_rate") num normalRate,
       @JsonKey(name: "instructor_rate") num instructorRate,
+      @JsonKey(name: "instructor_base_price") num instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour") num averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") num maxPickupDistanceKm,
       @JsonKey(name: "test_duration_hours") num testDurationHours,
       @JsonKey(name: "instructor_referral_price") num instructorReferralPrice,
       @JsonKey(name: "admin_referral_price") num adminReferralPrice,
@@ -139,7 +152,9 @@ class _$PricingConfigCopyWithImpl<$Res, $Val extends PricingConfig>
     Object? baseRate = null,
     Object? normalRate = null,
     Object? instructorRate = null,
+    Object? instructorBasePrice = null,
     Object? averageDistancePerHour = null,
+    Object? maxPickupDistanceKm = null,
     Object? testDurationHours = null,
     Object? instructorReferralPrice = null,
     Object? adminReferralPrice = null,
@@ -171,9 +186,17 @@ class _$PricingConfigCopyWithImpl<$Res, $Val extends PricingConfig>
           ? _value.instructorRate
           : instructorRate // ignore: cast_nullable_to_non_nullable
               as num,
+      instructorBasePrice: null == instructorBasePrice
+          ? _value.instructorBasePrice
+          : instructorBasePrice // ignore: cast_nullable_to_non_nullable
+              as num,
       averageDistancePerHour: null == averageDistancePerHour
           ? _value.averageDistancePerHour
           : averageDistancePerHour // ignore: cast_nullable_to_non_nullable
+              as num,
+      maxPickupDistanceKm: null == maxPickupDistanceKm
+          ? _value.maxPickupDistanceKm
+          : maxPickupDistanceKm // ignore: cast_nullable_to_non_nullable
               as num,
       testDurationHours: null == testDurationHours
           ? _value.testDurationHours
@@ -244,7 +267,9 @@ abstract class _$$PricingConfigImplCopyWith<$Res>
       @JsonKey(name: "base_rate") num baseRate,
       @JsonKey(name: "normal_rate") num normalRate,
       @JsonKey(name: "instructor_rate") num instructorRate,
+      @JsonKey(name: "instructor_base_price") num instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour") num averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") num maxPickupDistanceKm,
       @JsonKey(name: "test_duration_hours") num testDurationHours,
       @JsonKey(name: "instructor_referral_price") num instructorReferralPrice,
       @JsonKey(name: "admin_referral_price") num adminReferralPrice,
@@ -280,7 +305,9 @@ class __$$PricingConfigImplCopyWithImpl<$Res>
     Object? baseRate = null,
     Object? normalRate = null,
     Object? instructorRate = null,
+    Object? instructorBasePrice = null,
     Object? averageDistancePerHour = null,
+    Object? maxPickupDistanceKm = null,
     Object? testDurationHours = null,
     Object? instructorReferralPrice = null,
     Object? adminReferralPrice = null,
@@ -312,9 +339,17 @@ class __$$PricingConfigImplCopyWithImpl<$Res>
           ? _value.instructorRate
           : instructorRate // ignore: cast_nullable_to_non_nullable
               as num,
+      instructorBasePrice: null == instructorBasePrice
+          ? _value.instructorBasePrice
+          : instructorBasePrice // ignore: cast_nullable_to_non_nullable
+              as num,
       averageDistancePerHour: null == averageDistancePerHour
           ? _value.averageDistancePerHour
           : averageDistancePerHour // ignore: cast_nullable_to_non_nullable
+              as num,
+      maxPickupDistanceKm: null == maxPickupDistanceKm
+          ? _value.maxPickupDistanceKm
+          : maxPickupDistanceKm // ignore: cast_nullable_to_non_nullable
               as num,
       testDurationHours: null == testDurationHours
           ? _value.testDurationHours
@@ -379,9 +414,11 @@ class _$PricingConfigImpl implements _PricingConfig {
       {@JsonKey(name: "base_distance") this.baseDistance = 50,
       @JsonKey(name: "base_rate") this.baseRate = 100,
       @JsonKey(name: "normal_rate") this.normalRate = 50,
-      @JsonKey(name: "instructor_rate") this.instructorRate = 8000,
+      @JsonKey(name: "instructor_rate") this.instructorRate = 4000,
+      @JsonKey(name: "instructor_base_price") this.instructorBasePrice = 12000,
       @JsonKey(name: "average_distance_per_hour")
       this.averageDistancePerHour = 50,
+      @JsonKey(name: "max_pickup_distance_km") this.maxPickupDistanceKm = 300,
       @JsonKey(name: "test_duration_hours") this.testDurationHours = 1,
       @JsonKey(name: "instructor_referral_price")
       this.instructorReferralPrice = 10000,
@@ -415,28 +452,41 @@ class _$PricingConfigImpl implements _PricingConfig {
   @override
   @JsonKey(name: "normal_rate")
   final num normalRate;
-// ── Instructor economics ──
-  /// Cents per hour. Note the server's own fallback is 8000, which disagrees
-  /// with the seeded 4000 — mirrored deliberately so this app never advertises
-  /// a rate the server would not use.
+// ── Instructor economics (pay v2) ──
+  /// Cents per hour — **the single pay lever**.
+  ///
+  /// A ride pays `instructor_rate x 3` for the road test itself plus
+  /// `instructor_rate` per hour of driving the customer. The server's own
+  /// fallback used to be 8000 against a seeded 4000; both are 4000 now, so
+  /// this default finally matches what the server would use.
   @override
   @JsonKey(name: "instructor_rate")
   final num instructorRate;
+
+  /// Cents. **Derived and read-only** — `instructor_rate x 3`, the flat
+  /// road-test portion. It is not a stored setting and not admin-editable;
+  /// it is published so nothing has to hardcode the x3.
+  @override
+  @JsonKey(name: "instructor_base_price")
+  final num instructorBasePrice;
+
+  /// Legacy fallback only. Used server-side to derive transportation hours
+  /// for bookings taken before `pickup_duration` was recorded.
   @override
   @JsonKey(name: "average_distance_per_hour")
   final num averageDistancePerHour;
 
-  /// Hours a road test itself is assumed to occupy the instructor.
+  /// Kilometres. The furthest pickup the booking flow will accept. Was
+  /// already resolved server-side but undeclared; now published.
+  @override
+  @JsonKey(name: "max_pickup_distance_km")
+  final num maxPickupDistanceKm;
+
+  /// Hours a road test is assumed to occupy the instructor.
   ///
-  /// Added to `/v1/pricing-config` when the estimate was reworked: a job is
-  /// now quoted as `test_duration_hours + addon/60 + roundTripKm/avgPerHour`,
-  /// which is why a meet-at-centre booking is quoted ~1 h instead of $0
-  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §7.1).
-  ///
-  /// The app does **not** reproduce that formula — `addon_duration` is not
-  /// exposed to instructors (§14.11), so a job with a booked lesson cannot be
-  /// recomputed client-side. Always display the server's `ride_price` /
-  /// `total_ride_hour`.
+  /// **Display only — it no longer affects pay.** The road test is covered by
+  /// the flat base now, so neither this nor the add-on lesson contributes a
+  /// cent. Nothing in this app may compute pay from it.
   @override
   @JsonKey(name: "test_duration_hours")
   final num testDurationHours;
@@ -485,7 +535,7 @@ class _$PricingConfigImpl implements _PricingConfig {
 
   @override
   String toString() {
-    return 'PricingConfig(baseDistance: $baseDistance, baseRate: $baseRate, normalRate: $normalRate, instructorRate: $instructorRate, averageDistancePerHour: $averageDistancePerHour, testDurationHours: $testDurationHours, instructorReferralPrice: $instructorReferralPrice, adminReferralPrice: $adminReferralPrice, referralMinRides: $referralMinRides, bookingMinLeadDays: $bookingMinLeadDays, refundFullHours: $refundFullHours, refundPartialHours: $refundPartialHours, refundPartialPercentage: $refundPartialPercentage, failureCouponPercentage: $failureCouponPercentage, failureCouponValidityMonths: $failureCouponValidityMonths, instructorPayoutDelayDays: $instructorPayoutDelayDays, rideStartWindowHours: $rideStartWindowHours, rideTransferCutoffHours: $rideTransferCutoffHours)';
+    return 'PricingConfig(baseDistance: $baseDistance, baseRate: $baseRate, normalRate: $normalRate, instructorRate: $instructorRate, instructorBasePrice: $instructorBasePrice, averageDistancePerHour: $averageDistancePerHour, maxPickupDistanceKm: $maxPickupDistanceKm, testDurationHours: $testDurationHours, instructorReferralPrice: $instructorReferralPrice, adminReferralPrice: $adminReferralPrice, referralMinRides: $referralMinRides, bookingMinLeadDays: $bookingMinLeadDays, refundFullHours: $refundFullHours, refundPartialHours: $refundPartialHours, refundPartialPercentage: $refundPartialPercentage, failureCouponPercentage: $failureCouponPercentage, failureCouponValidityMonths: $failureCouponValidityMonths, instructorPayoutDelayDays: $instructorPayoutDelayDays, rideStartWindowHours: $rideStartWindowHours, rideTransferCutoffHours: $rideTransferCutoffHours)';
   }
 
   @override
@@ -501,12 +551,15 @@ class _$PricingConfigImpl implements _PricingConfig {
                 other.normalRate == normalRate) &&
             (identical(other.instructorRate, instructorRate) ||
                 other.instructorRate == instructorRate) &&
+            (identical(other.instructorBasePrice, instructorBasePrice) ||
+                other.instructorBasePrice == instructorBasePrice) &&
             (identical(other.averageDistancePerHour, averageDistancePerHour) ||
                 other.averageDistancePerHour == averageDistancePerHour) &&
+            (identical(other.maxPickupDistanceKm, maxPickupDistanceKm) ||
+                other.maxPickupDistanceKm == maxPickupDistanceKm) &&
             (identical(other.testDurationHours, testDurationHours) ||
                 other.testDurationHours == testDurationHours) &&
-            (identical(
-                    other.instructorReferralPrice, instructorReferralPrice) ||
+            (identical(other.instructorReferralPrice, instructorReferralPrice) ||
                 other.instructorReferralPrice == instructorReferralPrice) &&
             (identical(other.adminReferralPrice, adminReferralPrice) ||
                 other.adminReferralPrice == adminReferralPrice) &&
@@ -540,26 +593,29 @@ class _$PricingConfigImpl implements _PricingConfig {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      baseDistance,
-      baseRate,
-      normalRate,
-      instructorRate,
-      averageDistancePerHour,
-      testDurationHours,
-      instructorReferralPrice,
-      adminReferralPrice,
-      referralMinRides,
-      bookingMinLeadDays,
-      refundFullHours,
-      refundPartialHours,
-      refundPartialPercentage,
-      failureCouponPercentage,
-      failureCouponValidityMonths,
-      instructorPayoutDelayDays,
-      rideStartWindowHours,
-      rideTransferCutoffHours);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        baseDistance,
+        baseRate,
+        normalRate,
+        instructorRate,
+        instructorBasePrice,
+        averageDistancePerHour,
+        maxPickupDistanceKm,
+        testDurationHours,
+        instructorReferralPrice,
+        adminReferralPrice,
+        referralMinRides,
+        bookingMinLeadDays,
+        refundFullHours,
+        refundPartialHours,
+        refundPartialPercentage,
+        failureCouponPercentage,
+        failureCouponValidityMonths,
+        instructorPayoutDelayDays,
+        rideStartWindowHours,
+        rideTransferCutoffHours
+      ]);
 
   /// Create a copy of PricingConfig
   /// with the given fields replaced by the non-null parameter values.
@@ -583,8 +639,10 @@ abstract class _PricingConfig implements PricingConfig {
       @JsonKey(name: "base_rate") final num baseRate,
       @JsonKey(name: "normal_rate") final num normalRate,
       @JsonKey(name: "instructor_rate") final num instructorRate,
+      @JsonKey(name: "instructor_base_price") final num instructorBasePrice,
       @JsonKey(name: "average_distance_per_hour")
       final num averageDistancePerHour,
+      @JsonKey(name: "max_pickup_distance_km") final num maxPickupDistanceKm,
       @JsonKey(name: "test_duration_hours") final num testDurationHours,
       @JsonKey(name: "instructor_referral_price")
       final num instructorReferralPrice,
@@ -617,28 +675,41 @@ abstract class _PricingConfig implements PricingConfig {
   num get baseRate;
   @override
   @JsonKey(name: "normal_rate")
-  num get normalRate; // ── Instructor economics ──
-  /// Cents per hour. Note the server's own fallback is 8000, which disagrees
-  /// with the seeded 4000 — mirrored deliberately so this app never advertises
-  /// a rate the server would not use.
+  num get normalRate; // ── Instructor economics (pay v2) ──
+  /// Cents per hour — **the single pay lever**.
+  ///
+  /// A ride pays `instructor_rate x 3` for the road test itself plus
+  /// `instructor_rate` per hour of driving the customer. The server's own
+  /// fallback used to be 8000 against a seeded 4000; both are 4000 now, so
+  /// this default finally matches what the server would use.
   @override
   @JsonKey(name: "instructor_rate")
   num get instructorRate;
+
+  /// Cents. **Derived and read-only** — `instructor_rate x 3`, the flat
+  /// road-test portion. It is not a stored setting and not admin-editable;
+  /// it is published so nothing has to hardcode the x3.
+  @override
+  @JsonKey(name: "instructor_base_price")
+  num get instructorBasePrice;
+
+  /// Legacy fallback only. Used server-side to derive transportation hours
+  /// for bookings taken before `pickup_duration` was recorded.
   @override
   @JsonKey(name: "average_distance_per_hour")
   num get averageDistancePerHour;
 
-  /// Hours a road test itself is assumed to occupy the instructor.
+  /// Kilometres. The furthest pickup the booking flow will accept. Was
+  /// already resolved server-side but undeclared; now published.
+  @override
+  @JsonKey(name: "max_pickup_distance_km")
+  num get maxPickupDistanceKm;
+
+  /// Hours a road test is assumed to occupy the instructor.
   ///
-  /// Added to `/v1/pricing-config` when the estimate was reworked: a job is
-  /// now quoted as `test_duration_hours + addon/60 + roundTripKm/avgPerHour`,
-  /// which is why a meet-at-centre booking is quoted ~1 h instead of $0
-  /// (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §7.1).
-  ///
-  /// The app does **not** reproduce that formula — `addon_duration` is not
-  /// exposed to instructors (§14.11), so a job with a booked lesson cannot be
-  /// recomputed client-side. Always display the server's `ride_price` /
-  /// `total_ride_hour`.
+  /// **Display only — it no longer affects pay.** The road test is covered by
+  /// the flat base now, so neither this nor the add-on lesson contributes a
+  /// cent. Nothing in this app may compute pay from it.
   @override
   @JsonKey(name: "test_duration_hours")
   num get testDurationHours; // ── Referrals ──

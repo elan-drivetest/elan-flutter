@@ -24,6 +24,9 @@ _$RideSessionImpl _$$RideSessionImplFromJson(Map<String, dynamic> json) =>
       dropoffLongitude: _toDouble(json['dropoff_longitude']),
       totalHours: _toDouble(json['total_hours']),
       hourlyRate: (json['hourly_rate'] as num?)?.toInt(),
+      baseAmount: (json['base_amount'] as num?)?.toInt(),
+      transportationHours: _toDouble(json['transportation_hours']),
+      transportationAmount: (json['transportation_amount'] as num?)?.toInt(),
       instructorEarnings: (json['instructor_earnings'] as num?)?.toInt(),
       paymentScheduledAt: json['payment_scheduled_at'] == null
           ? null
@@ -47,6 +50,9 @@ Map<String, dynamic> _$$RideSessionImplToJson(_$RideSessionImpl instance) =>
       'dropoff_longitude': instance.dropoffLongitude,
       'total_hours': instance.totalHours,
       'hourly_rate': instance.hourlyRate,
+      'base_amount': instance.baseAmount,
+      'transportation_hours': instance.transportationHours,
+      'transportation_amount': instance.transportationAmount,
       'instructor_earnings': instance.instructorEarnings,
       'payment_scheduled_at': instance.paymentScheduledAt?.toIso8601String(),
       'payment_processed_at': instance.paymentProcessedAt?.toIso8601String(),

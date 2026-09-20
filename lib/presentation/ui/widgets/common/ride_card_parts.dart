@@ -187,23 +187,26 @@ class RideCallButton extends StatelessWidget {
   }
 }
 
-/// The distance the **price** was computed from.
+/// How far the job's driving leg actually is.
 ///
-/// This is the §14.1 gap as it survived on the list screens. The detail sheet
-/// and the active-ride map both show "Round trip" already, but the cards showed
-/// no distance at all — so in a list, `ride_price` had no visible basis. Two
-/// jobs whose routes look comparable can price 18x apart, because the number
-/// being priced (`booking.pickup_distance`, one-way, doubled) is not the number
-/// the app computes for the map (the deadhead from wherever the instructor is
-/// standing). Only the first one reaches the estimate.
+/// Since pay v2 this is context, not the basis of the money — the driving
+/// portion is priced on Google's **drive time**, not on kilometres. Distance
+/// still answers the question the instructor asks first ("how far is this?")
+/// and it is the only leg the customer's fare touches, so it keeps its own
+/// row.
 ///
-/// Showing it makes a corrupt booking self-evident: a row with a geocode that
-/// landed in the wrong province reads as "3015.0 km" beside its price, instead
-/// of an unexplained four-figure number.
+/// It is also what makes a corrupt booking self-evident: a row with a geocode
+/// that landed in the wrong province reads as "3015.0 km" beside its pay,
+/// instead of an unexplained four-figure number.
+///
+/// Note this is not the drive the *map* computes — that is the deadhead from
+/// wherever the instructor is standing, which is unpaid by design and would
+/// otherwise make one job worth a different amount to every instructor
+/// looking at the board.
 ///
 /// Deliberately no plausibility threshold here — what counts as too far is a
-/// business rule, and inventing a client-side limit would put a second,
-/// drifting copy of it in the app.
+/// business rule (`max_pickup_distance_km`), and inventing a client-side limit
+/// would put a second, drifting copy of it in the app.
 class RideDistanceRow extends StatelessWidget {
   const RideDistanceRow({
     super.key,

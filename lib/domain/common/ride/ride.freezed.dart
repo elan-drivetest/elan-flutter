@@ -63,10 +63,54 @@ mixin _$Ride {
   String? get fullName => throw _privateConstructorUsedError;
   @JsonKey(name: "phone_number")
   String? get phoneNumber => throw _privateConstructorUsedError;
+
+  /// **Deprecated.** Now just mirrors [transportationHours] server-side, and
+  /// will be dropped from the API once the pre-v2 builds are off the field.
+  /// Nothing should read it — use [transportationHours].
+  @Deprecated('Mirrors transportationHours; being removed from the API.')
   @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
-  double? get totalRideHour => throw _privateConstructorUsedError;
+  double? get totalRideHour =>
+      throw _privateConstructorUsedError; // ── Instructor pay v2 (`GET /v1/rides/available` only) ──
+//
+// Pay is `(instructor_rate x 3) + round(transportation_hours x
+// instructor_rate)`, computed once and frozen onto the ride the moment the
+// instructor accepts. It is no longer an estimate, and the wall clock no
+// longer moves it. Never reproduce the formula here — read the fields.
+  /// Cents. What the instructor **will be paid** for this job, base plus
+  /// transportation. Formerly a distance-derived estimate that the payout
+  /// then disagreed with; now the number that actually settles.
   @JsonKey(name: "ride_price")
   int? get ridePrice => throw _privateConstructorUsedError;
+
+  /// Cents. The flat road-test portion, `instructor_rate x 3` (e.g. 12000).
+  /// Paid on every ride, meet-at-centre included. Absent on pre-v2
+  /// responses, which is why the breakdown UI guards on `> 0`.
+  @JsonKey(name: "base_amount")
+  int? get baseAmount => throw _privateConstructorUsedError;
+
+  /// Paid driving hours: pickup → centre → back to pickup. `0` for
+  /// meet-at-centre, where there is no pickup leg at all.
+  ///
+  /// The instructor's own commute to the pickup address is deliberately not
+  /// in here — it would make the same job worth a different amount to every
+  /// instructor looking at the board.
+  @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+  double? get transportationHours => throw _privateConstructorUsedError;
+
+  /// Cents per hour of transportation — the single pay lever
+  /// (`instructor_rate`). Not a rate for the road test, which is flat.
+  @JsonKey(name: "hourly_rate")
+  int? get hourlyRate => throw _privateConstructorUsedError;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @JsonKey(name: "transportation_amount")
+  int? get transportationAmount => throw _privateConstructorUsedError;
+
+  /// Seconds. One-way drive time pickup → centre, from Google, stored on the
+  /// booking. Doubled server-side to get [transportationHours]. Null on
+  /// bookings taken before v2, which fall back to a distance/speed estimate.
+  @JsonKey(name: "pickup_duration")
+  int? get pickupDuration => throw _privateConstructorUsedError;
 
   /// Serializes this Ride to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -108,9 +152,16 @@ abstract class $RideCopyWith<$Res> {
       double? testCenterLongitude,
       @JsonKey(name: "full_name") String? fullName,
       @JsonKey(name: "phone_number") String? phoneNumber,
+      @Deprecated('Mirrors transportationHours; being removed from the API.')
       @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
       double? totalRideHour,
-      @JsonKey(name: "ride_price") int? ridePrice});
+      @JsonKey(name: "ride_price") int? ridePrice,
+      @JsonKey(name: "base_amount") int? baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+      double? transportationHours,
+      @JsonKey(name: "hourly_rate") int? hourlyRate,
+      @JsonKey(name: "transportation_amount") int? transportationAmount,
+      @JsonKey(name: "pickup_duration") int? pickupDuration});
 }
 
 /// @nodoc
@@ -150,6 +201,11 @@ class _$RideCopyWithImpl<$Res, $Val extends Ride>
     Object? phoneNumber = freezed,
     Object? totalRideHour = freezed,
     Object? ridePrice = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? hourlyRate = freezed,
+    Object? transportationAmount = freezed,
+    Object? pickupDuration = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -240,6 +296,26 @@ class _$RideCopyWithImpl<$Res, $Val extends Ride>
           ? _value.ridePrice
           : ridePrice // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      hourlyRate: freezed == hourlyRate
+          ? _value.hourlyRate
+          : hourlyRate // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      pickupDuration: freezed == pickupDuration
+          ? _value.pickupDuration
+          : pickupDuration // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -277,9 +353,16 @@ abstract class _$$RideImplCopyWith<$Res> implements $RideCopyWith<$Res> {
       double? testCenterLongitude,
       @JsonKey(name: "full_name") String? fullName,
       @JsonKey(name: "phone_number") String? phoneNumber,
+      @Deprecated('Mirrors transportationHours; being removed from the API.')
       @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
       double? totalRideHour,
-      @JsonKey(name: "ride_price") int? ridePrice});
+      @JsonKey(name: "ride_price") int? ridePrice,
+      @JsonKey(name: "base_amount") int? baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+      double? transportationHours,
+      @JsonKey(name: "hourly_rate") int? hourlyRate,
+      @JsonKey(name: "transportation_amount") int? transportationAmount,
+      @JsonKey(name: "pickup_duration") int? pickupDuration});
 }
 
 /// @nodoc
@@ -316,6 +399,11 @@ class __$$RideImplCopyWithImpl<$Res>
     Object? phoneNumber = freezed,
     Object? totalRideHour = freezed,
     Object? ridePrice = freezed,
+    Object? baseAmount = freezed,
+    Object? transportationHours = freezed,
+    Object? hourlyRate = freezed,
+    Object? transportationAmount = freezed,
+    Object? pickupDuration = freezed,
   }) {
     return _then(_$RideImpl(
       id: freezed == id
@@ -406,6 +494,26 @@ class __$$RideImplCopyWithImpl<$Res>
           ? _value.ridePrice
           : ridePrice // ignore: cast_nullable_to_non_nullable
               as int?,
+      baseAmount: freezed == baseAmount
+          ? _value.baseAmount
+          : baseAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationHours: freezed == transportationHours
+          ? _value.transportationHours
+          : transportationHours // ignore: cast_nullable_to_non_nullable
+              as double?,
+      hourlyRate: freezed == hourlyRate
+          ? _value.hourlyRate
+          : hourlyRate // ignore: cast_nullable_to_non_nullable
+              as int?,
+      transportationAmount: freezed == transportationAmount
+          ? _value.transportationAmount
+          : transportationAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      pickupDuration: freezed == pickupDuration
+          ? _value.pickupDuration
+          : pickupDuration // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -439,9 +547,16 @@ class _$RideImpl implements _Ride {
       this.testCenterLongitude,
       @JsonKey(name: "full_name") this.fullName,
       @JsonKey(name: "phone_number") this.phoneNumber,
+      @Deprecated('Mirrors transportationHours; being removed from the API.')
       @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
       this.totalRideHour,
-      @JsonKey(name: "ride_price") this.ridePrice});
+      @JsonKey(name: "ride_price") this.ridePrice,
+      @JsonKey(name: "base_amount") this.baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+      this.transportationHours,
+      @JsonKey(name: "hourly_rate") this.hourlyRate,
+      @JsonKey(name: "transportation_amount") this.transportationAmount,
+      @JsonKey(name: "pickup_duration") this.pickupDuration});
 
   factory _$RideImpl.fromJson(Map<String, dynamic> json) =>
       _$$RideImplFromJson(json);
@@ -509,16 +624,65 @@ class _$RideImpl implements _Ride {
   @override
   @JsonKey(name: "phone_number")
   final String? phoneNumber;
+
+  /// **Deprecated.** Now just mirrors [transportationHours] server-side, and
+  /// will be dropped from the API once the pre-v2 builds are off the field.
+  /// Nothing should read it — use [transportationHours].
   @override
+  @Deprecated('Mirrors transportationHours; being removed from the API.')
   @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
   final double? totalRideHour;
+// ── Instructor pay v2 (`GET /v1/rides/available` only) ──
+//
+// Pay is `(instructor_rate x 3) + round(transportation_hours x
+// instructor_rate)`, computed once and frozen onto the ride the moment the
+// instructor accepts. It is no longer an estimate, and the wall clock no
+// longer moves it. Never reproduce the formula here — read the fields.
+  /// Cents. What the instructor **will be paid** for this job, base plus
+  /// transportation. Formerly a distance-derived estimate that the payout
+  /// then disagreed with; now the number that actually settles.
   @override
   @JsonKey(name: "ride_price")
   final int? ridePrice;
 
+  /// Cents. The flat road-test portion, `instructor_rate x 3` (e.g. 12000).
+  /// Paid on every ride, meet-at-centre included. Absent on pre-v2
+  /// responses, which is why the breakdown UI guards on `> 0`.
+  @override
+  @JsonKey(name: "base_amount")
+  final int? baseAmount;
+
+  /// Paid driving hours: pickup → centre → back to pickup. `0` for
+  /// meet-at-centre, where there is no pickup leg at all.
+  ///
+  /// The instructor's own commute to the pickup address is deliberately not
+  /// in here — it would make the same job worth a different amount to every
+  /// instructor looking at the board.
+  @override
+  @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+  final double? transportationHours;
+
+  /// Cents per hour of transportation — the single pay lever
+  /// (`instructor_rate`). Not a rate for the road test, which is flat.
+  @override
+  @JsonKey(name: "hourly_rate")
+  final int? hourlyRate;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @override
+  @JsonKey(name: "transportation_amount")
+  final int? transportationAmount;
+
+  /// Seconds. One-way drive time pickup → centre, from Google, stored on the
+  /// booking. Doubled server-side to get [transportationHours]. Null on
+  /// bookings taken before v2, which fall back to a distance/speed estimate.
+  @override
+  @JsonKey(name: "pickup_duration")
+  final int? pickupDuration;
+
   @override
   String toString() {
-    return 'Ride(id: $id, instructorId: $instructorId, testType: $testType, testDate: $testDate, meetAtCenter: $meetAtCenter, pickupAddress: $pickupAddress, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, pickupDistance: $pickupDistance, isRescheduled: $isRescheduled, timezone: $timezone, roadTestDocUrl: $roadTestDocUrl, g1LicenseDocUrl: $g1LicenseDocUrl, testCenterId: $testCenterId, testCenterName: $testCenterName, testCenterAddress: $testCenterAddress, testCenterLatitude: $testCenterLatitude, testCenterLongitude: $testCenterLongitude, fullName: $fullName, phoneNumber: $phoneNumber, totalRideHour: $totalRideHour, ridePrice: $ridePrice)';
+    return 'Ride(id: $id, instructorId: $instructorId, testType: $testType, testDate: $testDate, meetAtCenter: $meetAtCenter, pickupAddress: $pickupAddress, pickupLatitude: $pickupLatitude, pickupLongitude: $pickupLongitude, pickupDistance: $pickupDistance, isRescheduled: $isRescheduled, timezone: $timezone, roadTestDocUrl: $roadTestDocUrl, g1LicenseDocUrl: $g1LicenseDocUrl, testCenterId: $testCenterId, testCenterName: $testCenterName, testCenterAddress: $testCenterAddress, testCenterLatitude: $testCenterLatitude, testCenterLongitude: $testCenterLongitude, fullName: $fullName, phoneNumber: $phoneNumber, totalRideHour: $totalRideHour, ridePrice: $ridePrice, baseAmount: $baseAmount, transportationHours: $transportationHours, hourlyRate: $hourlyRate, transportationAmount: $transportationAmount, pickupDuration: $pickupDuration)';
   }
 
   @override
@@ -568,7 +732,17 @@ class _$RideImpl implements _Ride {
             (identical(other.totalRideHour, totalRideHour) ||
                 other.totalRideHour == totalRideHour) &&
             (identical(other.ridePrice, ridePrice) ||
-                other.ridePrice == ridePrice));
+                other.ridePrice == ridePrice) &&
+            (identical(other.baseAmount, baseAmount) ||
+                other.baseAmount == baseAmount) &&
+            (identical(other.transportationHours, transportationHours) ||
+                other.transportationHours == transportationHours) &&
+            (identical(other.hourlyRate, hourlyRate) ||
+                other.hourlyRate == hourlyRate) &&
+            (identical(other.transportationAmount, transportationAmount) ||
+                other.transportationAmount == transportationAmount) &&
+            (identical(other.pickupDuration, pickupDuration) ||
+                other.pickupDuration == pickupDuration));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -596,7 +770,12 @@ class _$RideImpl implements _Ride {
         fullName,
         phoneNumber,
         totalRideHour,
-        ridePrice
+        ridePrice,
+        baseAmount,
+        transportationHours,
+        hourlyRate,
+        transportationAmount,
+        pickupDuration
       ]);
 
   /// Create a copy of Ride
@@ -642,9 +821,17 @@ abstract class _Ride implements Ride {
       final double? testCenterLongitude,
       @JsonKey(name: "full_name") final String? fullName,
       @JsonKey(name: "phone_number") final String? phoneNumber,
+      @Deprecated('Mirrors transportationHours; being removed from the API.')
       @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
       final double? totalRideHour,
-      @JsonKey(name: "ride_price") final int? ridePrice}) = _$RideImpl;
+      @JsonKey(name: "ride_price") final int? ridePrice,
+      @JsonKey(name: "base_amount") final int? baseAmount,
+      @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+      final double? transportationHours,
+      @JsonKey(name: "hourly_rate") final int? hourlyRate,
+      @JsonKey(name: "transportation_amount") final int? transportationAmount,
+      @JsonKey(name: "pickup_duration")
+      final int? pickupDuration}) = _$RideImpl;
 
   factory _Ride.fromJson(Map<String, dynamic> json) = _$RideImpl.fromJson;
 
@@ -711,12 +898,61 @@ abstract class _Ride implements Ride {
   @override
   @JsonKey(name: "phone_number")
   String? get phoneNumber;
+
+  /// **Deprecated.** Now just mirrors [transportationHours] server-side, and
+  /// will be dropped from the API once the pre-v2 builds are off the field.
+  /// Nothing should read it — use [transportationHours].
   @override
+  @Deprecated('Mirrors transportationHours; being removed from the API.')
   @JsonKey(name: "total_ride_hour", fromJson: _parseDouble)
-  double? get totalRideHour;
+  double?
+      get totalRideHour; // ── Instructor pay v2 (`GET /v1/rides/available` only) ──
+//
+// Pay is `(instructor_rate x 3) + round(transportation_hours x
+// instructor_rate)`, computed once and frozen onto the ride the moment the
+// instructor accepts. It is no longer an estimate, and the wall clock no
+// longer moves it. Never reproduce the formula here — read the fields.
+  /// Cents. What the instructor **will be paid** for this job, base plus
+  /// transportation. Formerly a distance-derived estimate that the payout
+  /// then disagreed with; now the number that actually settles.
   @override
   @JsonKey(name: "ride_price")
   int? get ridePrice;
+
+  /// Cents. The flat road-test portion, `instructor_rate x 3` (e.g. 12000).
+  /// Paid on every ride, meet-at-centre included. Absent on pre-v2
+  /// responses, which is why the breakdown UI guards on `> 0`.
+  @override
+  @JsonKey(name: "base_amount")
+  int? get baseAmount;
+
+  /// Paid driving hours: pickup → centre → back to pickup. `0` for
+  /// meet-at-centre, where there is no pickup leg at all.
+  ///
+  /// The instructor's own commute to the pickup address is deliberately not
+  /// in here — it would make the same job worth a different amount to every
+  /// instructor looking at the board.
+  @override
+  @JsonKey(name: "transportation_hours", fromJson: _parseDouble)
+  double? get transportationHours;
+
+  /// Cents per hour of transportation — the single pay lever
+  /// (`instructor_rate`). Not a rate for the road test, which is flat.
+  @override
+  @JsonKey(name: "hourly_rate")
+  int? get hourlyRate;
+
+  /// Cents. `round(transportation_hours x hourly_rate)`.
+  @override
+  @JsonKey(name: "transportation_amount")
+  int? get transportationAmount;
+
+  /// Seconds. One-way drive time pickup → centre, from Google, stored on the
+  /// booking. Doubled server-side to get [transportationHours]. Null on
+  /// bookings taken before v2, which fall back to a distance/speed estimate.
+  @override
+  @JsonKey(name: "pickup_duration")
+  int? get pickupDuration;
 
   /// Create a copy of Ride
   /// with the given fields replaced by the non-null parameter values.

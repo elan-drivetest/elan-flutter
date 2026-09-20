@@ -13,13 +13,19 @@ class ActiveRideCard extends StatelessWidget {
   /// Stop (`INSTRUCTOR_APP_RIDE_JOURNEY.md` §5.2). Labelled "Round trip"
   /// accordingly; it does not tick up as the instructor drives.
   final double totalDistance;
+
+  /// Wall-clock hours since Start. **Duration, not the basis of pay** — under
+  /// pay v2 the payout was fixed when the job was accepted, so this ticking up
+  /// does not earn the instructor another cent. Never multiply it by a rate.
   final double totalHours;
 
-  /// Cents per hour, straight off the wire — the snapshot taken when this ride
-  /// was accepted. Formatting happens here, not at the call site.
-  /// This ride's **own** snapshot, `RideSession.hourly_rate` — never the
-  /// dashboard's `hourly_rate`, which is the current global setting and can
-  /// disagree with what a held ride actually pays (§8.10, §7.2).
+  /// Cents per hour of **driving the customer**, straight off the wire — this
+  /// ride's own snapshot, `RideSession.hourly_rate`, never the dashboard's
+  /// global setting (§8.10, §7.2). Formatting happens here.
+  ///
+  /// It prices the transportation legs only; the road test itself is a flat
+  /// base and is not hourly at all. Labelled "Driving rate" for exactly that
+  /// reason — a bare "Rate" beside a running clock reads as pay accruing.
   ///
   /// Nullable so an absent rate reads as absent rather than as $0.00/hr.
   final num? hourlyRate;
@@ -145,7 +151,7 @@ class ActiveRideCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          'Rate',
+                          'Driving rate',
                           style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade500,

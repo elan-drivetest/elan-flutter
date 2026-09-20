@@ -24,9 +24,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// * **Pickup run** — `booking.pickup_distance`, the authoritative billable leg.
 /// * **Your drive** — the deadhead, clearly secondary, greyed.
 ///
-/// The old duration fallback showed `total_ride_hour`, which is a *billing
-/// constant* (`pickup_distance / average_distance_per_hour`), not a travel time
-/// (§6). It is labelled as billable hours here, never as an ETA.
+/// The old duration fallback showed `total_ride_hour`, a billing constant
+/// rather than a travel time (§6). It is not shown at all now: under pay v2
+/// the paid driving time is `transportation_hours`, which prices the job
+/// server-side and has no business sitting in a row of distances where it
+/// reads as an ETA.
 class RideLegsSection extends StatelessWidget {
   const RideLegsSection({super.key, required this.rideInfo});
 
@@ -222,10 +224,10 @@ class _DistanceSummary extends StatelessWidget {
               icon: Icons.route,
               iconColor: RideCardColors.actionGreen,
               // The drive actually made: out to the centre and back, because
-              // the customer is returned home. Quoting the one-way figure put
-              // a distance on the card that disagreed with the price beside it
-              // — the §14.1 bug. Derived from booking.pickup_distance, never
-              // from a Directions result (§5.3).
+              // the customer is returned home. Quoting the one-way figure
+              // would understate it by half. Derived from
+              // booking.pickup_distance, never from a Directions result
+              // (§5.3).
               label: 'Round trip',
               value: '${roundTripKm.toStringAsFixed(1)} km',
               emphasised: true,

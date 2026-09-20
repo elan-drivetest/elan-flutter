@@ -22,10 +22,14 @@ class PickupBottomSheet extends StatelessWidget {
     final formattedDate =
         BookingTime.format(rideInfo.testDate, rideInfo.timezone);
 
-    // Meet-at-centre bookings price at 0 because there is no pickup run;
-    // quoting the hourly rate is the honest version (§14.3).
-    final earnings = RideEarnings.estimate(ridePriceCents: rideInfo.ridePrice);
-    final ridePrice = earnings.amount;
+    // The actual payout, frozen onto the ride at accept — not an estimate.
+    // A meet-at-centre booking is the flat base and nothing else, which is a
+    // real number now rather than the $0.00 it used to advertise.
+    // Shown as a single figure, deliberately. The base/driving split is not
+    // something the instructor decides on — they are choosing whether to take
+    // the job, and the total is what that choice turns on.
+    final ridePrice =
+        RideEarnings.jobPay(ridePriceCents: rideInfo.ridePrice).amount;
 
     return BlocConsumer<UpcomingRideBloc, UpcomingRideState>(
       listener: (context, state) {
