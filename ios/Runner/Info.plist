@@ -4,27 +4,19 @@
 <dict>
    <key>BGTaskSchedulerPermittedIdentifiers</key>
     <array>
-        <string>hrtrace-periodic-task</string>
-        <string>be.tramckrijte.workmanagerExample.taskId</string>
-        <string>be.tramckrijte.workmanagerExample.simpleTask</string>
-        <string>be.tramckrijte.workmanagerExample.rescheduledTask</string>
-        <string>be.tramckrijte.workmanagerExample.failedTask</string>
-        <string>be.tramckrijte.workmanagerExample.simpleDelayedTask</string>
-        <string>be.tramckrijte.workmanagerExample.simplePeriodicTask</string>
-        <string>be.tramckrijte.workmanagerExample.simplePeriodic1HourTask</string>
-        <string>be.tramckrijte.workmanagerExample.iOSBackgroundAppRefresh</string>
-        <string>be.tramckrijte.workmanagerExample.iOSBackgroundProcessingTask</string>
-    </array>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Application requires user’s location for better user experience.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow access to location when in the background for checking your field visits after check-in. </string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow access to location for verifying check-in and check-out location.</string>
-    <key>BGTaskSchedulerPermittedIdentifiers</key>
-    <array>
         <string>com.pravera.flutter_foreground_task.refresh</string>
+        <string>hrtrace-periodic-task</string>
     </array>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Elan needs your location to set pickup addresses and navigate to your scheduled DriveTest centre.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Elan needs background location while an active road-test ride is underway to track route distance, calculate instructor pay, and ensure test-day safety.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Elan needs background location while an active road-test ride is underway to track route distance, calculate instructor pay, and ensure test-day safety.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Elan needs camera access so you can photograph your driver's licence, instructor credentials, vehicle documentation, or DriveTest booking confirmation.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Elan needs photo library access so you can select and upload required licences, vehicle ownership documents, and test confirmations.</string>
     <key>UIBackgroundModes</key>
     <array>
         <string>fetch</string>

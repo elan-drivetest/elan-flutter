@@ -1,8 +1,10 @@
 import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:elan/presentation/ui/pages/place_picker_page/place_picker_page.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:elan/core/error/api_error_mapper.dart';
 import 'package:elan/presentation/bloc/registration_bloc/registration_bloc.dart';
@@ -494,15 +496,71 @@ class _RegistrationPageState extends State<RegistrationPage>
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _nextStep(),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
+          _buildTermsAndPrivacyNotice(),
+          const SizedBox(height: 24),
           _primaryButton(
             'Complete Registration',
             _nextStep,
             Icons.check_circle_outline,
           ),
+          const SizedBox(height: 16),
+          _buildGovernmentDisclaimerNotice(),
         ],
       ),
     );
+  }
+
+  Widget _buildTermsAndPrivacyNotice() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Text.rich(
+        TextSpan(
+          text: 'By continuing, you agree to Elan\'s ',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.4),
+          children: [
+            TextSpan(
+              text: 'Terms of Service',
+              style: const TextStyle(
+                color: Color(0xFF4CAF50),
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => _openUrl('https://www.elanroadtestrental.ca/terms'),
+            ),
+            const TextSpan(text: ' and acknowledge our '),
+            TextSpan(
+              text: 'Privacy Policy',
+              style: const TextStyle(
+                color: Color(0xFF4CAF50),
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => _openUrl('https://www.elanroadtestrental.ca/privacy-policy'),
+            ),
+            const TextSpan(text: '.'),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildGovernmentDisclaimerNotice() {
+    return Text(
+      'Elan Road Test Rental is an independent service and is not affiliated with, endorsed by, or sponsored by DriveTest Ontario, Serco, or the Government of Ontario.',
+      textAlign: TextAlign.center,
+      style: TextStyle(fontSize: 11, color: Colors.grey.shade500, height: 1.3),
+    );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   // ================= COMMON WIDGETS =================
