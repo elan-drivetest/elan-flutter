@@ -319,6 +319,19 @@ class _LicenseEditSheetState extends State<LicenseEditSheet> {
       "driving_school_name": _drivingSchoolNameController.text.trim(),
     }..removeWhere((key, value) => value.isEmpty);
 
+    // Document URLs from /me are signed and expire (backend B12). Echoing an
+    // unchanged one back would store an expiring link, so only send URLs the
+    // instructor actually replaced (a fresh upload returns the raw URL).
+    // This is PATCH, so omitted fields keep their stored value.
+    void dropUnchanged(String key, String? initial) {
+      if (params[key] == (initial ?? '').trim()) params.remove(key);
+    }
+
+    dropUnchanged("tax_info_doc_url", widget.taxInfoDocUrl);
+    dropUnchanged("work_eligibility_doc_url", widget.workEligibilityDocUrl);
+    dropUnchanged("instructor_license_url", widget.instructorLicenseUrl);
+    dropUnchanged("driving_license_url", widget.drivingLicenseUrl);
+
     if (params.isEmpty) {
       Navigator.of(context).pop();
       return;
