@@ -135,6 +135,6 @@ refuses the update and you'd silently keep testing the old app.
 Deferred until after launch: B13 ports, cookies/Swagger, NODE_ENV + email Lambda,
 legal enforcement flag, crash reporting, signup legal payload, iOS.
 
-Live surfaces: web https://www.elanroadtestcar.ca (same deployment as
+Live surfaces: web https://www.elanroadtestrental.ca (canonical; elanroadtestcar.ca 308s to it; same deployment as
 www.elanroadtestrental.ca, the Play-verified domain), admin
 https://admin.elanroadtestcar.ca, API https://api-dev.elanroadtestrental.ca (= prod).
