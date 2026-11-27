@@ -122,8 +122,8 @@ refuses the update and you'd silently keep testing the old app.
 | # | Owner | Item | Status |
 |---|---|---|---|
 | F1 | Forge | Presigned document URLs + signature stripping on write | [x] LIVE (1f58ce5) |
-| P1 | Picasso | Publish privacy §17.1 foreground-location wording | [ ] |
-| P2 | Picasso | Web read-side B12 fix to prod (bbcd10d) | [ ] |
+| P1 | Picasso | Publish privacy §17.1 foreground-location wording | [x] live (5d13879) |
+| P2 | Picasso | Web read-side B12 fix to prod (bbcd10d) | [x] live |
 | A1 | Atlas | Admin photo_url only-if-changed (54c63d2) | [x] pushed (origin + client main) |
 | A2 | Atlas/Lead | refund_partial_percentage = 0 in admin settings | [ ] **Lead, in admin** |
 | B12 | Lead | Private-bucket terraform (after P2 + A1 live) | [ ] |
