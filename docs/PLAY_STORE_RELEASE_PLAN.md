@@ -124,7 +124,7 @@ refuses the update and you'd silently keep testing the old app.
 | F1 | Forge | Presigned document URLs + signature stripping on write | [x] LIVE (1f58ce5) |
 | P1 | Picasso | Publish privacy §17.1 foreground-location wording | [ ] |
 | P2 | Picasso | Web read-side B12 fix to prod (bbcd10d) | [ ] |
-| A1 | Atlas | Admin photo_url only-if-changed (54c63d2) | [ ] code done; **Lead pushes elan-admin main** |
+| A1 | Atlas | Admin photo_url only-if-changed (54c63d2) | [x] pushed (origin + client main) |
 | A2 | Atlas/Lead | refund_partial_percentage = 0 in admin settings | [ ] **Lead, in admin** |
 | B12 | Lead | Private-bucket terraform (after P2 + A1 live) | [ ] |
 | F2 | Forge | Play reviewer demo mode + `seed-play-review` | [ ] Forge confirming with Lead |
