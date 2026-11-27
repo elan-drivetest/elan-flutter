@@ -8,10 +8,10 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 | # | Issue | Where | Owner | Status |
 |---|---|---|---|---|
-| B1 | Release builds are signed with the **debug key** | `android/app/build.gradle` | Anvil + Lead (keystore) | [ ] |
+| B1 | Release builds are signed with the **debug key** | `android/app/build.gradle` | Anvil | [x] upload-key signing 2026-11-27 (keystore in %USERPROFILE%.elan-signing; BACK IT UP) |
 | B2 | "Delete account" only logs out. Play requires real deletion. The backend has `DELETE /v1/auth/instructor/me`. | `delete_account_button.dart` | Anvil | [x] code done 2026-11-27 (uncommitted); live behaviour depends on Forge 119a850 |
 | B3 | No prominent disclosure before the background-location prompt (Play also requires a Console declaration and a video) | `location_bloc.dart` | Anvil + Lead | [x] in-app disclosure done 2026-11-27 (uncommitted); Console declaration + video still to do |
-| B4 | Base URL hardcoded to `api-dev` | `api_endpoints.dart` | Anvil | [ ] |
+| B4 | Base URL hardcoded to `api-dev` | `api_endpoints.dart` | Anvil | [x] not a blocker: api-dev IS prod (backend dev = live) |
 | B5 | Restricted or obsolete permissions: `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `READ/WRITE_EXTERNAL_STORAGE`, `READ_MEDIA_DOCUMENTS` | `AndroidManifest.xml` | Anvil | [x] removed and verified in the merged manifest 2026-11-27 (uncommitted) |
 | B6 | Maps API key unrestricted | Manifest / Google Cloud Console | Lead | [ ] |
 | B7 | Tracker sends `timeZoneName` ("EDT") instead of an IANA name; `getIt` crash in the isolate on session rejection | `location_service_handler.dart` | Anvil | [x] fixed 2026-11-27 (uncommitted) |
