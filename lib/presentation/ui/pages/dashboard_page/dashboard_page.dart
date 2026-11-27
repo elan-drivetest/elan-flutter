@@ -28,6 +28,9 @@ import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:elan/presentation/ui/dialog/location_dialog/open_setting_dialog.dart';
 import 'package:elan/presentation/ui/dialog/location_dialog/permission_warning_dialog.dart';
 import 'package:elan/presentation/ui/pages/dashboard_page/dialog/transfer_dialog.dart';
+import 'package:elan/presentation/ui/pages/location_disclosure_page/location_disclosure_page.dart';
+import 'package:elan/presentation/ui/pages/legal_acceptance_page/legal_acceptance_page.dart';
+import 'package:elan/presentation/bloc/legal_bloc/legal_bloc.dart';
 import 'package:elan/presentation/ui/widgets/home/active_ride_card.dart';
 import 'package:elan/presentation/ui/widgets/home/dashboard_card_section.dart';
 import 'package:elan/presentation/ui/widgets/home/ride_history_card.dart';
@@ -57,6 +60,64 @@ class _DashboardPageState extends State<DashboardPage> {
   final battery = Battery();
   int batteryLevel = 0;
 
+  /// Guards against stacking a second disclosure while one is open.
+  bool _disclosureOpen = false;
+
+  bool _legalOpen = false;
+
+  /// Blocking legal acceptance. Before the location disclosure on purpose:
+  /// nothing else on this screen matters until the agreements are accepted.
+  Future<void> _showLegalAcceptance() async {
+    if (_legalOpen) return;
+    _legalOpen = true;
+    await LegalAcceptancePage.show(context);
+    _legalOpen = false;
+    // A disclosure request that arrived while this was open was deferred.
+    if (mounted && _disclosureDeferred) {
+      _disclosureDeferred = false;
+      context
+          .read<LocationBloc>()
+          .add(const LocationEvent.checkAllPermissions());
+    }
+  }
+
+  bool _disclosureDeferred = false;
+
+  /// The battery hint is shown at most once per app run.
+  static bool _batteryHintShown = false;
+
+  Future<void> _showLocationDisclosure() async {
+    if (_disclosureOpen) return;
+    if (_legalOpen) {
+      // Never stack the disclosure on top of the legal screen.
+      _disclosureDeferred = true;
+      return;
+    }
+    _disclosureOpen = true;
+    final accepted = await LocationDisclosurePage.show(context);
+    _disclosureOpen = false;
+    if (!accepted || !mounted) return;
+    context.read<LocationBloc>().add(const LocationEvent.acceptDisclosure());
+  }
+
+  void _maybeShowBatteryHint() {
+    if (_batteryHintShown) return;
+    _batteryHintShown = true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 8),
+        content: const Text(
+            'Battery optimization may pause ride tracking when your screen '
+            'is off.'),
+        action: SnackBarAction(
+          label: 'Settings',
+          onPressed: () =>
+              unawaited(_locationRequestService.openBatteryOptimizationSettings()),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +131,7 @@ class _DashboardPageState extends State<DashboardPage> {
     context
         .read<EarningsSummaryBloc>()
         .add(const EarningsSummaryEvent.getEarningsSummary());
+    context.read<LegalBloc>().add(const LegalEvent.fetch());
     // checkAllPermissions internally runs checkBackgroundPermissions sequentially
     context.read<LocationBloc>().add(const LocationEvent.checkAllPermissions());
     getInfo();
@@ -176,8 +238,23 @@ class _DashboardPageState extends State<DashboardPage> {
             },
             child: MultiBlocListener(
               listeners: [
+                BlocListener<LegalBloc, LegalState>(
+                  listenWhen: (prev, curr) =>
+                      curr.status == LegalStatusCode.loaded &&
+                      curr.mustAccept,
+                  listener: (context, state) =>
+                      unawaited(_showLegalAcceptance()),
+                ),
                 BlocListener<LocationBloc, LocationState>(
                   listener: (context, state) {
+                    if (state.status == LocationStatus.disclosureRequired) {
+                      unawaited(_showLocationDisclosure());
+                      return;
+                    }
+                    if (state.status == LocationStatus.success &&
+                        state.batteryRestricted) {
+                      _maybeShowBatteryHint();
+                    }
                     if (state.status == LocationStatus.success &&
                         state.location != null &&
                         state.rideId != null &&
@@ -196,7 +273,8 @@ class _DashboardPageState extends State<DashboardPage> {
                               bearing: state.location?.heading,
                               altitude: state.location?.altitude,
                               batteryLevel: batteryLevel,
-                              timezone: "America/Toronto",
+                              // The bloc resolves null to the app default.
+                              timezone: state.booking?.timezone,
                             ),
                           );
                     }
@@ -888,7 +966,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                                       // You can replace this with any custom loading UI if desired.
 
                                                       // Await the background permission request
-                                                      final granted =
+                                                      final granted = await LocationDisclosurePage
+                                                              .ensureAccepted(
+                                                                  context) &&
                                                           await _locationRequestService
                                                               .requestBackgroundPermission();
 

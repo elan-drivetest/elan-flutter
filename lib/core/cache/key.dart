@@ -54,7 +54,12 @@ enum Key {
   /// Android backend while [CacheManager] is configured for
   /// `encryptedSharedPreferences` — two different stores, one of which nothing
   /// else in the app used or verified.
-  hasSeenOnboarding("HAS_SEEN_ONBOARDING");
+  hasSeenOnboarding("HAS_SEEN_ONBOARDING"),
+
+  /// The instructor has read the background-location disclosure and tapped
+  /// Continue. Google Play requires this in-app disclosure **before** any
+  /// location permission prompt; no prompt may be shown until it is set.
+  locationDisclosureAccepted("LOCATION_DISCLOSURE_ACCEPTED");
 
   final String keyValue;
 

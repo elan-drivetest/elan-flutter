@@ -65,6 +65,16 @@ class FriendlyErrorMessages {
     'too many requests':
         'Too many attempts. Please wait a moment and try again.',
 
+    // ---- Legal acceptance (server gate) ----
+    'legalacceptancerequired':
+        'Please review and accept the updated agreements to continue.',
+    'legalversionoutdated':
+        'The agreements were just updated. Please review the new version.',
+    'accounthasactiverides':
+        'Finish or transfer your upcoming rides before deleting your account.',
+    'hasactiverides':
+        'Finish or transfer your upcoming rides before deleting your account.',
+
     // ---- Login ----
     'notfound': 'We couldn\'t find an account with that email.',
     'userisnotactive':

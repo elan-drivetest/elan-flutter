@@ -20,6 +20,7 @@ abstract class AuthRepository {
       {required Map<String, String> fields});
   Future<Either<RefreshErrorResponse, Response<dynamic>>> refresh();
   Future<Either<ErrorResponse, Response<dynamic>>> logOut();
+  Future<Either<ErrorResponse, Response<dynamic>>> deleteAccount();
   Future<Either<ErrorResponse, Response<dynamic>>> confirmEmail({required String hash});
   Future<Either<VerificationErrorResponse, Response<dynamic>>> verifyOtp({required String email, required String otp});
   Future<Either<VerificationErrorResponse, Response<dynamic>>> resendOtp({required String email});
@@ -44,6 +45,11 @@ class IAuthRepository extends AuthRepository {
   @override
   Future<Either<ErrorResponse, Response>> logOut() {
     return authApiService.logOut();
+  }
+
+  @override
+  Future<Either<ErrorResponse, Response>> deleteAccount() {
+    return authApiService.deleteAccount();
   }
 
   @override

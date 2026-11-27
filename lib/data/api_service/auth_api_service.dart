@@ -17,6 +17,7 @@ abstract class AuthApiService {
 
   Future<Either<RefreshErrorResponse, Response<dynamic>>> refresh();
   Future<Either<ErrorResponse, Response<dynamic>>> logOut();
+  Future<Either<ErrorResponse, Response<dynamic>>> deleteAccount();
   Future<Either<ErrorResponse, Response<dynamic>>> confirmEmail({required String hash});
   Future<Either<VerificationErrorResponse, Response<dynamic>>> verifyOtp({required String email, required String otp});
   Future<Either<VerificationErrorResponse, Response<dynamic>>> resendOtp({required String email});

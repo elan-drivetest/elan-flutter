@@ -12,6 +12,19 @@ class CacheManagerImpl {
     await _cache.clearAll();
   }
 
+  /// Wipes everything a deleted account left on the device: session marker,
+  /// ride ids, the cached active booking (which holds customer PII) and the
+  /// offline GPS queue. Only device-level flags (onboarding seen, location
+  /// disclosure accepted) survive, since they describe the device, not the
+  /// account.
+  Future<void> wipeAccountData() async {
+    final seenOnboarding = await getHasSeenOnboarding();
+    final disclosureAccepted = await getLocationDisclosureAccepted();
+    await _cache.clearAll();
+    if (seenOnboarding) await setHasSeenOnboarding();
+    if (disclosureAccepted) await setLocationDisclosureAccepted();
+  }
+
   // Future<String?> getToken() => _cache.getString(Key.token.keyValue);
   //
   // Future<void> setToken({required String? token}) async {
@@ -71,4 +84,11 @@ class CacheManagerImpl {
 
   Future<void> setHasSeenOnboarding() =>
       _cache.setBool(Key.hasSeenOnboarding.keyValue, true);
+
+  /// See [Key.locationDisclosureAccepted].
+  Future<bool> getLocationDisclosureAccepted() async =>
+      (await _cache.getBool(Key.locationDisclosureAccepted.keyValue)) ?? false;
+
+  Future<void> setLocationDisclosureAccepted() =>
+      _cache.setBool(Key.locationDisclosureAccepted.keyValue, true);
 }

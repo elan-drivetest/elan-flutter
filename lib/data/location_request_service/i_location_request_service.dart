@@ -54,21 +54,15 @@ class ILocationRequestService implements LocationRequestService {
   }
 
   @override
-  Future<bool> requestIgnoreBatteryOptimization() async {
+  Future<bool> isIgnoringBatteryOptimizations() async {
     if (!Platform.isAndroid) return true;
+    return FlutterForegroundTask.isIgnoringBatteryOptimizations;
+  }
 
-    if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-      final result =
-      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-      if (!result) return false;
-    }
-
-    if (!await FlutterForegroundTask.canScheduleExactAlarms) {
-      await FlutterForegroundTask.openAlarmsAndRemindersSettings();
-      return false;
-    }
-
-    return true;
+  @override
+  Future<void> openBatteryOptimizationSettings() async {
+    if (!Platform.isAndroid) return;
+    await FlutterForegroundTask.openIgnoreBatteryOptimizationSettings();
   }
 
   @override

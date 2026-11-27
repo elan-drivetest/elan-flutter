@@ -21,6 +21,22 @@ class ApiEndpoints {
   static const String pricingConfigUrl = "/v1/pricing-config";
   static const String instructorInfoUrl = "/v1/auth/instructor/me";
   static const String patchInstructorInfoUrl = "/v1/auth/instructor/me";
+
+  /// `DELETE`: the instructor deletes their own account (Play policy requires
+  /// it in-app). Returns 204 and clears the auth cookies server-side.
+  static const String deleteInstructorAccountUrl = "/v1/auth/instructor/me";
+
+  /// Legal acceptance (Forge's contract, 2026-11-27).
+  static const String legalStatusUrl = "/v1/legal/status";
+  static const String legalAcceptUrl = "/v1/legal/accept";
+
+  /// Public copies of the documents, for the settings screen and signup links.
+  /// Stable URLs with `#section-N-N` anchors (Picasso).
+  static const String websiteUrl = "https://www.elanroadtestrental.ca";
+  static const String privacyPolicyPageUrl = "$websiteUrl/privacy";
+  static const String termsPageUrl = "$websiteUrl/terms";
+  static const String providerAgreementPageUrl = "$websiteUrl/provider-agreement";
+  static const String deleteAccountPageUrl = "$websiteUrl/delete-account#instructors";
   static const String updateInstructorVehicleInfoUrl =
       "/v1/instructors/vehicle";
   static const String instructorDashboardUrl = "/v1/instructors/dashboard";

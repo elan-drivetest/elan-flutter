@@ -13,19 +13,22 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Storage Permissions -->
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
-    <uses-permission android:name="android.permission.READ_MEDIA_DOCUMENTS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-
+    <!-- No storage permissions: document uploads go through file_picker, which
+         uses the system picker (SAF) and needs none. -->
 
     <!-- Notification Permissions (for Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Google Play restricts these. Stripped from the MERGED manifest too, so
+         a plugin cannot re-add them. Battery exemption is now a link to the
+         system settings screen, which needs no permission. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" tools:node="remove" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
 
     <application
         android:label="Elan Instructor"
@@ -62,9 +65,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 
-                <!-- Handle both HTTP and HTTPS -->
+                <!-- HTTPS only; confirmation links are never sent as http. -->
                 <data android:scheme="https" />
-                <data android:scheme="http" />
                 <data android:host="www.elanroadtestrental.ca" />
                 <data android:pathPrefix="/confirm-email" />
             </intent-filter>

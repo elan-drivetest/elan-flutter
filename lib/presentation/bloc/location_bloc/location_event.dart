@@ -11,4 +11,8 @@ class LocationEvent with _$LocationEvent {
   const factory LocationEvent.checkBackgroundPermissions() =
       CheckBackgroundPermissions;
   const factory LocationEvent.checkAllPermissions() = CheckAllPermissions;
+
+  /// The instructor tapped Continue on the disclosure. Records it, then runs
+  /// the permission flow.
+  const factory LocationEvent.acceptDisclosure() = AcceptLocationDisclosure;
 }

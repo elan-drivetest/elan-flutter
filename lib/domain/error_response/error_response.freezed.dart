@@ -245,7 +245,18 @@ mixin _$Errors {
   @JsonKey(name: "no_auth token")
   List<String>? get noAuthToken => throw _privateConstructorUsedError;
   @JsonKey(name: "otp")
-  List<String>? get otp => throw _privateConstructorUsedError;
+  List<String>? get otp =>
+      throw _privateConstructorUsedError; // `DELETE /v1/auth/instructor/me` → 422 "hasActiveRides" while any ride is
+// scheduled or in progress. Object? because humanizeBody normalises field
+// codes to lists.
+// ignore: invalid_annotation_target
+  @JsonKey(name: "account")
+  Object? get account =>
+      throw _privateConstructorUsedError; // Legal codes: legalAcceptanceRequired (403), legalVersionOutdated (409),
+// documentNotApplicable (422).
+// ignore: invalid_annotation_target
+  @JsonKey(name: "legal")
+  Object? get legal => throw _privateConstructorUsedError;
 
   /// Serializes this Errors to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -263,7 +274,9 @@ abstract class $ErrorsCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: "no_auth token") List<String>? noAuthToken,
-      @JsonKey(name: "otp") List<String>? otp});
+      @JsonKey(name: "otp") List<String>? otp,
+      @JsonKey(name: "account") Object? account,
+      @JsonKey(name: "legal") Object? legal});
 }
 
 /// @nodoc
@@ -283,6 +296,8 @@ class _$ErrorsCopyWithImpl<$Res, $Val extends Errors>
   $Res call({
     Object? noAuthToken = freezed,
     Object? otp = freezed,
+    Object? account = freezed,
+    Object? legal = freezed,
   }) {
     return _then(_value.copyWith(
       noAuthToken: freezed == noAuthToken
@@ -293,6 +308,8 @@ class _$ErrorsCopyWithImpl<$Res, $Val extends Errors>
           ? _value.otp
           : otp // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      account: freezed == account ? _value.account : account,
+      legal: freezed == legal ? _value.legal : legal,
     ) as $Val);
   }
 }
@@ -306,7 +323,9 @@ abstract class _$$ErrorsImplCopyWith<$Res> implements $ErrorsCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: "no_auth token") List<String>? noAuthToken,
-      @JsonKey(name: "otp") List<String>? otp});
+      @JsonKey(name: "otp") List<String>? otp,
+      @JsonKey(name: "account") Object? account,
+      @JsonKey(name: "legal") Object? legal});
 }
 
 /// @nodoc
@@ -324,6 +343,8 @@ class __$$ErrorsImplCopyWithImpl<$Res>
   $Res call({
     Object? noAuthToken = freezed,
     Object? otp = freezed,
+    Object? account = freezed,
+    Object? legal = freezed,
   }) {
     return _then(_$ErrorsImpl(
       noAuthToken: freezed == noAuthToken
@@ -334,6 +355,8 @@ class __$$ErrorsImplCopyWithImpl<$Res>
           ? _value._otp
           : otp // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      account: freezed == account ? _value.account : account,
+      legal: freezed == legal ? _value.legal : legal,
     ));
   }
 }
@@ -343,7 +366,9 @@ class __$$ErrorsImplCopyWithImpl<$Res>
 class _$ErrorsImpl implements _Errors {
   const _$ErrorsImpl(
       {@JsonKey(name: "no_auth token") final List<String>? noAuthToken,
-      @JsonKey(name: "otp") final List<String>? otp})
+      @JsonKey(name: "otp") final List<String>? otp,
+      @JsonKey(name: "account") this.account,
+      @JsonKey(name: "legal") this.legal})
       : _noAuthToken = noAuthToken,
         _otp = otp;
 
@@ -372,9 +397,23 @@ class _$ErrorsImpl implements _Errors {
     return EqualUnmodifiableListView(value);
   }
 
+// `DELETE /v1/auth/instructor/me` → 422 "hasActiveRides" while any ride is
+// scheduled or in progress. Object? because humanizeBody normalises field
+// codes to lists.
+// ignore: invalid_annotation_target
+  @override
+  @JsonKey(name: "account")
+  final Object? account;
+// Legal codes: legalAcceptanceRequired (403), legalVersionOutdated (409),
+// documentNotApplicable (422).
+// ignore: invalid_annotation_target
+  @override
+  @JsonKey(name: "legal")
+  final Object? legal;
+
   @override
   String toString() {
-    return 'Errors(noAuthToken: $noAuthToken, otp: $otp)';
+    return 'Errors(noAuthToken: $noAuthToken, otp: $otp, account: $account, legal: $legal)';
   }
 
   @override
@@ -384,7 +423,9 @@ class _$ErrorsImpl implements _Errors {
             other is _$ErrorsImpl &&
             const DeepCollectionEquality()
                 .equals(other._noAuthToken, _noAuthToken) &&
-            const DeepCollectionEquality().equals(other._otp, _otp));
+            const DeepCollectionEquality().equals(other._otp, _otp) &&
+            const DeepCollectionEquality().equals(other.account, account) &&
+            const DeepCollectionEquality().equals(other.legal, legal));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -392,7 +433,9 @@ class _$ErrorsImpl implements _Errors {
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_noAuthToken),
-      const DeepCollectionEquality().hash(_otp));
+      const DeepCollectionEquality().hash(_otp),
+      const DeepCollectionEquality().hash(account),
+      const DeepCollectionEquality().hash(legal));
 
   /// Create a copy of Errors
   /// with the given fields replaced by the non-null parameter values.
@@ -413,7 +456,9 @@ class _$ErrorsImpl implements _Errors {
 abstract class _Errors implements Errors {
   const factory _Errors(
       {@JsonKey(name: "no_auth token") final List<String>? noAuthToken,
-      @JsonKey(name: "otp") final List<String>? otp}) = _$ErrorsImpl;
+      @JsonKey(name: "otp") final List<String>? otp,
+      @JsonKey(name: "account") final Object? account,
+      @JsonKey(name: "legal") final Object? legal}) = _$ErrorsImpl;
 
   factory _Errors.fromJson(Map<String, dynamic> json) = _$ErrorsImpl.fromJson;
 
@@ -422,7 +467,20 @@ abstract class _Errors implements Errors {
   List<String>? get noAuthToken;
   @override
   @JsonKey(name: "otp")
-  List<String>? get otp;
+  List<String>?
+      get otp; // `DELETE /v1/auth/instructor/me` → 422 "hasActiveRides" while any ride is
+// scheduled or in progress. Object? because humanizeBody normalises field
+// codes to lists.
+// ignore: invalid_annotation_target
+  @override
+  @JsonKey(name: "account")
+  Object?
+      get account; // Legal codes: legalAcceptanceRequired (403), legalVersionOutdated (409),
+// documentNotApplicable (422).
+// ignore: invalid_annotation_target
+  @override
+  @JsonKey(name: "legal")
+  Object? get legal;
 
   /// Create a copy of Errors
   /// with the given fields replaced by the non-null parameter values.

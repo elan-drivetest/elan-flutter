@@ -40,12 +40,20 @@ class CookieRefreshInterceptor extends Interceptor {
     }
     // Drop the marker too, or the next launch would restore a session the
     // server has already rejected (see Key.hasSession).
-    try {
-      await getIt<CacheManagerImpl>().clearHasSession();
-    } catch (e) {
-      log('⚠️ Error clearing session marker: $e');
+    // This interceptor also runs in the foreground-location isolate, where
+    // getIt is empty. An unguarded getIt<AuthBloc>() there threw on every
+    // session rejection. The isolate only needs the cookies gone (they're on
+    // shared disk); the UI isolate picks up the logout on its next request.
+    if (getIt.isRegistered<CacheManagerImpl>()) {
+      try {
+        await getIt<CacheManagerImpl>().clearHasSession();
+      } catch (e) {
+        log('⚠️ Error clearing session marker: $e');
+      }
     }
-    getIt<AuthBloc>().add(const AuthEvent.logout());
+    if (getIt.isRegistered<AuthBloc>()) {
+      getIt<AuthBloc>().add(const AuthEvent.logout());
+    }
 
     // Navigation is handled by the BlocListener in splash_page / global redirect.
     // Calling router.go() here causes a race condition with GoRouter's redirect chain.

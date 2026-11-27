@@ -27,10 +27,14 @@ _$ErrorsImpl _$$ErrorsImplFromJson(Map<String, dynamic> json) => _$ErrorsImpl(
           ?.map((e) => e as String)
           .toList(),
       otp: (json['otp'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      account: json['account'],
+      legal: json['legal'],
     );
 
 Map<String, dynamic> _$$ErrorsImplToJson(_$ErrorsImpl instance) =>
     <String, dynamic>{
       'no_auth token': instance.noAuthToken,
       'otp': instance.otp,
+      'account': instance.account,
+      'legal': instance.legal,
     };

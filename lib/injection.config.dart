@@ -17,11 +17,13 @@ import 'package:elan/core/endpoints/api_endpoints.dart' as _i684;
 import 'package:elan/data/api_service/auth_api_service.dart' as _i26;
 import 'package:elan/data/api_service/google_maps_api_service.dart' as _i522;
 import 'package:elan/data/api_service/i_auth_api_service.dart' as _i329;
+import 'package:elan/data/api_service/i_legal_api_service.dart' as _i388;
 import 'package:elan/data/api_service/i_pricing_config_api_service.dart'
     as _i165;
 import 'package:elan/data/api_service/i_public_api_service.dart' as _i988;
 import 'package:elan/data/api_service/i_trace_api_service.dart' as _i766;
 import 'package:elan/data/api_service/i_user_api_service.dart' as _i28;
+import 'package:elan/data/api_service/legal_api_service.dart' as _i1030;
 import 'package:elan/data/api_service/pricing_config_api_service.dart' as _i87;
 import 'package:elan/data/api_service/public_api_service.dart' as _i376;
 import 'package:elan/data/api_service/trace_api_service.dart' as _i658;
@@ -34,10 +36,13 @@ import 'package:elan/data/location_request_service/location_request_service.dart
 import 'package:elan/data/module/network_module.dart' as _i156;
 import 'package:elan/data/repository/auth_repository.dart' as _i47;
 import 'package:elan/data/repository/direction_repository.dart' as _i354;
+import 'package:elan/data/repository/legal_repository.dart' as _i463;
 import 'package:elan/data/repository/pricing_config_repository.dart' as _i506;
 import 'package:elan/data/repository/public_repository.dart' as _i1047;
 import 'package:elan/data/repository/user_repository.dart' as _i1010;
 import 'package:elan/data/service/cookie_refresh_service.dart' as _i1051;
+import 'package:elan/presentation/bloc/account_deletion_bloc/account_deletion_bloc.dart'
+    as _i221;
 import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart' as _i676;
 import 'package:elan/presentation/bloc/available_ride_bloc/available_ride_bloc.dart'
     as _i407;
@@ -63,6 +68,7 @@ import 'package:elan/presentation/bloc/instructor_onboarding_bloc/instructor_onb
     as _i733;
 import 'package:elan/presentation/bloc/instructor_ride_bloc/instructor_ride_bloc.dart'
     as _i30;
+import 'package:elan/presentation/bloc/legal_bloc/legal_bloc.dart' as _i777;
 import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart'
     as _i488;
 import 'package:elan/presentation/bloc/otp_verification_bloc/otp_verification_bloc.dart'
@@ -107,8 +113,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i685.CacheManager>(() => _i685.CacheManager());
     gh.lazySingleton<_i839.LocationRequestService>(
         () => _i264.ILocationRequestService());
-    gh.factory<_i488.LocationBloc>(
-        () => _i488.LocationBloc(gh<_i839.LocationRequestService>()));
     gh.lazySingleton<_i589.CookieRefreshInterceptor>(
         () => networkModule.cookieInterceptor(gh<_i557.PersistCookieJar>()));
     gh.lazySingleton<_i354.DirectionRepository>(
@@ -123,8 +127,14 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i557.PersistCookieJar>(),
           gh<_i589.CookieRefreshInterceptor>(),
         ));
+    gh.factory<_i488.LocationBloc>(() => _i488.LocationBloc(
+          gh<_i839.LocationRequestService>(),
+          gh<_i275.CacheManagerImpl>(),
+        ));
     gh.lazySingleton<_i658.TraceApiService>(
         () => _i766.ITraceApiService(gh<_i361.Dio>()));
+    gh.lazySingleton<_i1030.LegalApiService>(
+        () => _i388.ILegalApiService(gh<_i361.Dio>()));
     gh.lazySingleton<_i26.AuthApiService>(
         () => _i329.IAuthApiService(gh<_i361.Dio>()));
     gh.lazySingleton<_i87.PricingConfigApiService>(
@@ -135,6 +145,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i1010.IUserRepository(gh<_i231.UserApiService>()));
     gh.lazySingleton<_i376.PublicApiService>(
         () => _i988.IPublicApiService(gh<_i361.Dio>()));
+    gh.lazySingleton<_i463.LegalRepository>(
+        () => _i463.ILegalRepository(gh<_i1030.LegalApiService>()));
     gh.lazySingleton<_i47.AuthRepository>(
         () => _i47.IAuthRepository(gh<_i26.AuthApiService>()));
     gh.factory<_i407.AvailableRideBloc>(
@@ -176,8 +188,14 @@ extension GetItInjectableX on _i174.GetIt {
               gh<_i87.PricingConfigApiService>(),
               gh<_i275.CacheManagerImpl>(),
             ));
+    gh.factory<_i777.LegalBloc>(
+        () => _i777.LegalBloc(gh<_i463.LegalRepository>()));
     gh.lazySingleton<_i1051.CookieRefreshService>(
         () => _i1051.CookieRefreshService(gh<_i47.AuthRepository>()));
+    gh.factory<_i221.AccountDeletionBloc>(() => _i221.AccountDeletionBloc(
+          gh<_i47.AuthRepository>(),
+          gh<_i275.CacheManagerImpl>(),
+        ));
     gh.factory<_i676.AuthBloc>(() => _i676.AuthBloc(
           gh<_i47.AuthRepository>(),
           gh<_i557.PersistCookieJar>(),

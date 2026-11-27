@@ -23,6 +23,7 @@ mixin _$LocationEvent {
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
+    required TResult Function() acceptDisclosure,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -32,6 +33,7 @@ mixin _$LocationEvent {
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
+    TResult? Function()? acceptDisclosure,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -41,6 +43,7 @@ mixin _$LocationEvent {
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
+    TResult Function()? acceptDisclosure,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -50,6 +53,7 @@ mixin _$LocationEvent {
     required TResult Function(CheckBackgroundPermissions value)
         checkBackgroundPermissions,
     required TResult Function(CheckAllPermissions value) checkAllPermissions,
+    required TResult Function(AcceptLocationDisclosure value) acceptDisclosure,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -58,6 +62,7 @@ mixin _$LocationEvent {
     TResult? Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult? Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult? Function(AcceptLocationDisclosure value)? acceptDisclosure,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -66,6 +71,7 @@ mixin _$LocationEvent {
     TResult Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult Function(AcceptLocationDisclosure value)? acceptDisclosure,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -216,6 +222,7 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
+    required TResult Function() acceptDisclosure,
   }) {
     return checkLocationAccess(isRideRequest, rideId, booking, fromBackground);
   }
@@ -228,6 +235,7 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
+    TResult? Function()? acceptDisclosure,
   }) {
     return checkLocationAccess?.call(
         isRideRequest, rideId, booking, fromBackground);
@@ -241,6 +249,7 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
+    TResult Function()? acceptDisclosure,
     required TResult orElse(),
   }) {
     if (checkLocationAccess != null) {
@@ -257,6 +266,7 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
     required TResult Function(CheckBackgroundPermissions value)
         checkBackgroundPermissions,
     required TResult Function(CheckAllPermissions value) checkAllPermissions,
+    required TResult Function(AcceptLocationDisclosure value) acceptDisclosure,
   }) {
     return checkLocationAccess(this);
   }
@@ -268,6 +278,7 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
     TResult? Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult? Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult? Function(AcceptLocationDisclosure value)? acceptDisclosure,
   }) {
     return checkLocationAccess?.call(this);
   }
@@ -279,6 +290,7 @@ class _$CheckLocationAccessImpl implements CheckLocationAccess {
     TResult Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult Function(AcceptLocationDisclosure value)? acceptDisclosure,
     required TResult orElse(),
   }) {
     if (checkLocationAccess != null) {
@@ -356,6 +368,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
+    required TResult Function() acceptDisclosure,
   }) {
     return checkBackgroundPermissions();
   }
@@ -368,6 +381,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
+    TResult? Function()? acceptDisclosure,
   }) {
     return checkBackgroundPermissions?.call();
   }
@@ -380,6 +394,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
+    TResult Function()? acceptDisclosure,
     required TResult orElse(),
   }) {
     if (checkBackgroundPermissions != null) {
@@ -395,6 +410,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
     required TResult Function(CheckBackgroundPermissions value)
         checkBackgroundPermissions,
     required TResult Function(CheckAllPermissions value) checkAllPermissions,
+    required TResult Function(AcceptLocationDisclosure value) acceptDisclosure,
   }) {
     return checkBackgroundPermissions(this);
   }
@@ -406,6 +422,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
     TResult? Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult? Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult? Function(AcceptLocationDisclosure value)? acceptDisclosure,
   }) {
     return checkBackgroundPermissions?.call(this);
   }
@@ -417,6 +434,7 @@ class _$CheckBackgroundPermissionsImpl implements CheckBackgroundPermissions {
     TResult Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult Function(AcceptLocationDisclosure value)? acceptDisclosure,
     required TResult orElse(),
   }) {
     if (checkBackgroundPermissions != null) {
@@ -477,6 +495,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
         checkLocationAccess,
     required TResult Function() checkBackgroundPermissions,
     required TResult Function() checkAllPermissions,
+    required TResult Function() acceptDisclosure,
   }) {
     return checkAllPermissions();
   }
@@ -489,6 +508,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
         checkLocationAccess,
     TResult? Function()? checkBackgroundPermissions,
     TResult? Function()? checkAllPermissions,
+    TResult? Function()? acceptDisclosure,
   }) {
     return checkAllPermissions?.call();
   }
@@ -501,6 +521,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
         checkLocationAccess,
     TResult Function()? checkBackgroundPermissions,
     TResult Function()? checkAllPermissions,
+    TResult Function()? acceptDisclosure,
     required TResult orElse(),
   }) {
     if (checkAllPermissions != null) {
@@ -516,6 +537,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
     required TResult Function(CheckBackgroundPermissions value)
         checkBackgroundPermissions,
     required TResult Function(CheckAllPermissions value) checkAllPermissions,
+    required TResult Function(AcceptLocationDisclosure value) acceptDisclosure,
   }) {
     return checkAllPermissions(this);
   }
@@ -527,6 +549,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
     TResult? Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult? Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult? Function(AcceptLocationDisclosure value)? acceptDisclosure,
   }) {
     return checkAllPermissions?.call(this);
   }
@@ -538,6 +561,7 @@ class _$CheckAllPermissionsImpl implements CheckAllPermissions {
     TResult Function(CheckBackgroundPermissions value)?
         checkBackgroundPermissions,
     TResult Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult Function(AcceptLocationDisclosure value)? acceptDisclosure,
     required TResult orElse(),
   }) {
     if (checkAllPermissions != null) {
@@ -552,6 +576,135 @@ abstract class CheckAllPermissions implements LocationEvent {
 }
 
 /// @nodoc
+abstract class _$$AcceptLocationDisclosureImplCopyWith<$Res> {
+  factory _$$AcceptLocationDisclosureImplCopyWith(
+          _$AcceptLocationDisclosureImpl value,
+          $Res Function(_$AcceptLocationDisclosureImpl) then) =
+      __$$AcceptLocationDisclosureImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$AcceptLocationDisclosureImplCopyWithImpl<$Res>
+    extends _$LocationEventCopyWithImpl<$Res, _$AcceptLocationDisclosureImpl>
+    implements _$$AcceptLocationDisclosureImplCopyWith<$Res> {
+  __$$AcceptLocationDisclosureImplCopyWithImpl(
+      _$AcceptLocationDisclosureImpl _value,
+      $Res Function(_$AcceptLocationDisclosureImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of LocationEvent
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$AcceptLocationDisclosureImpl implements AcceptLocationDisclosure {
+  const _$AcceptLocationDisclosureImpl();
+
+  @override
+  String toString() {
+    return 'LocationEvent.acceptDisclosure()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AcceptLocationDisclosureImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            bool isRideRequest, int? rideId, Ride? booking, bool fromBackground)
+        checkLocationAccess,
+    required TResult Function() checkBackgroundPermissions,
+    required TResult Function() checkAllPermissions,
+    required TResult Function() acceptDisclosure,
+  }) {
+    return acceptDisclosure();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
+        checkLocationAccess,
+    TResult? Function()? checkBackgroundPermissions,
+    TResult? Function()? checkAllPermissions,
+    TResult? Function()? acceptDisclosure,
+  }) {
+    return acceptDisclosure?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(bool isRideRequest, int? rideId, Ride? booking,
+            bool fromBackground)?
+        checkLocationAccess,
+    TResult Function()? checkBackgroundPermissions,
+    TResult Function()? checkAllPermissions,
+    TResult Function()? acceptDisclosure,
+    required TResult orElse(),
+  }) {
+    if (acceptDisclosure != null) {
+      return acceptDisclosure();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(CheckLocationAccess value) checkLocationAccess,
+    required TResult Function(CheckBackgroundPermissions value)
+        checkBackgroundPermissions,
+    required TResult Function(CheckAllPermissions value) checkAllPermissions,
+    required TResult Function(AcceptLocationDisclosure value) acceptDisclosure,
+  }) {
+    return acceptDisclosure(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(CheckLocationAccess value)? checkLocationAccess,
+    TResult? Function(CheckBackgroundPermissions value)?
+        checkBackgroundPermissions,
+    TResult? Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult? Function(AcceptLocationDisclosure value)? acceptDisclosure,
+  }) {
+    return acceptDisclosure?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(CheckLocationAccess value)? checkLocationAccess,
+    TResult Function(CheckBackgroundPermissions value)?
+        checkBackgroundPermissions,
+    TResult Function(CheckAllPermissions value)? checkAllPermissions,
+    TResult Function(AcceptLocationDisclosure value)? acceptDisclosure,
+    required TResult orElse(),
+  }) {
+    if (acceptDisclosure != null) {
+      return acceptDisclosure(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class AcceptLocationDisclosure implements LocationEvent {
+  const factory AcceptLocationDisclosure() = _$AcceptLocationDisclosureImpl;
+}
+
+/// @nodoc
 mixin _$LocationState {
   LocationStatus get status => throw _privateConstructorUsedError;
   Position? get location => throw _privateConstructorUsedError;
@@ -559,6 +712,10 @@ mixin _$LocationState {
   Ride? get booking => throw _privateConstructorUsedError;
   bool get shouldStart => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
+
+  /// Android battery optimisation may throttle background tracking. Advisory
+  /// only; it never blocks a ride.
+  bool get batteryRestricted => throw _privateConstructorUsedError;
 
   /// Create a copy of LocationState
   /// with the given fields replaced by the non-null parameter values.
@@ -579,7 +736,8 @@ abstract class $LocationStateCopyWith<$Res> {
       int? rideId,
       Ride? booking,
       bool shouldStart,
-      String? errorMessage});
+      String? errorMessage,
+      bool batteryRestricted});
 
   $RideCopyWith<$Res>? get booking;
 }
@@ -605,6 +763,7 @@ class _$LocationStateCopyWithImpl<$Res, $Val extends LocationState>
     Object? booking = freezed,
     Object? shouldStart = null,
     Object? errorMessage = freezed,
+    Object? batteryRestricted = null,
   }) {
     return _then(_value.copyWith(
       status: null == status
@@ -631,6 +790,10 @@ class _$LocationStateCopyWithImpl<$Res, $Val extends LocationState>
           ? _value.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
+      batteryRestricted: null == batteryRestricted
+          ? _value.batteryRestricted
+          : batteryRestricted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -663,7 +826,8 @@ abstract class _$$LocationStateImplCopyWith<$Res>
       int? rideId,
       Ride? booking,
       bool shouldStart,
-      String? errorMessage});
+      String? errorMessage,
+      bool batteryRestricted});
 
   @override
   $RideCopyWith<$Res>? get booking;
@@ -688,6 +852,7 @@ class __$$LocationStateImplCopyWithImpl<$Res>
     Object? booking = freezed,
     Object? shouldStart = null,
     Object? errorMessage = freezed,
+    Object? batteryRestricted = null,
   }) {
     return _then(_$LocationStateImpl(
       status: null == status
@@ -714,6 +879,10 @@ class __$$LocationStateImplCopyWithImpl<$Res>
           ? _value.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
+      batteryRestricted: null == batteryRestricted
+          ? _value.batteryRestricted
+          : batteryRestricted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -727,7 +896,8 @@ class _$LocationStateImpl implements _LocationState {
       this.rideId,
       this.booking,
       this.shouldStart = false,
-      this.errorMessage});
+      this.errorMessage,
+      this.batteryRestricted = false});
 
   @override
   final LocationStatus status;
@@ -743,9 +913,15 @@ class _$LocationStateImpl implements _LocationState {
   @override
   final String? errorMessage;
 
+  /// Android battery optimisation may throttle background tracking. Advisory
+  /// only; it never blocks a ride.
+  @override
+  @JsonKey()
+  final bool batteryRestricted;
+
   @override
   String toString() {
-    return 'LocationState(status: $status, location: $location, rideId: $rideId, booking: $booking, shouldStart: $shouldStart, errorMessage: $errorMessage)';
+    return 'LocationState(status: $status, location: $location, rideId: $rideId, booking: $booking, shouldStart: $shouldStart, errorMessage: $errorMessage, batteryRestricted: $batteryRestricted)';
   }
 
   @override
@@ -761,12 +937,14 @@ class _$LocationStateImpl implements _LocationState {
             (identical(other.shouldStart, shouldStart) ||
                 other.shouldStart == shouldStart) &&
             (identical(other.errorMessage, errorMessage) ||
-                other.errorMessage == errorMessage));
+                other.errorMessage == errorMessage) &&
+            (identical(other.batteryRestricted, batteryRestricted) ||
+                other.batteryRestricted == batteryRestricted));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, status, location, rideId,
-      booking, shouldStart, errorMessage);
+      booking, shouldStart, errorMessage, batteryRestricted);
 
   /// Create a copy of LocationState
   /// with the given fields replaced by the non-null parameter values.
@@ -784,7 +962,8 @@ abstract class _LocationState implements LocationState {
       final int? rideId,
       final Ride? booking,
       final bool shouldStart,
-      final String? errorMessage}) = _$LocationStateImpl;
+      final String? errorMessage,
+      final bool batteryRestricted}) = _$LocationStateImpl;
 
   @override
   LocationStatus get status;
@@ -798,6 +977,11 @@ abstract class _LocationState implements LocationState {
   bool get shouldStart;
   @override
   String? get errorMessage;
+
+  /// Android battery optimisation may throttle background tracking. Advisory
+  /// only; it never blocks a ride.
+  @override
+  bool get batteryRestricted;
 
   /// Create a copy of LocationState
   /// with the given fields replaced by the non-null parameter values.

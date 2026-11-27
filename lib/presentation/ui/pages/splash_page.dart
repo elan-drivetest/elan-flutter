@@ -60,9 +60,10 @@ class _SplashPageState extends State<SplashPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<AuthBloc>().add(const AuthEvent.refresh());
-      context
-          .read<LocationBloc>()
-          .add(const LocationEvent.checkAllPermissions());
+      // Location permissions are no longer requested here. Asking at launch,
+      // before sign-in and before the disclosure, is exactly what Google
+      // Play's prominent-disclosure policy rejects. The dashboard asks, after
+      // the disclosure, once the instructor is signed in.
     });
 
     unawaited(_checkFirstLaunch());

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz/dartz.dart';
+import 'package:elan/core/cache/cache_manager_impl.dart';
 import 'package:elan/data/location_request_service/location_request_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
@@ -16,18 +17,39 @@ part 'location_bloc.freezed.dart';
 @injectable
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
   final LocationRequestService _locationRequestService;
+  final CacheManagerImpl _cacheManager;
 
-  LocationBloc(this._locationRequestService) : super(LocationState.initial()) {
+  LocationBloc(this._locationRequestService, this._cacheManager)
+      : super(LocationState.initial()) {
     on<CheckLocationAccess>(_onCheckLocationAccess, transformer: restartable());
     on<CheckBackgroundPermissions>(_onCheckBackgroundPermissions,
         transformer: restartable());
     on<CheckAllPermissions>(_onCheckAllPermissions);
+    on<AcceptLocationDisclosure>(_onAcceptDisclosure);
+  }
+
+  /// Google Play's prominent-disclosure rule: no location permission prompt
+  /// before the in-app disclosure has been accepted. Every handler that can
+  /// trigger a prompt goes through here first.
+  Future<bool> _disclosureAccepted(Emitter<LocationState> emit) async {
+    if (await _cacheManager.getLocationDisclosureAccepted()) return true;
+    emit(state.copyWith(status: LocationStatus.disclosureRequired));
+    return false;
+  }
+
+  Future<void> _onAcceptDisclosure(
+    AcceptLocationDisclosure event,
+    Emitter<LocationState> emit,
+  ) async {
+    await _cacheManager.setLocationDisclosureAccepted();
+    await _onCheckAllPermissions(const CheckAllPermissions(), emit);
   }
 
   Future<void> _onCheckLocationAccess(
     CheckLocationAccess event,
     Emitter<LocationState> emit,
   ) async {
+    if (!await _disclosureAccepted(emit)) return;
     if (event.fromBackground) {
       await Future.delayed(const Duration(seconds: 2));
     }
@@ -94,6 +116,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     CheckBackgroundPermissions event,
     Emitter<LocationState> emit,
   ) async {
+    if (!await _disclosureAccepted(emit)) return;
     emit(state.copyWith(
       status: LocationStatus.loading,
     ));
@@ -144,19 +167,16 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         }
       }
 
-      // Step 3: Request battery optimization exemption
-      final ignored =
-          await _locationRequestService.requestIgnoreBatteryOptimization();
-      if (!ignored) {
-        emit(state.copyWith(
-          status: LocationStatus.backgroundPermissionNotGranted,
-          errorMessage:
-              "Battery optimizations not disabled / exact alarms not allowed.",
-        ));
-        return;
-      }
+      // Step 3: Battery optimisation is advisory. It used to block the whole
+      // flow and fire a Play-restricted prompt; now it only flags the state so
+      // the UI can offer a shortcut to the system settings.
+      final batteryOk =
+          await _locationRequestService.isIgnoringBatteryOptimizations();
 
-      emit(state.copyWith(status: LocationStatus.success));
+      emit(state.copyWith(
+        status: LocationStatus.success,
+        batteryRestricted: !batteryOk,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LocationStatus.failure,
@@ -176,6 +196,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
       const CheckBackgroundPermissions(),
       emit,
     );
+    if (state.status == LocationStatus.disclosureRequired) return;
     await _onCheckLocationAccess(
       const CheckLocationAccess(),
       emit,

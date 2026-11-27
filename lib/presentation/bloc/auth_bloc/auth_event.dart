@@ -7,6 +7,11 @@ class AuthEvent with _$AuthEvent {
   const factory AuthEvent.refresh() = _Refresh;
   const factory AuthEvent.logout() = _Logout;
 
+  /// The server has already deleted the account (`DELETE /me` returned 2xx).
+  /// Tears the session down locally and wipes account data from the device;
+  /// it makes no request of its own.
+  const factory AuthEvent.accountDeleted() = _AccountDeleted;
+
   /// The server has just issued auth cookies outside the login flow.
   ///
   /// `POST /v1/auth/instructor/otp/verify` ends with `issueAuthCookies`

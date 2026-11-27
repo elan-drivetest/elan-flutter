@@ -1,4 +1,6 @@
+import 'package:elan/core/endpoints/api_endpoints.dart';
 import 'package:elan/presentation/navigation/page_name.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:elan/presentation/ui/pages/place_picker_page/place_picker_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -494,12 +496,76 @@ class _RegistrationPageState extends State<RegistrationPage>
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _nextStep(),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          _legalConsentField(),
+          const SizedBox(height: 16),
           _primaryButton(
             'Complete Registration',
             _nextStep,
             Icons.check_circle_outline,
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Required, never pre-ticked. Part of [_formKey2], so "Complete
+  /// Registration" can't submit until it's checked. The binding, versioned
+  /// acceptance is recorded after sign-in on the "I Agree and Accept" screen.
+  Widget _legalConsentField() {
+    Widget link(String label, String url) => GestureDetector(
+          onTap: () => launchUrl(Uri.parse(url),
+              mode: LaunchMode.inAppBrowserView),
+          child: Text(label,
+              style: const TextStyle(
+                  color: Color(0xFF0C8B44),
+                  decoration: TextDecoration.underline)),
+        );
+
+    return FormField<bool>(
+      initialValue: false,
+      validator: (v) => v == true
+          ? null
+          : 'Please accept the agreements to create your account',
+      builder: (field) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: field.value ?? false,
+                onChanged: (v) => field.didChange(v ?? false),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Wrap(
+                    runSpacing: 2,
+                    children: [
+                      const Text('I have read and agree to the '),
+                      link('Independent Vehicle Provider Agreement',
+                          ApiEndpoints.providerAgreementPageUrl),
+                      const Text(', the '),
+                      link('Terms of Service', ApiEndpoints.termsPageUrl),
+                      const Text(' and the '),
+                      link('Privacy Policy',
+                          ApiEndpoints.privacyPolicyPageUrl),
+                      const Text('.'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (field.hasError)
+            Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: Text(field.errorText!,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12)),
+            ),
         ],
       ),
     );

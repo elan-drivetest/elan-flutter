@@ -99,13 +99,27 @@ class IAuthApiService extends AuthApiService {
   @override
   Future<Either<ErrorResponse, Response>> logOut() async {
     try {
+      // This used to POST the *refresh* endpoint, so "log out" re-issued the
+      // session server-side instead of ending it.
       final response = await dio.post(
-        ApiEndpoints.baseUrl + ApiEndpoints.refreshCookieUrl,
+        ApiEndpoints.baseUrl + ApiEndpoints.logOutInstructorUrl,
       );
 
       AppLog.d("logout_header -> ${response.statusCode}");
-      AppLog.d("logout_header -> ${response.headers}");
 
+      return right(response);
+    } on DioException catch (e) {
+      return left(checkErrorResponse(e));
+    }
+  }
+
+  @override
+  Future<Either<ErrorResponse, Response>> deleteAccount() async {
+    try {
+      final response = await dio.delete(
+        ApiEndpoints.baseUrl + ApiEndpoints.deleteInstructorAccountUrl,
+      );
+      AppLog.d("delete_account -> ${response.statusCode}");
       return right(response);
     } on DioException catch (e) {
       return left(checkErrorResponse(e));

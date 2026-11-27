@@ -12,7 +12,14 @@ abstract class LocationRequestService {
   Future<bool> requestBackgroundPermission();       // tries to elevate only
 
   // Platform/background support extras
-  Future<bool> requestIgnoreBatteryOptimization();
+  /// True when Android battery optimisation will not throttle the tracker.
+  /// Always true off Android.
+  Future<bool> isIgnoringBatteryOptimizations();
+
+  /// Opens the system battery-optimisation list so the instructor can exempt
+  /// the app themselves. Deliberately not the direct "allow?" prompt: that
+  /// needs `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which Google Play restricts.
+  Future<void> openBatteryOptimizationSettings();
   Future<NotificationPermission> requestNotificationPermission();
   Future<NotificationPermission> checkNotificationPermission();
   Future<bool> isLocationServiceEnabled();

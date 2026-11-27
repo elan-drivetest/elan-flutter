@@ -5,6 +5,7 @@ import 'package:elan/domain/common/ride/ride.dart';
 import 'package:elan/domain/common/ride/ride_shape.dart';
 import 'package:elan/presentation/bloc/direction_bloc/direction_bloc.dart';
 import 'package:elan/presentation/ui/pages/ride_map_page/bottom_sheet/pickup_bottom_sheet.dart';
+import 'package:elan/presentation/ui/pages/location_disclosure_page/location_disclosure_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -124,7 +125,9 @@ class _RideMapPageState extends State<RideMapPage> {
   Future<void> _fetchDirectionsAutomatically() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
+      if (permission == LocationPermission.denied &&
+          mounted &&
+          await LocationDisclosurePage.ensureAccepted(context)) {
         permission = await Geolocator.requestPermission();
       }
       if (permission == LocationPermission.whileInUse ||

@@ -8,6 +8,7 @@ import 'package:elan/presentation/ui/pages/profile_page/bottom_sheet/instructor_
 import 'package:elan/presentation/ui/pages/profile_page/bottom_sheet/license_edit_sheet.dart';
 import 'package:elan/presentation/ui/widgets/profile_setting_page/bank_details_section.dart';
 import 'package:elan/presentation/ui/widgets/profile_setting_page/delete_account_button.dart';
+import 'package:elan/presentation/ui/widgets/profile_setting_page/legal_links_section.dart';
 import 'package:elan/presentation/ui/widgets/profile_setting_page/logout_button.dart';
 import 'package:elan/presentation/ui/widgets/profile_setting_page/profile_settings_card.dart';
 import 'package:elan/presentation/ui/widgets/profile_setting_page/profile_summary_card.dart';
@@ -371,6 +372,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                               },
                             ),
                             const SizedBox(height: 24),
+                            const LegalLinksSection(),
+                            const SizedBox(height: 16),
                             const LogoutButton(),
                             const SizedBox(height: 12),
                             const DeleteAccountButton(),

@@ -5,6 +5,7 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:elan/core/app_timezone.dart';
 import 'package:elan/core/cache/cache_manager.dart';
 import 'package:elan/core/cache/cache_manager_impl.dart';
 import 'package:elan/core/endpoints/api_endpoints.dart';
@@ -70,6 +71,24 @@ class LocationServiceHandler extends TaskHandler {
 
   bool _flushing = false;
 
+  /// IANA zone sent with every point. This used to be
+  /// `DateTime.now().timeZoneName` ("EDT"), an ambiguous abbreviation the
+  /// backend can't resolve (`app_timezone.dart`). Taken from the booking being
+  /// driven, which is the zone the test happens in.
+  String _timezone = kDefaultIanaTimezone;
+
+  Future<String> _rideTimezone() async {
+    try {
+      final raw = await _cache.getActiveBooking();
+      if (raw == null) return kDefaultIanaTimezone;
+      final json = jsonDecode(raw);
+      return resolveTimezone(json is Map ? json['timezone'] as String? : null);
+    } catch (e) {
+      AppLog.d('📍 could not read ride timezone: $e');
+      return kDefaultIanaTimezone;
+    }
+  }
+
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     // Cosmetic; never block a capture on a notification update.
@@ -100,6 +119,7 @@ class LocationServiceHandler extends TaskHandler {
     _traceService = ITraceApiService(_dio);
     _cache = CacheManagerImpl(CacheManager());
     _queue = LocationPingQueue(_cache);
+    _timezone = await _rideTimezone();
 
     await _readBattery();
     _startProactiveRefresh();
@@ -207,7 +227,7 @@ class LocationServiceHandler extends TaskHandler {
         bearing: position.heading,
         altitude: position.altitude,
         batteryLevel: _batteryLevel,
-        timezone: now.timeZoneName,
+        timezone: _timezone,
         // Capture time, not upload time — the server orders the track by this.
         timestamp: position.timestamp,
       );

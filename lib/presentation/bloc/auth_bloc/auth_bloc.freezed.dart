@@ -21,6 +21,7 @@ mixin _$AuthEvent {
     required TResult Function(String email, String password) login,
     required TResult Function() refresh,
     required TResult Function() logout,
+    required TResult Function() accountDeleted,
     required TResult Function() sessionEstablished,
   }) =>
       throw _privateConstructorUsedError;
@@ -29,6 +30,7 @@ mixin _$AuthEvent {
     TResult? Function(String email, String password)? login,
     TResult? Function()? refresh,
     TResult? Function()? logout,
+    TResult? Function()? accountDeleted,
     TResult? Function()? sessionEstablished,
   }) =>
       throw _privateConstructorUsedError;
@@ -37,6 +39,7 @@ mixin _$AuthEvent {
     TResult Function(String email, String password)? login,
     TResult Function()? refresh,
     TResult Function()? logout,
+    TResult Function()? accountDeleted,
     TResult Function()? sessionEstablished,
     required TResult orElse(),
   }) =>
@@ -46,6 +49,7 @@ mixin _$AuthEvent {
     required TResult Function(_Login value) login,
     required TResult Function(_Refresh value) refresh,
     required TResult Function(_Logout value) logout,
+    required TResult Function(_AccountDeleted value) accountDeleted,
     required TResult Function(_SessionEstablished value) sessionEstablished,
   }) =>
       throw _privateConstructorUsedError;
@@ -54,6 +58,7 @@ mixin _$AuthEvent {
     TResult? Function(_Login value)? login,
     TResult? Function(_Refresh value)? refresh,
     TResult? Function(_Logout value)? logout,
+    TResult? Function(_AccountDeleted value)? accountDeleted,
     TResult? Function(_SessionEstablished value)? sessionEstablished,
   }) =>
       throw _privateConstructorUsedError;
@@ -62,6 +67,7 @@ mixin _$AuthEvent {
     TResult Function(_Login value)? login,
     TResult Function(_Refresh value)? refresh,
     TResult Function(_Logout value)? logout,
+    TResult Function(_AccountDeleted value)? accountDeleted,
     TResult Function(_SessionEstablished value)? sessionEstablished,
     required TResult orElse(),
   }) =>
@@ -168,6 +174,7 @@ class _$LoginImpl implements _Login {
     required TResult Function(String email, String password) login,
     required TResult Function() refresh,
     required TResult Function() logout,
+    required TResult Function() accountDeleted,
     required TResult Function() sessionEstablished,
   }) {
     return login(email, password);
@@ -179,6 +186,7 @@ class _$LoginImpl implements _Login {
     TResult? Function(String email, String password)? login,
     TResult? Function()? refresh,
     TResult? Function()? logout,
+    TResult? Function()? accountDeleted,
     TResult? Function()? sessionEstablished,
   }) {
     return login?.call(email, password);
@@ -190,6 +198,7 @@ class _$LoginImpl implements _Login {
     TResult Function(String email, String password)? login,
     TResult Function()? refresh,
     TResult Function()? logout,
+    TResult Function()? accountDeleted,
     TResult Function()? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -205,6 +214,7 @@ class _$LoginImpl implements _Login {
     required TResult Function(_Login value) login,
     required TResult Function(_Refresh value) refresh,
     required TResult Function(_Logout value) logout,
+    required TResult Function(_AccountDeleted value) accountDeleted,
     required TResult Function(_SessionEstablished value) sessionEstablished,
   }) {
     return login(this);
@@ -216,6 +226,7 @@ class _$LoginImpl implements _Login {
     TResult? Function(_Login value)? login,
     TResult? Function(_Refresh value)? refresh,
     TResult? Function(_Logout value)? logout,
+    TResult? Function(_AccountDeleted value)? accountDeleted,
     TResult? Function(_SessionEstablished value)? sessionEstablished,
   }) {
     return login?.call(this);
@@ -227,6 +238,7 @@ class _$LoginImpl implements _Login {
     TResult Function(_Login value)? login,
     TResult Function(_Refresh value)? refresh,
     TResult Function(_Logout value)? logout,
+    TResult Function(_AccountDeleted value)? accountDeleted,
     TResult Function(_SessionEstablished value)? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -296,6 +308,7 @@ class _$RefreshImpl implements _Refresh {
     required TResult Function(String email, String password) login,
     required TResult Function() refresh,
     required TResult Function() logout,
+    required TResult Function() accountDeleted,
     required TResult Function() sessionEstablished,
   }) {
     return refresh();
@@ -307,6 +320,7 @@ class _$RefreshImpl implements _Refresh {
     TResult? Function(String email, String password)? login,
     TResult? Function()? refresh,
     TResult? Function()? logout,
+    TResult? Function()? accountDeleted,
     TResult? Function()? sessionEstablished,
   }) {
     return refresh?.call();
@@ -318,6 +332,7 @@ class _$RefreshImpl implements _Refresh {
     TResult Function(String email, String password)? login,
     TResult Function()? refresh,
     TResult Function()? logout,
+    TResult Function()? accountDeleted,
     TResult Function()? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -333,6 +348,7 @@ class _$RefreshImpl implements _Refresh {
     required TResult Function(_Login value) login,
     required TResult Function(_Refresh value) refresh,
     required TResult Function(_Logout value) logout,
+    required TResult Function(_AccountDeleted value) accountDeleted,
     required TResult Function(_SessionEstablished value) sessionEstablished,
   }) {
     return refresh(this);
@@ -344,6 +360,7 @@ class _$RefreshImpl implements _Refresh {
     TResult? Function(_Login value)? login,
     TResult? Function(_Refresh value)? refresh,
     TResult? Function(_Logout value)? logout,
+    TResult? Function(_AccountDeleted value)? accountDeleted,
     TResult? Function(_SessionEstablished value)? sessionEstablished,
   }) {
     return refresh?.call(this);
@@ -355,6 +372,7 @@ class _$RefreshImpl implements _Refresh {
     TResult Function(_Login value)? login,
     TResult Function(_Refresh value)? refresh,
     TResult Function(_Logout value)? logout,
+    TResult Function(_AccountDeleted value)? accountDeleted,
     TResult Function(_SessionEstablished value)? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -413,6 +431,7 @@ class _$LogoutImpl implements _Logout {
     required TResult Function(String email, String password) login,
     required TResult Function() refresh,
     required TResult Function() logout,
+    required TResult Function() accountDeleted,
     required TResult Function() sessionEstablished,
   }) {
     return logout();
@@ -424,6 +443,7 @@ class _$LogoutImpl implements _Logout {
     TResult? Function(String email, String password)? login,
     TResult? Function()? refresh,
     TResult? Function()? logout,
+    TResult? Function()? accountDeleted,
     TResult? Function()? sessionEstablished,
   }) {
     return logout?.call();
@@ -435,6 +455,7 @@ class _$LogoutImpl implements _Logout {
     TResult Function(String email, String password)? login,
     TResult Function()? refresh,
     TResult Function()? logout,
+    TResult Function()? accountDeleted,
     TResult Function()? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -450,6 +471,7 @@ class _$LogoutImpl implements _Logout {
     required TResult Function(_Login value) login,
     required TResult Function(_Refresh value) refresh,
     required TResult Function(_Logout value) logout,
+    required TResult Function(_AccountDeleted value) accountDeleted,
     required TResult Function(_SessionEstablished value) sessionEstablished,
   }) {
     return logout(this);
@@ -461,6 +483,7 @@ class _$LogoutImpl implements _Logout {
     TResult? Function(_Login value)? login,
     TResult? Function(_Refresh value)? refresh,
     TResult? Function(_Logout value)? logout,
+    TResult? Function(_AccountDeleted value)? accountDeleted,
     TResult? Function(_SessionEstablished value)? sessionEstablished,
   }) {
     return logout?.call(this);
@@ -472,6 +495,7 @@ class _$LogoutImpl implements _Logout {
     TResult Function(_Login value)? login,
     TResult Function(_Refresh value)? refresh,
     TResult Function(_Logout value)? logout,
+    TResult Function(_AccountDeleted value)? accountDeleted,
     TResult Function(_SessionEstablished value)? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -484,6 +508,129 @@ class _$LogoutImpl implements _Logout {
 
 abstract class _Logout implements AuthEvent {
   const factory _Logout() = _$LogoutImpl;
+}
+
+/// @nodoc
+abstract class _$$AccountDeletedImplCopyWith<$Res> {
+  factory _$$AccountDeletedImplCopyWith(_$AccountDeletedImpl value,
+          $Res Function(_$AccountDeletedImpl) then) =
+      __$$AccountDeletedImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$AccountDeletedImplCopyWithImpl<$Res>
+    extends _$AuthEventCopyWithImpl<$Res, _$AccountDeletedImpl>
+    implements _$$AccountDeletedImplCopyWith<$Res> {
+  __$$AccountDeletedImplCopyWithImpl(
+      _$AccountDeletedImpl _value, $Res Function(_$AccountDeletedImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of AuthEvent
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$AccountDeletedImpl implements _AccountDeleted {
+  const _$AccountDeletedImpl();
+
+  @override
+  String toString() {
+    return 'AuthEvent.accountDeleted()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$AccountDeletedImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String email, String password) login,
+    required TResult Function() refresh,
+    required TResult Function() logout,
+    required TResult Function() accountDeleted,
+    required TResult Function() sessionEstablished,
+  }) {
+    return accountDeleted();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String email, String password)? login,
+    TResult? Function()? refresh,
+    TResult? Function()? logout,
+    TResult? Function()? accountDeleted,
+    TResult? Function()? sessionEstablished,
+  }) {
+    return accountDeleted?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String email, String password)? login,
+    TResult Function()? refresh,
+    TResult Function()? logout,
+    TResult Function()? accountDeleted,
+    TResult Function()? sessionEstablished,
+    required TResult orElse(),
+  }) {
+    if (accountDeleted != null) {
+      return accountDeleted();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Login value) login,
+    required TResult Function(_Refresh value) refresh,
+    required TResult Function(_Logout value) logout,
+    required TResult Function(_AccountDeleted value) accountDeleted,
+    required TResult Function(_SessionEstablished value) sessionEstablished,
+  }) {
+    return accountDeleted(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Login value)? login,
+    TResult? Function(_Refresh value)? refresh,
+    TResult? Function(_Logout value)? logout,
+    TResult? Function(_AccountDeleted value)? accountDeleted,
+    TResult? Function(_SessionEstablished value)? sessionEstablished,
+  }) {
+    return accountDeleted?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Login value)? login,
+    TResult Function(_Refresh value)? refresh,
+    TResult Function(_Logout value)? logout,
+    TResult Function(_AccountDeleted value)? accountDeleted,
+    TResult Function(_SessionEstablished value)? sessionEstablished,
+    required TResult orElse(),
+  }) {
+    if (accountDeleted != null) {
+      return accountDeleted(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _AccountDeleted implements AuthEvent {
+  const factory _AccountDeleted() = _$AccountDeletedImpl;
 }
 
 /// @nodoc
@@ -530,6 +677,7 @@ class _$SessionEstablishedImpl implements _SessionEstablished {
     required TResult Function(String email, String password) login,
     required TResult Function() refresh,
     required TResult Function() logout,
+    required TResult Function() accountDeleted,
     required TResult Function() sessionEstablished,
   }) {
     return sessionEstablished();
@@ -541,6 +689,7 @@ class _$SessionEstablishedImpl implements _SessionEstablished {
     TResult? Function(String email, String password)? login,
     TResult? Function()? refresh,
     TResult? Function()? logout,
+    TResult? Function()? accountDeleted,
     TResult? Function()? sessionEstablished,
   }) {
     return sessionEstablished?.call();
@@ -552,6 +701,7 @@ class _$SessionEstablishedImpl implements _SessionEstablished {
     TResult Function(String email, String password)? login,
     TResult Function()? refresh,
     TResult Function()? logout,
+    TResult Function()? accountDeleted,
     TResult Function()? sessionEstablished,
     required TResult orElse(),
   }) {
@@ -567,6 +717,7 @@ class _$SessionEstablishedImpl implements _SessionEstablished {
     required TResult Function(_Login value) login,
     required TResult Function(_Refresh value) refresh,
     required TResult Function(_Logout value) logout,
+    required TResult Function(_AccountDeleted value) accountDeleted,
     required TResult Function(_SessionEstablished value) sessionEstablished,
   }) {
     return sessionEstablished(this);
@@ -578,6 +729,7 @@ class _$SessionEstablishedImpl implements _SessionEstablished {
     TResult? Function(_Login value)? login,
     TResult? Function(_Refresh value)? refresh,
     TResult? Function(_Logout value)? logout,
+    TResult? Function(_AccountDeleted value)? accountDeleted,
     TResult? Function(_SessionEstablished value)? sessionEstablished,
   }) {
     return sessionEstablished?.call(this);
@@ -589,6 +741,7 @@ class _$SessionEstablishedImpl implements _SessionEstablished {
     TResult Function(_Login value)? login,
     TResult Function(_Refresh value)? refresh,
     TResult Function(_Logout value)? logout,
+    TResult Function(_AccountDeleted value)? accountDeleted,
     TResult Function(_SessionEstablished value)? sessionEstablished,
     required TResult orElse(),
   }) {

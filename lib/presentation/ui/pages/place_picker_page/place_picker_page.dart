@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:elan/presentation/ui/pages/location_disclosure_page/location_disclosure_page.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -148,7 +149,9 @@ class _PlacePickerPageState extends State<PlacePickerPage>
       // Ask once, and only from the state where asking does something. On
       // deniedForever the OS dialog never appears, so re-requesting would just
       // stall silently.
-      if (permission == LocationPermission.denied) {
+      if (permission == LocationPermission.denied &&
+          mounted &&
+          await LocationDisclosurePage.ensureAccepted(context)) {
         permission = await _locationService.requestPermission();
       }
 

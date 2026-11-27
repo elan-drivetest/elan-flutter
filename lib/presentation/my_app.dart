@@ -14,6 +14,7 @@ import 'package:elan/presentation/bloc/location_bloc/location_bloc.dart';
 import 'package:elan/presentation/bloc/pricing_config_bloc/pricing_config_bloc.dart';
 import 'package:elan/presentation/bloc/stripe_onboarding_bloc/stripe_onboarding_bloc.dart';
 import 'package:elan/presentation/bloc/upcoming_ride_bloc/upcoming_ride_bloc.dart';
+import 'package:elan/presentation/bloc/legal_bloc/legal_bloc.dart';
 import 'package:elan/presentation/bloc/earnings_summary_bloc/earnings_summary_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => getIt<ConfirmEmailBloc>()),
         BlocProvider(create: (context) => getIt<DirectionBloc>()),
         BlocProvider(create: (context) => getIt<EarningsSummaryBloc>()),
+        BlocProvider(create: (context) => getIt<LegalBloc>()),
         // `.value` because PricingConfigBloc is a get_it @lazySingleton —
         // BlocProvider(create:) would close the singleton on dispose, and any
         // later `add()` would throw "Cannot add new events after calling

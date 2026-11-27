@@ -39,6 +39,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<_Refresh>(_onRefresh);
     on<_Logout>(_onLogout);
     on<_SessionEstablished>(_onSessionEstablished);
+    on<_AccountDeleted>(_onAccountDeleted);
+  }
+
+  Future<void> _onAccountDeleted(
+      _AccountDeleted event, Emitter<AuthState> emit) async {
+    emit(const AuthState());
+    cookieRefreshService.stopPeriodicRefresh();
+    try {
+      await cacheManager.wipeAccountData();
+    } catch (e) {
+      AppLog.e('wipeAccountData failed: $e');
+    }
+    try {
+      await cookieJar.deleteAll();
+    } catch (_) {}
+    if (emit.isDone) return;
+    emit(state.copyWith(status: AuthStatus.logout));
   }
 
   /// Status codes that are a statement about *this session* rather than about

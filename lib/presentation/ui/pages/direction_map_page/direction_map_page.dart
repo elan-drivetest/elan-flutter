@@ -11,6 +11,7 @@ import 'package:elan/domain/ride_session/ride_session.dart';
 import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/ride_route_bloc/ride_route_bloc.dart';
 import 'package:elan/presentation/ui/widgets/common/ride_route_style.dart';
+import 'package:elan/presentation/ui/pages/location_disclosure_page/location_disclosure_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -87,7 +88,9 @@ class _DirectionMapPageState extends State<DirectionMapPage> {
     LatLng? current;
     try {
       var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
+      if (permission == LocationPermission.denied &&
+          mounted &&
+          await LocationDisclosurePage.ensureAccepted(context)) {
         permission = await Geolocator.requestPermission();
       }
       if (permission == LocationPermission.whileInUse ||
