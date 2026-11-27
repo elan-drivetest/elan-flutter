@@ -5,6 +5,15 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// Upload-key signing. android/key.properties is gitignored and points at a
+// keystore kept OUTSIDE the repo. Google Play App Signing holds the real app
+// signing key; this key only authenticates uploads.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader("UTF-8") { keystoreProperties.load(it) }
+}
+
 android {
     namespace = "com.drivingschool.elan"
     compileSdk = 36
@@ -31,11 +40,32 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties["keyAlias"]
+                keyPassword = keystoreProperties["keyPassword"]
+                storeFile = file(keystoreProperties["storeFile"])
+                storePassword = keystoreProperties["storePassword"]
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Never fall back to debug keys: Play rejects debug-signed bundles,
+            // and a silent fallback would only surface at upload time.
+            // Checked only when a release task is requested, so debug builds
+            // still work on machines without the upload key.
+            def releaseRequested = gradle.startParameter.taskNames.any {
+                it.toLowerCase().contains("release")
+            }
+            if (releaseRequested && !keystorePropertiesFile.exists()) {
+                throw new GradleException(
+                    "android/key.properties is missing. Release builds must be " +
+                    "signed with the upload key; see docs/PLAY_STORE_RELEASE_PLAN.md.")
+            }
+            signingConfig = signingConfigs.release
         }
     }
 }
