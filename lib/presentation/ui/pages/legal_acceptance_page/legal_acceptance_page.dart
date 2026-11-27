@@ -3,7 +3,9 @@ import 'package:elan/domain/legal/legal_status.dart';
 import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:elan/presentation/bloc/legal_bloc/legal_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Blocking "I Agree and Accept" screen.
@@ -21,7 +23,10 @@ class LegalAcceptancePage extends StatelessWidget {
   /// the instructor has accepted or signed out.
   static Future<void> show(BuildContext context) {
     final bloc = context.read<LegalBloc>();
-    return Navigator.of(context).push<void>(
+    // Root navigator: the dashboard sits in a StatefulShellRoute branch, and a
+    // branch-level push would leave the bottom navigation tappable, which
+    // would let the instructor walk around the gate.
+    return Navigator.of(context, rootNavigator: true).push<void>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => BlocProvider.value(
@@ -119,10 +124,15 @@ class LegalAcceptancePage extends StatelessWidget {
                         onPressed: busy
                             ? null
                             : () {
+                                // No refreshListenable on the router, so
+                                // navigate explicitly. Capture the router
+                                // before this route is popped.
+                                final router = GoRouter.of(context);
                                 context
                                     .read<AuthBloc>()
                                     .add(const AuthEvent.logout());
                                 Navigator.of(context).pop();
+                                router.go(PagesName.loginPage.path);
                               },
                         child: const Text('Sign out'),
                       ),

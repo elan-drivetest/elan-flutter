@@ -94,3 +94,24 @@ Facts: the prod API is `https://api-dev.elanroadtestrental.ca` (backend `dev` = 
 
 ## Critical path
 D-U-N-S / Console account ∥ Phase 1 code ∥ legal pages → internal test → review.
+
+## On-device release checklist (run on 2+ real phones before production)
+Install from the Play **internal testing** link, not a local build. **Uninstall
+any previous debug build first:** it's signed with a different key, so Android
+refuses the update and you'd silently keep testing the old app.
+
+1. Fresh install → onboarding → login. **No** location prompt before login.
+2. After login: the "Review and accept" screen blocks the app. The bottom nav
+   isn't reachable. "Sign out" returns to login. "I Agree and Accept" closes it.
+3. Location disclosure appears **before** any OS location prompt → Continue →
+   allow "All the time" and notifications. "Not now" shows no OS prompt.
+4. Battery hint snackbar appears (if not exempt) and "Settings" opens the system list.
+5. Accept a ride → Start → lock the screen for 5+ minutes while moving, with the
+   battery exemption **not** granted → unlock → route recorded without gaps; the
+   tracking notification stays visible throughout.
+6. Stop the ride → earnings and history update.
+7. Profile Settings → Legal links open the four live pages.
+8. Delete Account (use a throwaway account): blocked while a ride is upcoming;
+   otherwise confirm → returns to login; logging in again fails.
+9. Registration step 2: "Complete Registration" is blocked until the
+   agreements checkbox is ticked.

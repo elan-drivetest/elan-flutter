@@ -2,14 +2,14 @@ import 'package:elan/core/styles.dart';
 import 'package:elan/injection.dart';
 import 'package:elan/presentation/bloc/account_deletion_bloc/account_deletion_bloc.dart';
 import 'package:elan/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'package:elan/presentation/navigation/page_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 /// In-app account deletion (Google Play requirement).
 ///
-/// Confirm → `DELETE /me` → `AuthEvent.accountDeleted()`. Navigation to login
-/// is left to the router's redirect, which already reacts to
-/// `AuthStatus.logout`.
+/// Confirm → `DELETE /me` → `AuthEvent.accountDeleted()` → login.
 class DeleteAccountButton extends StatelessWidget {
   const DeleteAccountButton({super.key});
 
@@ -27,6 +27,16 @@ class _DeleteAccountView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The router has no refreshListenable, so its redirect never runs on an
+    // auth change by itself. Navigate explicitly, like LogoutButton does.
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (_, curr) => curr.status == AuthStatus.logout,
+      listener: (context, _) => context.go(PagesName.loginPage.path),
+      child: _buildButton(context),
+    );
+  }
+
+  Widget _buildButton(BuildContext context) {
     return BlocConsumer<AccountDeletionBloc, AccountDeletionState>(
       listener: (context, state) {
         switch (state.status) {

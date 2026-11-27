@@ -245,6 +245,26 @@ class _DashboardPageState extends State<DashboardPage> {
                   listener: (context, state) =>
                       unawaited(_showLegalAcceptance()),
                 ),
+                // Server-side gate: a 403 legalAcceptanceRequired on ride
+                // accept or Stripe onboarding re-checks status, which re-opens
+                // the acceptance screen above. Both blocs are app-wide and this
+                // page stays mounted in the shell, so it catches it from any tab.
+                BlocListener<UpcomingRideBloc, UpcomingRideState>(
+                  listenWhen: (_, curr) =>
+                      curr.status == UpcomingRideStatus.error &&
+                      LegalBloc.isAcceptanceRequired(curr.errorResponse),
+                  listener: (context, _) => context
+                      .read<LegalBloc>()
+                      .add(const LegalEvent.fetch()),
+                ),
+                BlocListener<StripeOnboardingBloc, StripeOnboardingState>(
+                  listenWhen: (_, curr) =>
+                      curr.status == StripeOnboardingStatus.error &&
+                      LegalBloc.isAcceptanceRequired(curr.errorResponse),
+                  listener: (context, _) => context
+                      .read<LegalBloc>()
+                      .add(const LegalEvent.fetch()),
+                ),
                 BlocListener<LocationBloc, LocationState>(
                   listener: (context, state) {
                     if (state.status == LocationStatus.disclosureRequired) {

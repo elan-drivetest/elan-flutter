@@ -28,7 +28,9 @@ class LocationDisclosurePage extends StatelessWidget {
   }
 
   static Future<bool> show(BuildContext context) async {
-    final accepted = await Navigator.of(context).push<bool>(
+    // Root navigator, so the shell's bottom navigation can't be tapped around it.
+    final accepted =
+        await Navigator.of(context, rootNavigator: true).push<bool>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => const LocationDisclosurePage(),
@@ -67,9 +69,12 @@ class LocationDisclosurePage extends StatelessWidget {
                           'the app is closed or not in use.',
                           bold: true,
                         ),
-                        _Bullet('Collected only while a ride you started is '
-                            'in progress. Tracking stops when you stop the '
-                            'ride.'),
+                        _Bullet('In the background, location is collected '
+                            'only while a ride you started is in progress, '
+                            'and tracking stops when you stop the ride.'),
+                        _Bullet('While you are using the app, your location '
+                            'is also used to show your position and the '
+                            'route on maps.'),
                         _Bullet('What is collected: precise location, speed, '
                             'heading, altitude and battery level, with the '
                             'time of each point.'),

@@ -15,7 +15,7 @@ Account: Elan Instructor (organization), signed in as the Lead (Admin).
 | Upload key SHA-1 | `96:59:E8:20:3B:1C:D6:E8:B2:14:47:B2:15:C9:71:E1:B6:4E:29:C1` |
 | Hi-res icon 512×512 | `store/play/icon-512.png` |
 | Feature graphic 1024×500 | `store/play/feature-graphic-1024x500.png` |
-| Phone screenshots | TODO. At least 2, and the longest side must be ≤ 2× the shortest (the Pixel 9 Pro emulator's 1280×2856 is too tall). Capture on a 1080×1920 device/emulator, logged in as the demo account: Dashboard, Available Rides, active ride map, Profile. |
+| Phone screenshots | TODO (checklist: docs/PLAY_STORE_RELEASE_PLAN.md, "On-device release checklist"). At least 2, and the longest side must be ≤ 2× the shortest (the Pixel 9 Pro emulator's 1280×2856 is too tall). Capture on a 1080×1920 device/emulator, logged in as the demo account: Dashboard, Available Rides, active ride map, Profile. |
 
 ## 1. Create app
 - App name: **Elan Instructor**
@@ -55,7 +55,7 @@ GROW WITH REFERRALS
 • Generate referral codes and earn rewards when they are claimed
 
 PRIVACY
-Location is collected only while a ride you started is in progress, including when the app is in the background, and stops when you end the ride. You can delete your account at any time in the app.
+In the background, location is collected only while a ride you started is in progress, and tracking stops when you end the ride. While you use the app, your location also shows your position and route on maps. You can delete your account at any time in the app.
 
 An approved Elan instructor or vehicle-provider account is required.
 ```
@@ -142,7 +142,7 @@ the privacy policy are not truthful.
 - Feature: **Live ride tracking**
 - Description:
 ```
-Elan Instructor records the instructor's location only while a ride they started is in progress, so the route, the distance driven (which determines the instructor's pay) and the ride record are accurate. Tracking must continue while the screen is off or the instructor is using navigation, which requires background location. Tracking starts when the instructor taps Start and stops when they tap Stop; a persistent notification is shown the whole time. An in-app disclosure explains this before any permission prompt.
+In the background, Elan Instructor records the instructor's location only while a ride they started is in progress (in the foreground it also shows their position and route on maps), so the route, the distance driven (which determines the instructor's pay) and the ride record are accurate. Tracking must continue while the screen is off or the instructor is using navigation, which requires background location. Tracking starts when the instructor taps Start and stops when they tap Stop; a persistent notification is shown the whole time. An in-app disclosure explains this before any permission prompt.
 ```
 - Video (≤ 30 s, YouTube unlisted link): record on a phone:
   1. the disclosure screen → Continue → OS prompt → "Allow all the time",

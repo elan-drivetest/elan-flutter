@@ -13,9 +13,11 @@ part 'legal_bloc.freezed.dart';
 /// Service and Provider Agreement, and records acceptance.
 ///
 /// Fails **open** on the client: if `/legal/status` is missing (404 before the
-/// backend deploy) or unreachable, nothing is gated here. The binding gate is
+/// backend deploy) or unreachable, nothing is gated here, so a client that
+/// can't ask never strands an instructor. The binding gate is meant to be
 /// server-side (403 `legalAcceptanceRequired` on ride accept and Stripe
-/// onboarding), so a client that can't ask never strands an instructor.
+/// onboarding), but it's behind the `legal_enforcement_enabled` setting, which
+/// was OFF on 2026-11-27. Until it's on, this client gate is the only one.
 @injectable
 class LegalBloc extends Bloc<LegalEvent, LegalState> {
   final LegalRepository repository;
@@ -29,6 +31,11 @@ class LegalBloc extends Bloc<LegalEvent, LegalState> {
     final v = e.errors?.legal;
     return v == code || (v is List && v.contains(code));
   }
+
+  /// The server's gate (403 on ride accept and Stripe onboarding). Callers
+  /// should re-fetch, which re-opens the acceptance screen.
+  static bool isAcceptanceRequired(ErrorResponse? e) =>
+      e != null && _isCode(e, 'legalAcceptanceRequired');
 
   Future<void> _onFetch(_Fetch event, Emitter<LegalState> emit) async {
     emit(state.copyWith(status: LegalStatusCode.loading));
