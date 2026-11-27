@@ -115,3 +115,26 @@ refuses the update and you'd silently keep testing the old app.
    otherwise confirm → returns to login; logging in again fails.
 9. Registration step 2: "Complete Registration" is blocked until the
    agreements checkbox is ticked.
+
+## Android ship: minimum scope (Lead, 2026-11-27)
+"Least scope so the Android app ships; core functionality must work."
+
+| # | Owner | Item | Status |
+|---|---|---|---|
+| F1 | Forge | Presigned document URLs + signature stripping on write | [x] LIVE (1f58ce5) |
+| P1 | Picasso | Publish privacy §17.1 foreground-location wording | [ ] |
+| P2 | Picasso | Web read-side B12 fix to prod (bbcd10d) | [ ] |
+| A1 | Atlas | Admin photo_url only-if-changed (54c63d2) | [ ] code done; **Lead pushes elan-admin main** |
+| A2 | Atlas/Lead | refund_partial_percentage = 0 in admin settings | [ ] **Lead, in admin** |
+| B12 | Lead | Private-bucket terraform (after P2 + A1 live) | [ ] |
+| F2 | Forge | Play reviewer demo mode + `seed-play-review` | [ ] Forge confirming with Lead |
+| N1 | Anvil | Signed AAB 1.0.0 (6) with all fixes | [x] |
+| N2 | Anvil | Emulator walkthrough with the demo account + screenshots | [ ] after F2 |
+| L1 | Lead | Back up keystore; record video; Console forms; upload to internal testing | [ ] |
+
+Deferred until after launch: B13 ports, cookies/Swagger, NODE_ENV + email Lambda,
+legal enforcement flag, crash reporting, signup legal payload, iOS.
+
+Live surfaces: web https://www.elanroadtestcar.ca (same deployment as
+www.elanroadtestrental.ca, the Play-verified domain), admin
+https://admin.elanroadtestcar.ca, API https://api-dev.elanroadtestrental.ca (= prod).
